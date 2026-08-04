@@ -8,7 +8,12 @@ import PreviousRequirement from "../pages/kitchen/PreviousRequirement/PreviousRe
 import TrackRequirement from "../pages/kitchen/TrackRequirement/TrackRequirement.jsx";
 import RequirementDetails from "../pages/kitchen/RequirementDetails/RequirementDetails.jsx";
 import MainStoreLayout from "../layouts/MainStoreLayout.jsx";
-import Requirements from "../components/mainStore/requirement/Requirements.jsx";
+import Requirements from "../pages/MainStore/Requirements/Requirements.jsx";
+import Inventory from "../pages/MainStore/Inventory/Inventory.jsx";
+import Vehicles from "../pages/MainStore/Vehicles/Vehicles.jsx";
+import Drivers from "../pages/MainStore/Drivers/Drivers.jsx";
+import RequirementWorkspace from "../pages/MainStore/RequirementWorkspace/RequirementWorkspace.jsx";
+
 
 const AppRoutes = () => {
   return (
@@ -38,7 +43,7 @@ const AppRoutes = () => {
         element={<Requirements />}
     />
 
-    {/* <Route
+    <Route
         path="requirements/:id"
         element={<RequirementWorkspace />}
     />
@@ -56,7 +61,7 @@ const AppRoutes = () => {
     <Route
         path="drivers"
         element={<Drivers />}
-    /> */}
+    />
 
 </Route>
     </Routes>

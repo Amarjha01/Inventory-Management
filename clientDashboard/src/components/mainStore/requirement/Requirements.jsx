@@ -41,11 +41,13 @@ const Requirements = () => {
 
         return (
 
-            <MainStoreLayout>
+        <span>
+            <Loader />
+        </span>
 
-                <Loader />
+                
 
-            </MainStoreLayout>
+            
 
         );
 
@@ -53,7 +55,7 @@ const Requirements = () => {
 
     return (
 
-        <MainStoreLayout>
+        
 
             <div className="space-y-4">
 
@@ -72,7 +74,7 @@ const Requirements = () => {
 
             </div>
 
-        </MainStoreLayout>
+      
 
     );
 
