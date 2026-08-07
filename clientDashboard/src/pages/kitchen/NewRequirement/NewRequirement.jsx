@@ -1,127 +1,129 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { FiPlus, FiPackage } from "react-icons/fi";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 
 import PageHeader from "../../../components/shared/ui/PageHeader";
 import Button from "../../../components/shared/ui/Button";
+import Loader from "../../../components/shared/ui/Loader";
 
 import KitchenInfo from "../../../components/kitchen/requirement/KitchenInfo";
 import ItemCard from "../../../components/kitchen/requirement/ItemCard";
 import ItemSelectorModal from "../../../components/kitchen/requirement/ItemSelectorModal";
 
-import { FiPlus } from "react-icons/fi";
-
-import { useNavigate } from "react-router-dom";
-import { createRequirement } from "../../../services/requirement.service";
 import { storage } from "../../../utils/storage";
+import { getInventory } from "../../../services/inventory.service";
+import {
+  createRequirement,
+  getLatestKitchenRequirement,
+} from "../../../services/requirement.service";
+import Card from "../../../components/shared/ui/Card";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 },
+};
+
 const NewRequirement = () => {
+  const navigate = useNavigate();
 
-    const [selectedItems, setSelectedItems] = useState([]);
+  const user = storage.getUser();
 
-    const [remarks, setRemarks] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [inventory, setInventory] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [remarks, setRemarks] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [activeRequirement, setActiveRequirement] = useState(null);
+  useEffect(() => {
+    fetchLatestKitchenRequirement();
+    fetchInventory();
+  }, []);
+  const fetchLatestKitchenRequirement = async () => {
+    try {
+      const latestRequirement = await getLatestKitchenRequirement();
 
-    const [showModal, setShowModal] = useState(false);
-    const navigate = useNavigate();
-    const user = storage.getUser();
-
-    const addItem = (item) => {
-
-        const exists = selectedItems.find(
-            i => i.id === item.id
-        );
-
-        if (exists) return;
-
-        setSelectedItems(prev => [
-            ...prev,
-            {
-                ...item,
-                requestedQuantity: 1,
-            },
-        ]);
-
-    };
-
-    const updateQuantity = (id, requestedQuantity) => {
-
-        setSelectedItems(prev =>
-
-            prev.map(item =>
-
-                item.id === id
-
-                    ? {
-                        ...item,
-                        requestedQuantity,
-                    }
-
-                    : item
-
-            )
-
-        );
-
-    };
-
-    const removeItem = (id) => {
-
-        setSelectedItems(prev =>
-
-            prev.filter(item => item.id !== id)
-
-        );
-
-    };
-
-    const handleSubmit = async () => {
-
-    if (selectedItems.length === 0) {
-        alert("Please select at least one item.");
-        return;
+      setActiveRequirement(latestRequirement);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
+  };
+  const fetchInventory = async () => {
+    try {
+      const items = await getInventory();
+      setInventory(items);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const payload = {
+  const addItem = (item) => {
+    if (selectedItems.some((i) => i._id === item._id)) return;
 
-         kitchen: user.kitchen.name,
-            createdBy: user.name,
+    setSelectedItems((prev) => [
+      ...prev,
+      {
+        ...item,
+        quantity: 1,
+      },
+    ]);
+  };
 
-        remarks,
+  const updateQuantity = (_id, quantity) => {
+    if (quantity < 1) quantity = 1;
 
-        items: selectedItems.map(item => ({
+    setSelectedItems((prev) =>
+      prev.map((item) =>
+        item._id === _id
+          ? {
+              ...item,
+              quantity,
+            }
+          : item,
+      ),
+    );
+  };
 
-            id: item.id,
+  const removeItem = (_id) => {
+    setSelectedItems((prev) => prev.filter((item) => item._id !== _id));
+  };
 
-            name: item.name,
-
-            hindiName: item.hindiName,
-
-            image: item.image,
-
-            requestedQuantity: item.requestedQuantity,
-
-            unit: item.unit,
-
-        })),
-
-    };
+  const handleSubmit = async () => {
+    if (!selectedItems.length) {
+      alert("Please select at least one item.");
+      return;
+    }
 
     try {
+      const payload = {
+        kitchen: user.kitchenId._id,
+        createdBy: user._id,
+        remarks,
+        items: selectedItems.map((item) => ({
+          inventoryId: item._id,
+          quantity: Number(item.quantity),
+          unit: item.unit,
+        })),
+      };
 
-        const requirement = await createRequirement(payload);
+      const requirement = await createRequirement(payload);
 
-        console.log(requirement);
-
-        navigate(`/requirements/${requirement.id}`);
-
+      navigate(`/requirements/${requirement._id}`);
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || "Failed to create requirement.");
     }
+  };
 
-    catch (err) {
+  if (loading) return <Loader />;
 
-        console.error(err);
-
-    }
-
-};
+  if (activeRequirement) {
 
     return (
 
@@ -132,105 +134,176 @@ const NewRequirement = () => {
                 subtitle="Create material requirement"
             />
 
-            <KitchenInfo />
+            <Card>
 
-            <div className="mt-6">
+                <h2 className="text-lg font-semibold">
+
+                    You already have an active requirement.
+
+                </h2>
+
+                <p className="text-gray-600 mt-2">
+
+                    Requirement Number: {activeRequirement.requirementNumber}
+
+                </p>
+
+                <p className="text-gray-600">
+
+                    Status: {activeRequirement.status}
+
+                </p>
 
                 <Button
-                    onClick={() => setShowModal(true)}
-                    className="flex items-center justify-center gap-2"
-                >
-
-                    <FiPlus />
-
-                    Add Item
-
-                </Button>
-
-            </div>
-
-            <div className="space-y-4 mt-6">
-
-                {
-
-                    selectedItems.length === 0
-
-                        ? (
-
-                            <div className="border-2 border-dashed rounded-2xl p-10 text-center text-gray-500">
-
-                                No items selected
-
-                            </div>
-
-                        )
-
-                        : (
-
-                            selectedItems.map(item => (
-
-                                <ItemCard
-                                    key={item.id}
-                                    item={item}
-                                    onQuantityChange={(qty) =>
-                                        updateQuantity(item.id, qty)
-                                    }
-                                    onRemove={() =>
-                                        removeItem(item.id)
-                                    }
-                                />
-
-                            ))
-
-                        )
-
-                }
-
-            </div>
-
-            <div className="mt-6">
-
-                <label className="font-medium block mb-2">
-
-                    Remarks
-
-                </label>
-
-                <textarea
-                    rows={4}
-                    value={remarks}
-                    onChange={(e) =>
-                        setRemarks(e.target.value)
+                    className="mt-5"
+                    onClick={() =>
+                        navigate(`/track`)
                     }
-                    placeholder="Write remarks..."
-                    className="w-full rounded-xl border p-3 focus:ring-2 focus:ring-teal-600 focus:outline-none"
-                />
-
-            </div>
-
-            <div className="mt-8">
-
-                <Button
-                    onClick={handleSubmit}
                 >
-
-                    Submit Requirement
-
+                    Track Requirement
                 </Button>
 
-            </div>
-
-            <ItemSelectorModal
-                open={showModal}
-                onClose={() => setShowModal(false)}
-                onSelect={addItem}
-                selectedItems={selectedItems}
-            />
+            </Card>
 
         </DashboardLayout>
 
     );
 
+}
+
+  return (
+    <DashboardLayout>
+      <PageHeader
+        title="New Requirement"
+        subtitle="Create a material requirement for your kitchen"
+      />
+
+      <motion.div
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+        transition={{ duration: 0.3 }}
+      >
+        <KitchenInfo />
+      </motion.div>
+
+      {/* Items Toolbar */}
+      <motion.div
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+        transition={{ delay: 0.1 }}
+        className="mt-6 rounded-xl border bg-white shadow-sm p-4 flex items-center justify-between"
+      >
+        <div>
+          <h3 className="font-semibold text-gray-800">Required Items</h3>
+
+          <p className="text-sm text-gray-500">
+            {selectedItems.length} item
+            {selectedItems.length !== 1 && "s"} selected
+          </p>
+        </div>
+
+        <Button
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-2"
+        >
+          <FiPlus />
+          Add Item
+        </Button>
+      </motion.div>
+
+      {/* Item List */}
+      <div className="mt-5 space-y-3">
+        {!selectedItems.length ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 py-14 text-center"
+          >
+            <FiPackage className="mx-auto text-5xl text-gray-300" />
+
+            <h3 className="mt-4 text-lg font-semibold text-gray-700">
+              No Items Selected
+            </h3>
+
+            <p className="mt-1 text-sm text-gray-500">
+              Click "Add Item" to begin creating your requirement.
+            </p>
+          </motion.div>
+        ) : (
+          <AnimatePresence>
+            {selectedItems.map((item) => (
+              <motion.div
+                key={item._id}
+                layout
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, x: -30 }}
+                transition={{ duration: 0.25 }}
+              >
+                <ItemCard
+                  item={item}
+                  onQuantityChange={(qty) => updateQuantity(item._id, qty)}
+                  onRemove={() => removeItem(item._id)}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        )}
+      </div>
+
+      {/* Remarks */}
+      <motion.div
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+        transition={{ delay: 0.2 }}
+        className="mt-6 rounded-xl border bg-white shadow-sm p-5"
+      >
+        <label className="block mb-2 font-semibold text-gray-800">
+          Remarks
+        </label>
+
+        <textarea
+          rows={4}
+          value={remarks}
+          onChange={(e) => setRemarks(e.target.value)}
+          placeholder="Write additional instructions (optional)..."
+          className="w-full rounded-lg border border-gray-200 p-3 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none resize-none"
+        />
+      </motion.div>
+
+      {/* Sticky Footer */}
+      <div className="sticky bottom-4 mt-8">
+        <div className="rounded-2xl bg-white border shadow-lg p-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-500">Selected Items</p>
+
+            <p className="text-2xl font-bold text-teal-600">
+              {selectedItems.length}
+            </p>
+          </div>
+
+          <Button
+            onClick={handleSubmit}
+            disabled={!selectedItems.length}
+            className="px-8"
+          >
+            Submit Requirement
+          </Button>
+        </div>
+      </div>
+
+      <ItemSelectorModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        items={inventory}
+        selectedItems={selectedItems}
+        onSelect={addItem}
+      />
+    </DashboardLayout>
+  );
 };
 
 export default NewRequirement;

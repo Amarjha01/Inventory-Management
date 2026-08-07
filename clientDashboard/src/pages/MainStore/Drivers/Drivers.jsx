@@ -1,10 +1,7 @@
 import { useMemo, useState } from "react";
-import {
-  MdAdd,
-  MdEdit,
-  MdPerson,
-  MdSearch,
-} from "react-icons/md";
+import { motion, AnimatePresence } from "framer-motion";
+
+import { MdAdd, MdEdit, MdPerson, MdSearch, MdBadge } from "react-icons/md";
 
 import Card from "../../../components/shared/ui/Card";
 import Button from "../../../components/shared/ui/Button";
@@ -12,7 +9,6 @@ import Button from "../../../components/shared/ui/Button";
 import driverData from "../../../mock/drivers";
 
 const Drivers = () => {
-
   const [drivers, setDrivers] = useState(driverData);
 
   const [search, setSearch] = useState("");
@@ -28,19 +24,14 @@ const Drivers = () => {
   });
 
   const filteredDrivers = useMemo(() => {
-
-    return drivers.filter(driver =>
-
-      driver.name.toLowerCase().includes(search.toLowerCase()) ||
-
-      driver.phone.includes(search)
-
+    return drivers.filter(
+      (driver) =>
+        driver.name.toLowerCase().includes(search.toLowerCase()) ||
+        driver.phone.includes(search),
     );
-
   }, [drivers, search]);
 
   const openAddModal = () => {
-
     setEditingDriver(null);
 
     setForm({
@@ -50,266 +41,325 @@ const Drivers = () => {
     });
 
     setShowModal(true);
-
   };
 
   const openEditModal = (driver) => {
-
     setEditingDriver(driver);
 
     setForm(driver);
 
     setShowModal(true);
-
   };
 
   const handleChange = (e) => {
-
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
-
   };
 
   const handleSave = () => {
-
     if (!form.name || !form.phone) {
-
-      alert("Please fill all required fields.");
+      alert("Please fill required fields.");
 
       return;
-
     }
 
     if (editingDriver) {
-
-      setDrivers(prev =>
-
-        prev.map(driver =>
-
+      setDrivers((prev) =>
+        prev.map((driver) =>
           driver.id === editingDriver.id
-
             ? {
                 ...form,
                 id: editingDriver.id,
               }
-
-            : driver
-
-        )
-
+            : driver,
+        ),
       );
-
     } else {
-
-      setDrivers(prev => [
-
+      setDrivers((prev) => [
         ...prev,
 
         {
           ...form,
           id: Date.now(),
         },
-
       ]);
-
     }
 
     setShowModal(false);
-
   };
 
   return (
+    <div className="space-y-6 pb-10">
+      {/* Header */}
 
-    <div className="space-y-5 pb-10">
-
-      <div className="flex justify-between items-center">
-
+      <motion.div
+        initial={{
+          opacity: 0,
+          y: 15,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        className="flex justify-between items-center"
+      >
         <div>
+          <h1 className="text-2xl font-bold text-gray-800">Drivers</h1>
 
-          <h1 className="text-2xl font-bold">
-
-            Drivers
-
-          </h1>
-
-          <p className="text-gray-500">
-
-            Manage delivery drivers
-
-          </p>
-
+          <p className="text-gray-500">Manage delivery drivers</p>
         </div>
 
-        <Button onClick={openAddModal}>
-
+        <Button onClick={openAddModal} className="flex items-center gap-2">
           <MdAdd size={20} />
 
+          <span className="hidden sm:block">Add Driver</span>
         </Button>
+      </motion.div>
 
+      {/* Stats */}
+
+      <div className="grid grid-cols-2 gap-4">
+        <Card>
+          <div className="flex items-center gap-3">
+            <div
+              className="
+              p-3
+              rounded-xl
+              bg-green-100
+              text-green-600
+            "
+            >
+              <MdPerson size={26} />
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-500">Total Drivers</p>
+
+              <h2 className="text-xl font-bold">{drivers.length}</h2>
+            </div>
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flex items-center gap-3">
+            <div
+              className="
+              p-3
+              rounded-xl
+              bg-blue-100
+              text-blue-600
+            "
+            >
+              <MdBadge size={26} />
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-500">Licensed</p>
+
+              <h2 className="text-xl font-bold">{drivers.length}</h2>
+            </div>
+          </div>
+        </Card>
       </div>
 
-      <div className="relative">
+      {/* Search */}
 
+      <div className="relative">
         <MdSearch
-          className="absolute left-3 top-3.5 text-gray-400"
-          size={20}
+          className="
+          absolute
+          left-3
+          top-3.5
+          text-gray-400
+          "
+          size={22}
         />
 
         <input
-          type="text"
-          placeholder="Search Driver..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full border rounded-xl py-3 pl-10 pr-4 outline-none"
+          placeholder="Search driver..."
+          className="
+          w-full
+          rounded-xl
+          border
+          py-3
+          pl-10
+          pr-4
+          outline-none
+          focus:border-teal-500
+          focus:ring-4
+          focus:ring-teal-500/10
+          "
         />
-
       </div>
+
+      {/* Driver List */}
 
       <div className="space-y-4">
+        <AnimatePresence>
+          {filteredDrivers.map((driver) => (
+            <motion.div
+              key={driver.id}
+              initial={{
+                opacity: 0,
+                y: 15,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+            >
+              <Card
+                className="
+            hover:shadow-lg
+            transition
+            "
+              >
+                <div className="flex justify-between">
+                  <div className="flex gap-4">
+                    <div
+                      className="
+                w-16
+                h-16
+                rounded-xl
+                bg-green-100
+                flex
+                items-center
+                justify-center
+              "
+                    >
+                      <MdPerson size={34} className="text-green-600" />
+                    </div>
 
-        {
+                    <div>
+                      <h2 className="text-lg font-bold">{driver.name}</h2>
 
-          filteredDrivers.map(driver => (
+                      <p className="text-gray-500">{driver.phone}</p>
 
-            <Card key={driver.id}>
-
-              <div className="flex justify-between">
-
-                <div className="flex gap-4">
-
-                  <div className="w-16 h-16 rounded-xl bg-green-100 flex items-center justify-center">
-
-                    <MdPerson
-                      size={34}
-                      className="text-green-600"
-                    />
-
+                      <span
+                        className="
+                  inline-block
+                  mt-2
+                  rounded-full
+                  bg-blue-100
+                  px-3
+                  py-1
+                  text-xs
+                  font-semibold
+                  text-blue-700
+                "
+                      >
+                        License : {driver.licenseNumber}
+                      </span>
+                    </div>
                   </div>
 
-                  <div>
-
-                    <h2 className="font-semibold text-lg">
-
-                      {driver.name}
-
-                    </h2>
-
-                    <p className="text-gray-500">
-
-                      {driver.phone}
-
-                    </p>
-
-                    <p className="text-sm mt-1">
-
-                      License : {driver.licenseNumber}
-
-                    </p>
-
-                  </div>
-
+                  <button
+                    onClick={() => openEditModal(driver)}
+                    className="
+              text-gray-500
+              hover:text-teal-600
+              "
+                  >
+                    <MdEdit size={22} />
+                  </button>
                 </div>
-
-                <button
-                  onClick={() => openEditModal(driver)}
-                >
-
-                  <MdEdit size={22} />
-
-                </button>
-
-              </div>
-
-            </Card>
-
-          ))
-
-        }
-
+              </Card>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
 
-      {
+      {/* Modal */}
 
-        showModal && (
-
-          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 p-4">
-
-            <div className="bg-white rounded-2xl p-5 w-full max-w-md space-y-4">
-
-              <h2 className="text-xl font-semibold">
-
-                {
-
-                  editingDriver
-
-                    ? "Edit Driver"
-
-                    : "Add Driver"
-
-                }
-
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            initial={{
+              opacity: 0,
+            }}
+            animate={{
+              opacity: 1,
+            }}
+            exit={{
+              opacity: 0,
+            }}
+            className="
+          fixed
+          inset-0
+          bg-black/40
+          z-50
+          flex
+          items-center
+          justify-center
+          p-4
+          "
+          >
+            <motion.div
+              initial={{
+                scale: 0.9,
+              }}
+              animate={{
+                scale: 1,
+              }}
+              className="
+          bg-white
+          rounded-2xl
+          p-5
+          w-full
+          max-w-md
+          space-y-4
+          "
+            >
+              <h2 className="text-xl font-bold">
+                {editingDriver ? "Edit Driver" : "Add Driver"}
               </h2>
 
-              <input
-                name="name"
-                placeholder="Driver Name"
-                value={form.name}
-                onChange={handleChange}
-                className="w-full border rounded-xl p-3"
-              />
-
-              <input
-                name="phone"
-                placeholder="Phone Number"
-                value={form.phone}
-                onChange={handleChange}
-                className="w-full border rounded-xl p-3"
-              />
-
-              <input
-                name="licenseNumber"
-                placeholder="License Number"
-                value={form.licenseNumber}
-                onChange={handleChange}
-                className="w-full border rounded-xl p-3"
-              />
+              {[
+                ["name", "Driver Name"],
+                ["phone", "Phone Number"],
+                ["licenseNumber", "License Number"],
+              ].map(([name, placeholder]) => (
+                <input
+                  key={name}
+                  name={name}
+                  value={form[name]}
+                  onChange={handleChange}
+                  placeholder={placeholder}
+                  className="
+                w-full
+                border
+                rounded-xl
+                p-3
+                "
+                />
+              ))}
 
               <div className="flex gap-3">
-
-                <Button
-                  className="flex-1"
-                  onClick={handleSave}
-                >
-
+                <Button className="flex-1" onClick={handleSave}>
                   Save
-
                 </Button>
 
                 <Button
-                  className="flex-1 bg-gray-300 text-black hover:bg-gray-400"
+                  className="
+              flex-1
+              bg-gray-200
+              text-black
+              "
                   onClick={() => setShowModal(false)}
                 >
-
                   Cancel
-
                 </Button>
-
               </div>
-
-            </div>
-
-          </div>
-
-        )
-
-      }
-
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
-
   );
-
 };
 
 export default Drivers;

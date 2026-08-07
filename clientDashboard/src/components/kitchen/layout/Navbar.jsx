@@ -1,33 +1,50 @@
 import { storage } from "../../../utils/storage";
 
 const Navbar = () => {
-    const user = storage.getUser();
+  const user = storage.getUser();
 
-    return (
-        <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+  return (
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200 shadow-sm">
+      <div className="flex h-16 items-center justify-between px-5">
+        {/* Left */}
+        <div className="flex items-center gap-4">
+          <img
+            src="/ESF_full_logo.avif"
+            alt="ESF Logo"
+            className="h-10 w-auto object-contain hidden md:block"
+          />
+          <img
+            src="/ESF_Logo.avif"
+            alt="ESF Logo"
+            className="h-10 w-auto object-contain  md:hidden"
+          />
 
-            <div className="flex items-center justify-between px-4 h-16">
+          <div className="h-8 w-px bg-gray-200" />
 
-                <div>
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">
+              {user?.kitchenId?.name || "Kitchen"}
+            </h2>
 
-                    <h2 className="text-lg font-semibold text-gray-800">
-                        {user?.name}
-                    </h2>
+            <p className="text-xs text-blue-900 font-bold">Ekta Shakti Foundation</p>
+          </div>
+        </div>
 
-                    <p className="text-sm text-gray-500">
-                        {user?.role}
-                    </p>
+        {/* Right */}
+        <div className="flex items-center gap-3">
+          <div className="text-right ">
+            <p className="text-sm font-semibold text-gray-800">{user?.name}</p>
 
-                </div>
+            <p className="text-xs text-green-900 capitalize">{user?.role}</p>
+          </div>
 
-                <div className="w-10 h-10 rounded-full bg-teal-600 text-white flex items-center justify-center font-semibold">
-                    {user?.name?.charAt(0)}
-                </div>
-
-            </div>
-
-        </header>
-    );
+          {/* <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 text-sm font-semibold text-white shadow-md">
+            {user?.name?.charAt(0)?.toUpperCase()}
+          </div> */}
+        </div>
+      </div>
+    </header>
+  );
 };
 
 export default Navbar;

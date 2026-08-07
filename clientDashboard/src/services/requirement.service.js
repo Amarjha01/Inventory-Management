@@ -1,92 +1,74 @@
-import requirements from "../mock/requirements";
-
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
+import api from "../api/axios";
+import { ENDPOINTS } from "../api/endpoints";
+import { storage } from "../utils/storage";
+const user = storage.getUser();
 export const createRequirement = async (payload) => {
-    await delay(500);
+  const { data } = await api.post(
+    ENDPOINTS.REQUIREMENTS,
 
-    const requirement = {
-        id: `REQ-${Date.now()}`,
-        createdAt: new Date().toLocaleString(),
-        status: "SUBMITTED",
-        vehicle: null,
-        timeline: [
-            {
-                status: "SUBMITTED",
-                time: new Date().toLocaleString(),
-            },
-            {
-                status: "APPROVED",
-                time: null,
-            },
-            {
-                status: "PACKING",
-                time: null,
-            },
-            {
-                status: "PACKED",
-                time: null,
-            },
-            {
-                status: "OUT_FOR_DELIVERY",
-                time: null,
-            },
-            {
-                status: "DELIVERED",
-                time: null,
-            },
-            {
-                status: "RECEIVED",
-                time: null,
-            },
-        ],
-        receivingLetter: null,
-        ...payload,
-    };
+    payload,
+  );
 
-    requirements.unshift(requirement);
-
-    return requirement;
+  return data.data;
 };
 
-export const getCurrentRequirement = async () => {
+export const getAllKitchenRequirements = async () => {
+  const { data } = await api.get(`${ENDPOINTS.REQUIREMENTS}/allKitchenRequirements`);
 
-    await delay(500);
-
-    return requirements.find(
-        (item) =>
-            item.status !== "DELIVERED" &&
-            item.status !== "RECEIVED"
-    );
-
+  return data.data;
 };
-
 export const getRequirements = async () => {
+  const { data } = await api.get(ENDPOINTS.REQUIREMENTS);
 
-    await delay(500);
-
-    return requirements.filter(
-        (item) =>
-            item.status === "DELIVERED" ||
-            item.status === "RECEIVED"
-    );
-
+  return data.data;
 };
 
 export const getRequirementById = async (id) => {
+  const { data } = await api.get(`${ENDPOINTS.REQUIREMENTS}/${id}`);
 
-    await delay(500);
-
-    return requirements.find(
-        (item) => item.id === id
-    );
-
+   const requirementData = data.data;
+   return requirementData;
 };
 
-export const getAllRequirements = async () => {
+export const getLatestKitchenRequirement = async () => {
 
-    await delay(500);
+  const { data } = await api.get(
+    `${ENDPOINTS.REQUIREMENTS}/latest/${user.kitchenId._id}`,
+  );
 
-    return requirements;
+  return data.data;
+};
 
+export const updateRequirement = async (
+  id,
+
+  payload,
+) => {
+  const { data } = await api.patch(
+    `${ENDPOINTS.REQUIREMENTS}/${id}`,
+
+    payload,
+  );
+
+  return data.data;
+};
+
+export const dispatchRequirement = async (
+  id,
+
+  payload,
+) => {
+  const { data } = await api.patch(
+    `${ENDPOINTS.REQUIREMENTS}/${id}/dispatch`,
+
+    payload,
+  );
+
+  return data.data;
+};
+
+export const receiveRequirement = async (id) => {
+  const { data } = await api.patch(`${ENDPOINTS.REQUIREMENTS}/${id}/receive`);
+
+  return data.data;
 };

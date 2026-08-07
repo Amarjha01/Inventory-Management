@@ -1,6 +1,7 @@
 import Card from "../../shared/ui/Card";
 
-const RequirementItems = ({ items = [] }) => {
+const RequirementItems = ({ items }) => {
+console.log(items);
 
     return (
 
@@ -19,14 +20,14 @@ const RequirementItems = ({ items = [] }) => {
                     items.map(item => (
 
                         <div
-                            key={item.id}
+                            key={item.inventoryId._id}
                             className="flex justify-between items-center"
                         >
 
                             <div className="flex gap-3 items-center">
 
                                 <img
-                                    src={`/items/${item.image}`}
+                                    src={`/items/${item.inventoryId.image}`}
                                     alt={item.name}
                                     className="w-14 h-14 rounded-xl object-cover"
                                 />
@@ -35,13 +36,13 @@ const RequirementItems = ({ items = [] }) => {
 
                                     <p className="font-medium">
 
-                                        {item.name}
+                                        {item.inventoryId.name}
 
                                     </p>
 
                                     <p className="text-sm text-gray-500">
 
-                                        {item.hindiName}
+                                        {item.inventoryId.hindiName}
 
                                     </p>
 
@@ -53,7 +54,7 @@ const RequirementItems = ({ items = [] }) => {
 
                                 <p className="font-semibold">
 
-                                    {item.requestedQuantity}
+                                    {item.quantity}
 
                                 </p>
 

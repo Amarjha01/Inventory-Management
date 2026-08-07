@@ -1,154 +1,109 @@
 import { useMemo, useState } from "react";
-import { FiSearch, FiX } from "react-icons/fi";
-import items from "../../../mock/items";
+
+import { MdClose, MdSearch } from "react-icons/md";
 
 const ItemSelectorModal = ({
-    open,
-    onClose,
-    onSelect,
-    selectedItems = [],
+  open,
+
+  onClose,
+
+  items = [],
+
+  selectedItems = [],
+
+  onSelect,
 }) => {
+  const [search, setSearch] = useState("");
 
-    const [search, setSearch] = useState("");
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const alreadySelected = selectedItems.some(
+        (selected) => selected._id === item._id,
+      );
 
-    const selectedIds = selectedItems.map(item => item.id);
+      if (alreadySelected) {
+        return false;
+      }
 
-    const filteredItems = useMemo(() => {
+      const keyword = search.toLowerCase();
 
-        return items.filter(item => {
+      return (
+        item.name.toLowerCase().includes(keyword) ||
+        item.hindiName.toLowerCase().includes(keyword)
+      );
+    });
+  }, [items, selectedItems, search]);
 
-            const matchesSearch =
-                item.name.toLowerCase().includes(search.toLowerCase()) ||
-                item.hindiName.includes(search);
+  if (!open) {
+    return null;
+  }
 
-            const notSelected = !selectedIds.includes(item.id);
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
+        <div className="flex justify-between items-center p-5 border-b">
+          <h2 className="text-xl font-semibold">Select Item</h2>
 
-            return matchesSearch && notSelected;
+          <button onClick={onClose}>
+            <MdClose size={24} />
+          </button>
+        </div>
 
-        });
-
-    }, [search, selectedItems]);
-
-    if (!open) return null;
-
-    return (
-
-        <>
-
-            {/* Backdrop */}
-
-            <div
-                className="fixed inset-0 bg-black/40 z-40"
-                onClick={onClose}
+        <div className="p-5">
+          <div className="relative">
+            <MdSearch
+              className="absolute left-3 top-3.5 text-gray-400"
+              size={20}
             />
 
-            {/* Bottom Sheet */}
+            <input
+              type="text"
+              placeholder="Search item..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full border rounded-xl py-3 pl-10 pr-4 outline-none"
+            />
+          </div>
+        </div>
 
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl p-5 max-h-[80vh]">
-
-                <div className="flex items-center justify-between">
-
-                    <h2 className="text-xl font-semibold">
-                        Add Item
-                    </h2>
-
-                    <button
-                        onClick={onClose}
-                    >
-                        <FiX size={24} />
-                    </button>
-
-                </div>
-
-                {/* Search */}
-
-                <div className="mt-5 relative">
-
-                    <FiSearch
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                    />
-
-                    <input
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search item..."
-                        className="w-full border rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-teal-600"
-                    />
-
-                </div>
-
-                {/* Items */}
-
-                <div className="mt-5 space-y-3 overflow-y-auto max-h-[55vh]">
-
-                    {
-
-                        filteredItems.length === 0 && (
-
-                            <div className="text-center text-gray-500 py-8">
-
-                                No items found
-
-                            </div>
-
-                        )
-
-                    }
-
-                    {
-
-                        filteredItems.map(item => (
-
-                            <button
-                                key={item.id}
-                                onClick={() => {
-
-                                    onSelect(item);
-
-                                    setSearch("");
-
-                                    onClose();
-
-                                }}
-                                className="w-full flex items-center gap-4 border rounded-xl p-3 hover:bg-gray-50 transition"
-                            >
-
-                                <img
-                                    src={`/items/${item.image}`}
-                                    alt={item.name}
-                                    className="w-14 h-14 rounded-xl object-cover"
-                                />
-
-                                <div className="text-left">
-
-                                    <p className="font-semibold">
-
-                                        {item.name}
-
-                                    </p>
-
-                                    <p className="text-gray-500 text-sm">
-
-                                        {item.hindiName}
-
-                                    </p>
-
-                                </div>
-
-                            </button>
-
-                        ))
-
-                    }
-
-                </div>
-
+        <div className="max-h-[450px] overflow-y-auto px-5 pb-5 space-y-3">
+          {filteredItems.length === 0 && (
+            <div className="text-center text-gray-500 py-10">
+              No item found.
             </div>
+          )}
 
-        </>
+          {filteredItems.map((item) => (
+            <button
+              key={item._id}
+              onClick={() => {
+                onSelect(item);
 
-    );
+                onClose();
+              }}
+              className="w-full border rounded-xl p-3 flex items-center gap-4 hover:border-teal-500 transition"
+            >
+              <img
+                src={`/items/${item.image}`}
+                alt={item.name}
+                className="w-16 h-16 rounded-xl object-cover border"
+              />
 
+              <div className="flex-1 text-left">
+                <h3 className="font-semibold">{item.name}</h3>
+
+                <p className="text-sm text-gray-500">{item.hindiName}</p>
+
+                <p className="text-sm mt-1">
+                  Available : {item.quantity} {item.unit}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default ItemSelectorModal;
