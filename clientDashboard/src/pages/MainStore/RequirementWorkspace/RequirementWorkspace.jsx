@@ -286,7 +286,7 @@ const isReceived =
 
 {isReceived && 
 <img
-    src={`http://localhost:5000/uploads/requirements/${requirement.gatePass.image}`}
+    src={`http://esfserver.axeiro.com/uploads/requirements/${requirement.gatePass.image}`}
     alt="Gate Pass"
     className="w-full rounded-xl border"
 />

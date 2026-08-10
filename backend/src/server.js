@@ -19,20 +19,20 @@ const startServer = async () => {
     initializeSocket(server);
 
     server.listen(
-      env.PORT,
+      env.PORT , "0.0.0.0",
 
       () => {
-        logger.info(`Server running on http://localhost:${env.PORT}`);
+        logger.info(`Server running on https://esfserver.axeiro.com:${env.PORT}`);
       },
     );
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     
-    // logger.error({
-    //   message: error.message,
+    logger.error({
+      message: error.message,
 
-    //   stack: error.stack,
-    // });
+      stack: error.stack,
+    });
 
     process.exit(1);
   }
