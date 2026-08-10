@@ -63,17 +63,17 @@ const NewRequirement = () => {
     }
   };
 
-  const addItem = (item) => {
+const addItem = (item) => {
     if (selectedItems.some((i) => i._id === item._id)) return;
 
     setSelectedItems((prev) => [
-      ...prev,
-      {
-        ...item,
-        quantity: 1,
-      },
+        ...prev,
+        {
+            ...item,
+            quantity: item.bagSize,
+        },
     ]);
-  };
+};
 
   const updateQuantity = (_id, quantity) => {
     if (quantity < 1) quantity = 1;
