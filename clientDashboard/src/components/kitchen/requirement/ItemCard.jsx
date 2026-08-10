@@ -17,12 +17,11 @@ const ItemCard = ({ item, onQuantityChange, onRemove }) => {
         <p className="text-gray-500 text-sm">{item.hindiName}</p>
 
         <div className="flex items-center justify-between mt-4">
-          <QuantitySelector
-            bagSize={item.bagSize}
-            value={item.bagSize}
-            max={item.quantity}
-            onChange={onQuantityChange}
-          />
+         <QuantitySelector
+    bagSize={item.bagSize}
+    value={item.quantity}
+    onChange={onQuantityChange}
+/>
 
           <button
             onClick={onRemove}
