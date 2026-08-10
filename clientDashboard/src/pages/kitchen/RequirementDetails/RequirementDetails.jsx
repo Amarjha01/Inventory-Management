@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
+import { FiArrowLeft, FiFileText } from "react-icons/fi";
 
 import DashboardLayout from "../../../layouts/DashboardLayout";
 
@@ -12,6 +14,18 @@ import RequirementItems from "../../../components/kitchen/requirement/Requiremen
 import VehicleCard from "../../../components/kitchen/requirement/VehicleCard";
 
 import { getRequirementById } from "../../../services/requirement.service";
+import DispatchDetails from "../../../components/shared/dispatch/DispatchDetails";
+
+const sectionAnimation = {
+  initial: {
+    opacity: 0,
+    y: 20,
+  },
+  animate: {
+    opacity: 1,
+    y: 0,
+  },
+};
 
 const RequirementDetails = () => {
   const { id } = useParams();
@@ -25,6 +39,8 @@ const RequirementDetails = () => {
       try {
         const data = await getRequirementById(id);
         setRequirement(data);
+      } catch (error) {
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -44,16 +60,26 @@ const RequirementDetails = () => {
   if (!requirement) {
     return (
       <DashboardLayout>
-        <div className="bg-white rounded-2xl border p-10 text-center">
-          <h2 className="text-xl font-semibold">Requirement Not Found</h2>
+        <motion.div
+          {...sectionAnimation}
+          className="rounded-2xl border bg-white p-10 text-center shadow-sm"
+        >
+          <h2 className="text-xl font-bold text-gray-800">
+            Requirement Not Found
+          </h2>
+
+          <p className="mt-2 text-gray-500">
+            The requested requirement does not exist.
+          </p>
 
           <Button
-            className="mt-6"
+            className="mt-6 flex items-center gap-2 mx-auto"
             onClick={() => navigate(-1)}
           >
+            <FiArrowLeft />
             Go Back
           </Button>
-        </div>
+        </motion.div>
       </DashboardLayout>
     );
   }
@@ -61,46 +87,12 @@ const RequirementDetails = () => {
   return (
     <DashboardLayout>
       <div className="space-y-5">
-
-        <RequirementHeader requirement={requirement} />
-
-        <RequirementTimeline
-          timeline={requirement.timeline}
-          currentStatus={requirement.status}
-        />
-
-        <RequirementItems
-          items={requirement.items}
-        />
-
-        <VehicleCard
-          vehicle={requirement.vehicle}
-        />
-
-        {requirement.receivingLetter && (
-          <div className="bg-white rounded-2xl border p-5">
-
-            <h2 className="text-lg font-semibold mb-4">
-              Receiving Letter
-            </h2>
-
-            <img
-              src={requirement.receivingLetter.file}
-              alt="Receiving Letter"
-              className="rounded-xl w-full"
-            />
-
-            <p className="text-sm text-gray-500 mt-3">
-              Uploaded By : {requirement.receivingLetter.uploadedBy}
-            </p>
-
-            <p className="text-sm text-gray-500">
-              Uploaded At : {requirement.receivingLetter.uploadedAt}
-            </p>
-
-          </div>
-        )}
-
+        {/* Header */}
+        <motion.div {...sectionAnimation} transition={{ duration: 0.3 }}>
+          <RequirementHeader requirement={requirement} />
+        </motion.div>
+      <DispatchDetails requirement={requirement}/>
+      
       </div>
     </DashboardLayout>
   );

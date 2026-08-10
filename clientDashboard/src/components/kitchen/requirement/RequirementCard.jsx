@@ -5,7 +5,7 @@ import { FiChevronRight, FiPackage } from "react-icons/fi";
 
 const RequirementCard = ({ requirement }) => {
   return (
-    <Link to={`/requirements/${requirement.id}`}>
+    <Link to={`/requirements/${requirement._id}`}>
       <Card className="hover:shadow-md transition-all duration-200">
 
         <div className="flex items-start justify-between">
@@ -13,7 +13,7 @@ const RequirementCard = ({ requirement }) => {
           <div>
 
             <h2 className="text-lg font-semibold">
-              {requirement.id}
+              {requirement.requirementNumber}
             </h2>
 
             <p className="text-sm text-gray-500 mt-1">

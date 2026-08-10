@@ -1,17 +1,25 @@
-import user from "../mock/user";
-
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+// arc/services/auth.service.js
+import api from "../api/axios";
+import { ENDPOINTS } from "../api/endpoints";
 
 export const login = async (phone, password) => {
-  await delay(800);
 
-  if (phone === user.phone && password === user.password) {
-    return {
-      success: true,
-      token: "dummy-jwt-token",
-      user,
-    };
-  }
+    const response = await api.post(ENDPOINTS.AUTH.LOGIN, {
 
-  throw new Error("Invalid phone number or password");
+        phone,
+
+        password
+
+    });
+ 
+    return response.data.data;
+
+};
+
+export const logout = async () => {
+
+    const response = await api.post("/auth/logout");
+
+    return response.data;
+
 };

@@ -2,7 +2,6 @@ import Card from "../../shared/ui/Card";
 import RequirementStatusBadge from "./RequirementStatusBadge";
 
 const RequirementHeader = ({ requirement }) => {
-console.log(requirement);
 
     return (
 
@@ -14,7 +13,7 @@ console.log(requirement);
 
                     <h2 className="text-2xl font-bold">
 
-                        {requirement.id}
+                        {requirement.requirementNumber}
 
                     </h2>
 
@@ -61,7 +60,7 @@ console.log(requirement);
 
                     <p className="font-medium">
 
-                        {requirement.createdBy}
+                        {requirement.createdBy.name}
 
                     </p>
 

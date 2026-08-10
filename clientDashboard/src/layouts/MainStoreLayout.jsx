@@ -1,14 +1,12 @@
 import { Outlet } from "react-router-dom";
-import MainStoreNavbar from "../components/mainStore/layout/MainStoreNavbar";
-import MainStoreBottomNavigation from "../components/mainStore/layout/MainStoreBottomNavigation";
+import MainStoreNavigation from "../components/mainStore/layout/MainStoreNavigation";
 
 const MainStoreLayout = () => {
 
     return (
 
         <div className="min-h-screen bg-gray-50">
-
-            <MainStoreNavbar />
+            <MainStoreNavigation />
 
             <main className="px-4 py-5 pb-24">
 
@@ -16,7 +14,7 @@ const MainStoreLayout = () => {
 
             </main>
 
-            <MainStoreBottomNavigation />
+           
 
         </div>
 

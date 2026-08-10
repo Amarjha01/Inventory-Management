@@ -10,11 +10,11 @@ const BottomNavigation = () => {
 
     const menus = [
 
-        {
-            title: "Home",
-            icon: <MdDashboard size={24} />,
-            path: "/dashboard"
-        },
+        // {
+        //     title: "Home",
+        //     icon: <MdDashboard size={24} />,
+        //     path: "/dashboard"
+        // },
 
         {
             title: "New",

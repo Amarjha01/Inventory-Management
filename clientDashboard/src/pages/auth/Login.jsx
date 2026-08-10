@@ -24,12 +24,28 @@ const Login = () => {
             setLoading(true);
 
             const response = await login(phone,password);
+            
+            localStorage.setItem("user",JSON.stringify(response));
 
-            localStorage.setItem("token",response.token);
+            switch (response.role) {
 
-            localStorage.setItem("user",JSON.stringify(response.user));
+    case "Kitchen Incharge":
+        case "Store Incharge":
+        navigate("/new-requirement");
+        break;
 
-            navigate("/dashboard");
+    case "Store Supervisor":
+    
+    case "Admin":
+
+        navigate("/store");
+        break;
+
+    default:
+
+        navigate("/login");
+
+}
 
         }
 
@@ -68,11 +84,22 @@ const Login = () => {
                 <div className="space-y-5 mt-8">
 
                     <Input
-                    label="Phone Number"
-                    value={phone}
-                    onChange={(e)=>setPhone(e.target.value)}
-                    placeholder="9876543210"
-                    />
+  type="tel"
+  value={phone}
+  maxLength={10}
+  placeholder="Type Phone Number"
+  onKeyDown={(e) => {
+    if (
+      !/[0-9]/.test(e.key) &&
+      !["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(e.key)
+    ) {
+      e.preventDefault();
+    }
+  }}
+  onChange={(e) =>
+    setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
+  }
+/>
 
                     <Input
                     label="Password"
