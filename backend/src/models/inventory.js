@@ -19,8 +19,13 @@ const inventorySchema = new mongoose.Schema(
       default: "",
     },
 
+    bagSize:{
+      type:Number,
+      required:true,
+    },
+
     quantity: {
-      type: Number,
+      type:Number,
       required: true,
       default: 0,
       min: 0,

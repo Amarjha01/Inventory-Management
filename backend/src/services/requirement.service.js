@@ -7,7 +7,9 @@ import { REQUIREMENT_STATUS } from "../constants/status.js";
 import generateRequirementNumber from "../utils/generateRequirementNumber.js";
 
 import requirementRepository from "../repositories/requirement.repository.js";
-
+import vehicleRepository from "../repositories/vehicle.repository.js";
+import inventoryRepository from "../repositories/inventory.repository.js";
+import driverRepository from "../repositories/driver.repository.js";
 class RequirementService {
   async createRequirement(payload) {
     payload.requirementNumber = generateRequirementNumber();
@@ -16,11 +18,11 @@ class RequirementService {
   }
 
   async getRequirements(kitchenId) {
-    return await requirementRepository.findMany({kitchen:kitchenId});
+    return await requirementRepository.findMany({ kitchen: kitchenId });
   }
   async allKitchenRequirements() {
     console.log("here API reached");
-    
+
     return await requirementRepository.findMany();
   }
 
@@ -60,25 +62,43 @@ class RequirementService {
     return requirement;
   }
 
-  async dispatchRequirement(
-    id,
+  async dispatchRequirement({ requirementId, payload, userId }) {
+    console.log("payload at service", payload);
 
-    vehicle,
+    const requirement = await requirementRepository.findById(requirementId);
 
-    driver,
+    if (!requirement) {
+      throw new ApiError(404, "Requirement not found");
+    }
 
-    userId,
-  ) {
-    return await this.updateRequirement(
-      id,
+    // if (requirement.status !== REQUIREMENT_STATUS.APPROVED) {
+    //   throw new ApiError(
+    //     400,
+
+    //     "Requirement is not ready for dispatch",
+    //   );
+    // }
+
+    const vehicle = await this.prepareVehicle(payload);
+
+    const driver = await this.prepareDriver(payload);
+
+    await this.dispatchInventory(payload.items);
+
+    return await requirementRepository.update(
+      requirementId,
 
       {
         status: REQUIREMENT_STATUS.OUT_FOR_DELIVERY,
 
-        dispatch: {
-          vehicle,
+        remarks: payload.remarks,
 
-          driver,
+        items: payload.items,
+
+        dispatch: {
+          vehicle: vehicle?._id,
+
+          driver: driver?._id,
 
           dispatchedBy: userId,
 
@@ -88,7 +108,138 @@ class RequirementService {
     );
   }
 
-  async receiveRequirement(id) {
+  async prepareVehicle(payload) {
+    if (payload.vehicleId) {
+      const VID = payload.vehicleId;
+      console.log(VID);
+
+      const vehicle = await vehicleRepository.findById(VID);
+
+      await vehicleRepository.update(
+        vehicle._id,
+
+        {
+          isActive: false,
+        },
+      );
+
+      return vehicle;
+    }
+
+    let vehicle = await vehicleRepository.findByVehicleNumber(
+      payload.manualVehicleNumber,
+    );
+    console.log(
+      "vehicle is 143:",
+      vehicle,
+      "Number",
+      payload.manualVehicleNumber,
+    );
+
+    if (!vehicle) {
+      vehicle = await vehicleRepository.create({
+        vehicleNumber: payload.manualVehicleNumber,
+
+        vehicleName: "Contract Vehicle",
+
+        isAvailable: false,
+      });
+    } else {
+      await vehicleRepository.update(
+        vehicle._id,
+
+        {
+          isAvailable: false,
+        },
+      );
+    }
+
+    return vehicle;
+  }
+
+  async prepareDriver(payload) {
+    let driver = await driverRepository.findByPhone(payload.manualDriverPhone);
+
+    if (!driver) {
+      driver = await driverRepository.create({
+        name: payload.manualDriverName,
+
+        phone: payload.manualDriverPhone,
+
+        licenseNumber: "NA",
+      });
+    }
+
+    return driver;
+  }
+
+  async dispatchInventory(items) {
+    for (const item of items) {
+      const inventory = await inventoryRepository.findById(item.inventoryId);
+
+      if (!inventory) {
+        throw new ApiError(
+          404,
+
+          "Inventory not found",
+        );
+      }
+
+      if (item.dispatchedQuantity > inventory.quantity) {
+        throw new ApiError(
+          400,
+
+          `${inventory.name} has insufficient stock`,
+        );
+      }
+
+      await inventoryRepository.update(
+        inventory._id,
+
+        {
+          quantity: inventory.quantity - item.dispatchedQuantity,
+        },
+      );
+
+      // await inventory.save();
+    }
+  }
+
+  async receiveRequirement(id, file, userId) {
+    const requirement = await requirementRepository.findById(id);
+
+    if (!requirement) {
+      throw new ApiError(404, "Requirement not found");
+    }
+
+    if (requirement.status !== REQUIREMENT_STATUS.OUT_FOR_DELIVERY) {
+      throw new ApiError(400, "Requirement is not out for delivery.");
+    }
+
+    // make vehicle available again
+
+    if (requirement.dispatch.vehicle) {
+      await vehicleRepository.update(
+        requirement.dispatch.vehicle,
+
+        {
+          isAvailable: true,
+        },
+      );
+    }
+
+    // make driver available again
+
+    if (requirement.dispatch.driver) {
+      await driverRepository.update(
+        requirement.dispatch.driver,
+
+        {
+          isAvailable: true,
+        },
+      );
+    }
+
     return await this.updateRequirement(
       id,
 
@@ -96,6 +247,14 @@ class RequirementService {
         status: REQUIREMENT_STATUS.RECEIVED,
 
         receivedAt: new Date(),
+
+        gatePass: {
+          image: file.filename,
+
+          uploadedBy: userId,
+
+          uploadedAt: new Date(),
+        },
       },
     );
   }

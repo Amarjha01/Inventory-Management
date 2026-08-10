@@ -39,8 +39,8 @@ const ItemSelectorModal = ({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl w-full max-w-lg max-h-screen overflow-hidden">
         <div className="flex justify-between items-center p-5 border-b">
           <h2 className="text-xl font-semibold">Select Item</h2>
 
@@ -66,7 +66,7 @@ const ItemSelectorModal = ({
           </div>
         </div>
 
-        <div className="max-h-[450px] overflow-y-auto px-5 pb-5 space-y-3">
+        <div className="max-h-[450px] overflow-y-auto px-5 pb-5 space-y-3 ">
           {filteredItems.length === 0 && (
             <div className="text-center text-gray-500 py-10">
               No item found.
@@ -75,13 +75,14 @@ const ItemSelectorModal = ({
 
           {filteredItems.map((item) => (
             <button
+            disabled={!item.isActive}
               key={item._id}
               onClick={() => {
                 onSelect(item);
 
                 onClose();
               }}
-              className="w-full border rounded-xl p-3 flex items-center gap-4 hover:border-teal-500 transition"
+              className={`w-full  border rounded-xl p-3 flex items-center gap-4 hover:border-teal-500 transition ${!item.isActive ? "bg-gray-400" : ""}`}
             >
               <img
                 src={`/items/${item.image}`}
@@ -93,10 +94,9 @@ const ItemSelectorModal = ({
                 <h3 className="font-semibold">{item.name}</h3>
 
                 <p className="text-sm text-gray-500">{item.hindiName}</p>
+                <p className={`text-sm ${item.isActive ? "text-green-700 " :" text-red-700"} `}>{item.isActive ? "Available" : "Not Available"}</p>
 
-                <p className="text-sm mt-1">
-                  Available : {item.quantity} {item.unit}
-                </p>
+               
               </div>
             </button>
           ))}

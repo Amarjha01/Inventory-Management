@@ -7,7 +7,7 @@ import {
   MdWarningAmber,
   MdInventory,
 } from "react-icons/md";
-
+import { FaToggleOn, FaToggleOff } from "react-icons/fa6";
 import Card from "../../../components/shared/ui/Card";
 import Button from "../../../components/shared/ui/Button";
 import Loader from "../../../components/shared/ui/Loader";
@@ -26,6 +26,7 @@ const Inventory = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
+  const [isOn, setIsOn] = useState(false);
   const [form, setForm] = useState({
     name: "",
     hindiName: "",
@@ -66,7 +67,9 @@ const Inventory = () => {
       hindiName: "",
       quantity: "",
       minimumStock: "",
+      bagSize: "",
       unit: "",
+      isActive: "",
       image: "",
     });
 
@@ -81,7 +84,9 @@ const Inventory = () => {
       hindiName: item.hindiName,
       quantity: item.quantity,
       minimumStock: item.minimumStock,
+      bagSize: item.bagSize,
       unit: item.unit,
+      isActive: item.isActive,
       image: item.image,
     });
 
@@ -131,6 +136,27 @@ const Inventory = () => {
   const lowStockCount = inventory.filter(
     (item) => Number(item.quantity) <= Number(item.minimumStock),
   ).length;
+
+  const handleToggle = async (item) => {
+    try {
+      const payload = {
+        ...item,
+        isActive: !item.isActive,
+      };
+
+      await updateInventory(item._id, payload);
+
+      setInventory((prev) =>
+        prev.map((inventoryItem) =>
+          inventoryItem._id === item._id
+            ? { ...inventoryItem, isActive: !item.isActive }
+            : inventoryItem,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to update item status:", error);
+    }
+  };
 
   return (
     <div className="space-y-6 pb-10">
@@ -222,18 +248,27 @@ const Inventory = () => {
             "
                 >
                   <div className="flex gap-4">
+                   <div className="flex flex-col justify-center items-center">
                     <img
                       src={`/items/${item.image}`}
                       alt={item.name}
-                      className="
-              w-20 h-20
-              rounded-xl
-              object-cover
-              border
-              bg-gray-100
-              "
+                      className="w-20 h-20 rounded-xl object-coverborder bg-gray-100"
                     />
-
+                    <button
+                      type="button"
+                      onClick={() => handleToggle(item)}
+                      className="text-4xl transition-colors"
+                      aria-label={
+                        item.isActive ? "Disable item" : "Enable item"
+                      }
+                    >
+                      {item.isActive ? (
+                        <FaToggleOn className="text-green-500" />
+                      ) : (
+                        <FaToggleOff className="text-gray-400" />
+                      )}
+                    </button>
+                   </div>
                     <div className="flex-1">
                       <div className="flex justify-between">
                         <div>
@@ -250,8 +285,8 @@ const Inventory = () => {
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 mt-4">
-                        <div>
+                      <div className="grid grid-cols-3 gap-4 mt-4">
+                        {/* <div>
                           <p className="text-xs text-gray-500">Current Stock</p>
 
                           <p className="font-semibold">
@@ -264,6 +299,13 @@ const Inventory = () => {
 
                           <p className="font-semibold">
                             {item.minimumStock} {item.unit}
+                          </p>
+                        </div> */}
+                        <div>
+                          <p className="text-xs text-gray-500">Bag Size</p>
+
+                          <p className="font-semibold">
+                            {item.bagSize} {item.unit}
                           </p>
                         </div>
                       </div>
@@ -327,6 +369,7 @@ const Inventory = () => {
                 ["hindiName", "Hindi Name"],
                 ["quantity", "Quantity"],
                 ["minimumStock", "Minimum Stock"],
+                ["bagSize", "Bag Size"],
                 ["unit", "Unit"],
                 ["image", "Image Name"],
               ].map(([name, placeholder]) => (

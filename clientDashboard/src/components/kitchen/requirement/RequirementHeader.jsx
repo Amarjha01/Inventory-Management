@@ -2,7 +2,6 @@ import Card from "../../shared/ui/Card";
 import RequirementStatusBadge from "./RequirementStatusBadge";
 
 const RequirementHeader = ({ requirement }) => {
-console.log(requirement);
 
     return (
 

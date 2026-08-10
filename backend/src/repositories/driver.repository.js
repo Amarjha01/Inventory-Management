@@ -16,6 +16,9 @@ class DriverRepository {
   async findById(id) {
     return await Driver.findById(id).lean();
   }
+  async findByPhone(phone) {
+    return await Driver.findOne({phone}).lean();
+  }
 
   async update(id, payload) {
     return await Driver.findByIdAndUpdate(

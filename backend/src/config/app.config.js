@@ -9,7 +9,13 @@ import logger from "../utils/logger.js";
 
 const configureApplication = (app) => {
 
-    app.use(helmet());
+    app.use(
+    helmet({
+        crossOriginResourcePolicy: {
+            policy: "cross-origin",
+        },
+    })
+);
 
     app.use(cors({
 

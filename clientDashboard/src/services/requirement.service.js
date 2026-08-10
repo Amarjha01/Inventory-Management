@@ -13,7 +13,9 @@ export const createRequirement = async (payload) => {
 };
 
 export const getAllKitchenRequirements = async () => {
-  const { data } = await api.get(`${ENDPOINTS.REQUIREMENTS}/allKitchenRequirements`);
+  const { data } = await api.get(
+    `${ENDPOINTS.REQUIREMENTS}/allKitchenRequirements`,
+  );
 
   return data.data;
 };
@@ -26,12 +28,11 @@ export const getRequirements = async () => {
 export const getRequirementById = async (id) => {
   const { data } = await api.get(`${ENDPOINTS.REQUIREMENTS}/${id}`);
 
-   const requirementData = data.data;
-   return requirementData;
+  const requirementData = data.data;
+  return requirementData;
 };
 
 export const getLatestKitchenRequirement = async () => {
-
   const { data } = await api.get(
     `${ENDPOINTS.REQUIREMENTS}/latest/${user.kitchenId._id}`,
   );
@@ -53,22 +54,26 @@ export const updateRequirement = async (
   return data.data;
 };
 
-export const dispatchRequirement = async (
-  id,
-
-  payload,
-) => {
+export const dispatchRequirement = async (id, payload) => {
   const { data } = await api.patch(
     `${ENDPOINTS.REQUIREMENTS}/${id}/dispatch`,
-
     payload,
   );
-
   return data.data;
 };
 
-export const receiveRequirement = async (id) => {
-  const { data } = await api.patch(`${ENDPOINTS.REQUIREMENTS}/${id}/receive`);
+export const receiveRequirement = async (id, formData) => {
+  const response = await api.patch(
+    `/requirements/${id}/receive`,
 
-  return data.data;
+    formData,
+
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+
+  return response.data.data;
 };

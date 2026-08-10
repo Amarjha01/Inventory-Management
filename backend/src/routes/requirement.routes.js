@@ -23,6 +23,7 @@ import {
 } from "../validators/requirement.validator.js";
 
 import { ROLE } from "../constants/roles.js";
+import upload from "../middleware/upload.middleware.js";
 
 const router = Router();
 
@@ -87,11 +88,16 @@ router.patch(
 );
 
 router.patch(
-  "/:id/receive",
-  authorize(
-    ROLE.KITCHEN_INCHARGE,
-    ROLE.STORE_INCHARGE),
-  receiveRequirement,
+    "/:id/receive",
+
+    authorize(
+        ROLE.KITCHEN_INCHARGE,
+        ROLE.STORE_INCHARGE
+    ),
+
+    upload.single("gatePass"),
+
+    receiveRequirement
 );
 
 export default router;

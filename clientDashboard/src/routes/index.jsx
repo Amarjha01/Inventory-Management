@@ -17,6 +17,7 @@ import Drivers from "../pages/MainStore/Drivers/Drivers.jsx";
 import RequirementWorkspace from "../pages/MainStore/RequirementWorkspace/RequirementWorkspace.jsx";
 import Kitchens from "../pages/MainStore/Kitchens/Kitchens.jsx";
 import Users from "../pages/MainStore/Users/Users.jsx";
+import Reports from "../pages/MainStore/Reports/Reports.jsx";
 
 
 const AppRoutes = () => {
@@ -124,6 +125,10 @@ const AppRoutes = () => {
     <Route
         path="users"
         element={<Users />}
+    />
+   <Route
+    path="reports"
+    element={<Reports />}
     />
 
 </Route>

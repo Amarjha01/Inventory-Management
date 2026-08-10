@@ -13,6 +13,8 @@ import RequirementTimeline from "../../../components/kitchen/requirement/Require
 import VehicleCard from "../../../components/kitchen/requirement/VehicleCard";
 
 import { getLatestKitchenRequirement } from "../../../services/requirement.service";
+import DispatchDetails from "../../../components/shared/dispatch/DispatchDetails";
+import ReceiveRequirement from "../../../components/shared/dispatch/ReceiveRequirement";
 
 const TrackRequirement = () => {
   const [loading, setLoading] = useState(true);
@@ -93,46 +95,7 @@ const TrackRequirement = () => {
         <motion.div {...animation} transition={{ duration: 0.3 }}>
           <RequirementHeader requirement={requirement} />
         </motion.div>
-
-        {/* Timeline */}
-        <motion.div
-          {...animation}
-          transition={{ delay: 0.1 }}
-          className="rounded-2xl border bg-white p-5 shadow-sm"
-        >
-          <div className="mb-4 flex items-center gap-2">
-            <div className="rounded-lg bg-teal-100 p-2 text-teal-700">
-              <FiTruck size={20} />
-            </div>
-
-            <h2 className="font-semibold text-gray-800">Delivery Progress</h2>
-          </div>
-
-          <RequirementTimeline
-            timeline={requirement.timeline}
-            currentStatus={requirement.status}
-          />
-        </motion.div>
-
-        {/* Items */}
-        <motion.div
-          {...animation}
-          transition={{ delay: 0.15 }}
-          className="rounded-2xl border bg-white p-5 shadow-sm"
-        >
-          <RequirementItems items={requirement.items} />
-        </motion.div>
-
-        {/* Vehicle */}
-        {requirement.vehicle && (
-          <motion.div
-            {...animation}
-            transition={{ delay: 0.2 }}
-            className="rounded-2xl border bg-white p-5 shadow-sm"
-          >
-            <VehicleCard vehicle={requirement.vehicle} />
-          </motion.div>
-        )}
+        <DispatchDetails requirement={requirement} />
       </div>
     </DashboardLayout>
   );

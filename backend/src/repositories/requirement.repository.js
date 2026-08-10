@@ -39,6 +39,10 @@ class RequirementRepository {
 
       .populate("dispatch.driver")
 
+      .populate("dispatch.dispatchedBy" , "-password")
+
+      .populate("dispatch.dispatchedAt")
+
       .lean();
   }
 
@@ -71,6 +75,7 @@ class RequirementRepository {
   async findLatestKitchenRequirement(kitchenId) {
     return await Requirement.findOne({
       kitchen: kitchenId,
+      status: "Out For Delivery",
     })
 
       .sort({

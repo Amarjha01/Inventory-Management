@@ -3,27 +3,33 @@ import mongoose from "mongoose";
 import { REQUIREMENT_STATUS } from "../constants/status.js";
 
 const requirementItemSchema = new mongoose.Schema(
-  {
+{
     inventoryId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Inventory",
-      required: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Inventory",
+        required: true,
     },
 
     quantity: {
-      type: Number,
-      required: true,
-      min: 1,
+        type: Number,
+        required: true,
+        min: 1,
+    },
+
+    dispatchedQuantity: {
+        type: Number,
+        default: null,
+        min: 0,
     },
 
     unit: {
-      type: String,
-      required: true,
+        type: String,
+        required: true,
     },
-  },
-  {
+},
+{
     _id: false,
-  },
+}
 );
 
 const requirementSchema = new mongoose.Schema(
@@ -98,6 +104,35 @@ const requirementSchema = new mongoose.Schema(
 
       default: null,
     },
+ gatePass: {
+
+    image: {
+
+        type: String,
+
+        default: ""
+
+    },
+
+    uploadedBy: {
+
+        type: mongoose.Schema.Types.ObjectId,
+
+        ref: "User",
+
+        default: null
+
+    },
+
+    uploadedAt: {
+
+        type: Date,
+
+        default: null
+
+    }
+
+},
   },
   {
     timestamps: true,

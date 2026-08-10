@@ -14,6 +14,7 @@ import RequirementItems from "../../../components/kitchen/requirement/Requiremen
 import VehicleCard from "../../../components/kitchen/requirement/VehicleCard";
 
 import { getRequirementById } from "../../../services/requirement.service";
+import DispatchDetails from "../../../components/shared/dispatch/DispatchDetails";
 
 const sectionAnimation = {
   initial: {
@@ -90,83 +91,8 @@ const RequirementDetails = () => {
         <motion.div {...sectionAnimation} transition={{ duration: 0.3 }}>
           <RequirementHeader requirement={requirement} />
         </motion.div>
-
-        {/* Timeline */}
-        <motion.div
-          {...sectionAnimation}
-          transition={{ delay: 0.1 }}
-          className="rounded-2xl border bg-white p-5 shadow-sm"
-        >
-          <RequirementTimeline
-            timeline={requirement.timeline}
-            currentStatus={requirement.status}
-          />
-        </motion.div>
-
-        {/* Items */}
-        <motion.div
-          {...sectionAnimation}
-          transition={{ delay: 0.15 }}
-          className="rounded-2xl border bg-white p-5 shadow-sm"
-        >
-          <RequirementItems items={requirement.items} />
-        </motion.div>
-
-        {/* Vehicle */}
-        {requirement.vehicle && (
-          <motion.div
-            {...sectionAnimation}
-            transition={{ delay: 0.2 }}
-            className="rounded-2xl border bg-white p-5 shadow-sm"
-          >
-            <VehicleCard vehicle={requirement.vehicle} />
-          </motion.div>
-        )}
-
-        {/* Receiving Letter */}
-        {requirement.receivingLetter && (
-          <motion.div
-            {...sectionAnimation}
-            transition={{ delay: 0.25 }}
-            className="rounded-2xl border bg-white p-5 shadow-sm"
-          >
-            <div className="flex items-center gap-2 mb-5">
-              <div className="rounded-lg bg-teal-100 p-2 text-teal-700">
-                <FiFileText size={20} />
-              </div>
-
-              <h2 className="text-lg font-semibold text-gray-800">
-                Receiving Letter
-              </h2>
-            </div>
-
-            <div className="overflow-hidden rounded-xl border bg-gray-50">
-              <img
-                src={requirement.receivingLetter.file}
-                alt="Receiving Letter"
-                className="w-full max-h-[600px] object-contain"
-              />
-            </div>
-
-            <div className="mt-4 space-y-1 text-sm text-gray-500">
-              <p>
-                Uploaded By :
-                <span className="ml-1 font-medium text-gray-700">
-                  {requirement.receivingLetter.uploadedBy}
-                </span>
-              </p>
-
-              <p>
-                Uploaded At :
-                <span className="ml-1 font-medium text-gray-700">
-                  {new Date(
-                    requirement.receivingLetter.uploadedAt,
-                  ).toLocaleString()}
-                </span>
-              </p>
-            </div>
-          </motion.div>
-        )}
+      <DispatchDetails requirement={requirement}/>
+      
       </div>
     </DashboardLayout>
   );

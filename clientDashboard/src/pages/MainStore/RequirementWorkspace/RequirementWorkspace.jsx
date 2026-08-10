@@ -14,6 +14,8 @@ import {
 import { getInventory } from "../../../services/inventory.service";
 
 import { getVehicles } from "../../../services/vehicle.service";
+import InfoRow from "../../../components/shared/ui/InfoRow";
+import DispatchDetails from "../../../components/shared/dispatch/DispatchDetails";
 
 const RequirementWorkspace = () => {
   const { id } = useParams();
@@ -32,6 +34,13 @@ const RequirementWorkspace = () => {
 
   const [vehicleId, setVehicleId] = useState("");
 
+  // manual
+  const [manualVehicleNumber, setManualVehicleNumber] = useState("");
+
+  const [manualDriverName, setManualDriverName] = useState("");
+
+  const [manualDriverPhone, setManualDriverPhone] = useState("");
+
   useEffect(() => {
     loadData();
   }, [id]);
@@ -45,9 +54,16 @@ const RequirementWorkspace = () => {
 
         getVehicles(),
       ]);
-      console.log(requirementData, inventoryData, vehicleData);
 
-      setRequirement(requirementData);
+      setRequirement({
+        ...requirementData,
+
+        items: requirementData.items.map((item) => ({
+          ...item,
+
+          dispatchedQuantity: item.dispatchedQuantity ?? item.quantity,
+        })),
+      });
 
       setInventory(inventoryData);
 
@@ -62,7 +78,10 @@ const RequirementWorkspace = () => {
       setLoading(false);
     }
   };
-
+const isDispatched =
+    requirement?.status === "Out For Delivery";
+const isReceived =
+    requirement?.status === "Received";
   const inventoryMap = useMemo(() => {
     const map = {};
 
@@ -73,27 +92,38 @@ const RequirementWorkspace = () => {
     return map;
   }, [inventory]);
 
-  const updateDispatchQuantity = (
-    inventoryId,
-
-    quantity,
-  ) => {
-    if (quantity < 0) {
-      quantity = 0;
-    }
-
+  const updateDispatchQuantity = (inventoryId, value) => {
     setRequirement((prev) => ({
       ...prev,
 
-      items: prev.items.map((item) =>
-        item.inventoryId._id === inventoryId
-          ? {
-              ...item,
+      items: prev.items.map((item) => {
+        if (item.inventoryId._id !== inventoryId) {
+          return item;
+        }
 
-              dispatchedQuantity: Number(quantity),
-            }
-          : item,
-      ),
+        if (value === "") {
+          return {
+            ...item,
+            dispatchedQuantity: "",
+          };
+        }
+
+        let quantity = Number(value);
+
+        if (quantity < 0) {
+          quantity = 0;
+        }
+
+        if (quantity > item.quantity) {
+          quantity = item.quantity;
+        }
+
+        return {
+          ...item,
+
+          dispatchedQuantity: quantity,
+        };
+      }),
     }));
   };
 
@@ -102,21 +132,24 @@ const RequirementWorkspace = () => {
       const payload = {
         vehicleId,
 
+        manualVehicleNumber,
+
+        manualDriverName,
+
+        manualDriverPhone,
+
         remarks,
 
         items: requirement.items.map((item) => ({
           inventoryId: item.inventoryId._id,
-
-          quantity: item.dispatchedQuantity,
+          quantity: item.quantity,
+          dispatchedQuantity: item.dispatchedQuantity,
+          unit:item.unit
         })),
       };
-console.log(payload);
+      console.log(payload);
 
-      await dispatchRequirement(
-        requirement._id,
-
-        payload,
-      );
+      await dispatchRequirement(requirement._id, payload);
 
       alert("Requirement dispatched successfully.");
 
@@ -226,17 +259,17 @@ console.log(payload);
 
                     <input
                       type="number"
+                      disabled={isDispatched||isReceived}
                       min={0}
-                      max={stock?.quantity || 0}
-                      value={item.dispatchedQuantity ?? item.quantity}
+                      max={item.quantity}
+                      value={item.dispatchedQuantity}
                       onChange={(e) =>
                         updateDispatchQuantity(
                           item.inventoryId._id,
-
                           e.target.value,
                         )
                       }
-                      className="w-full border rounded-xl px-3 py-3 outline-none"
+                      className="w-full border rounded-xl px-3 py-3 outline-none disabled:bg-gray-100 disabled:text-gray-500"
                     />
                   </div>
                 </div>
@@ -245,8 +278,28 @@ console.log(payload);
           </div>
         </Card>
 
-        <Card>
-          <h3 className="text-lg font-semibold mb-4">Assign Vehicle</h3>
+
+            {isDispatched || isReceived ? (
+
+<>
+<DispatchDetails requirement={requirement}/>
+
+{isReceived && 
+<img
+    src={`http://localhost:5000/uploads/requirements/${requirement.gatePass.image}`}
+    alt="Gate Pass"
+    className="w-full rounded-xl border"
+/>
+}
+
+</>
+) : (
+
+<>
+ <Card>
+          <h3 className="text-lg font-semibold mb-4">Vehicle Details</h3>
+
+          <label className="block text-sm mb-2">Registered Vehicle</label>
 
           <select
             value={vehicleId}
@@ -269,17 +322,52 @@ console.log(payload);
                 </option>
               ))}
           </select>
+
+          <div className="my-5 text-center text-gray-500">OR</div>
+
+          <input
+            type="text"
+            placeholder="Vehicle Number"
+            value={manualVehicleNumber}
+            onChange={(e) => setManualVehicleNumber(e.target.value)}
+            className="w-full border rounded-xl px-3 py-3 mb-3"
+          />
         </Card>
+
+        <Card>
+          <h3 className="text-lg font-semibold mb-4">Driver Details</h3>
+
+          <input
+            type="text"
+            placeholder="Driver Name"
+            value={manualDriverName}
+            onChange={(e) => setManualDriverName(e.target.value)}
+            className="w-full border rounded-xl px-3 py-3 mb-3"
+          />
+
+          <input
+            type="text"
+            placeholder="Driver Phone Number"
+            value={manualDriverPhone}
+            onChange={(e) => setManualDriverPhone(e.target.value)}
+            className="w-full border rounded-xl px-3 py-3"
+          />
+        </Card>
+</>
+
+)}
+       
 
         <Card>
           <h3 className="text-lg font-semibold mb-4">Dispatch Remarks</h3>
 
           <textarea
             rows={4}
+            disabled={isDispatched || isReceived}
             value={remarks}
             onChange={(e) => setRemarks(e.target.value)}
             placeholder="Write dispatch remarks..."
-            className="w-full border rounded-xl p-3 resize-none"
+            className="w-full border rounded-xl p-3 resize-none disabled:bg-gray-100 disabled:text-gray-500"
           />
         </Card>
         <Card>
@@ -313,9 +401,18 @@ console.log(payload);
           )}
         </Card>
 
-        <Button className="w-full" onClick={handleSave}>
-          Dispatch Requirement
-        </Button>
+        {!isDispatched && !isReceived && (
+
+<Button
+    className="w-full"
+    onClick={handleSave}
+>
+
+    Dispatch Requirement
+
+</Button>
+
+)}
       </div>
     );
   }

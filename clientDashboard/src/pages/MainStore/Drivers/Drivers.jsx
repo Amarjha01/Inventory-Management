@@ -6,10 +6,16 @@ import { MdAdd, MdEdit, MdPerson, MdSearch, MdBadge } from "react-icons/md";
 import Card from "../../../components/shared/ui/Card";
 import Button from "../../../components/shared/ui/Button";
 
-import driverData from "../../../mock/drivers";
+import { useEffect } from "react";
+
+import {
+    getDrivers,
+    createDriver,
+    updateDriver,
+} from "../../../services/driver.service";
 
 const Drivers = () => {
-  const [drivers, setDrivers] = useState(driverData);
+  const [drivers, setDrivers] = useState([]);
 
   const [search, setSearch] = useState("");
 
@@ -17,11 +23,42 @@ const Drivers = () => {
 
   const [editingDriver, setEditingDriver] = useState(null);
 
+  useEffect(() => {
+
+    loadDrivers();
+
+}, []);
+
+const loadDrivers = async () => {
+
+    try {
+
+        const data = await getDrivers();
+
+        setDrivers(data);
+
+    } catch (err) {
+
+        console.error(err);
+
+    }
+
+};
   const [form, setForm] = useState({
+
     name: "",
+
     phone: "",
+
     licenseNumber: "",
-  });
+
+    address: "",
+
+    remarks: "",
+
+    isActive: true,
+
+});
 
   const filteredDrivers = useMemo(() => {
     return drivers.filter(
@@ -35,10 +72,20 @@ const Drivers = () => {
     setEditingDriver(null);
 
     setForm({
-      name: "",
-      phone: "",
-      licenseNumber: "",
-    });
+
+    name: "",
+
+    phone: "",
+
+    licenseNumber: "",
+
+    address: "",
+
+    remarks: "",
+
+    isActive: true,
+
+});
 
     setShowModal(true);
   };
@@ -46,7 +93,21 @@ const Drivers = () => {
   const openEditModal = (driver) => {
     setEditingDriver(driver);
 
-    setForm(driver);
+    setForm({
+
+    name: driver.name,
+
+    phone: driver.phone,
+
+    licenseNumber: driver.licenseNumber,
+
+    address: driver.address || "",
+
+    remarks: driver.remarks || "",
+
+    isActive: driver.isActive,
+
+});
 
     setShowModal(true);
   };
@@ -58,37 +119,65 @@ const Drivers = () => {
     }));
   };
 
-  const handleSave = () => {
-    if (!form.name || !form.phone) {
-      alert("Please fill required fields.");
+const handleSave = async () => {
 
-      return;
+    if (
+
+        !form.name ||
+
+        !form.phone ||
+
+        !form.licenseNumber
+
+    ) {
+
+        alert("Please fill all required fields.");
+
+        return;
+
     }
 
-    if (editingDriver) {
-      setDrivers((prev) =>
-        prev.map((driver) =>
-          driver.id === editingDriver.id
-            ? {
-                ...form,
-                id: editingDriver.id,
-              }
-            : driver,
-        ),
-      );
-    } else {
-      setDrivers((prev) => [
-        ...prev,
+    try {
 
-        {
-          ...form,
-          id: Date.now(),
-        },
-      ]);
+        if (editingDriver) {
+
+            await updateDriver(
+
+                editingDriver._id,
+
+                form
+
+            );
+
+        }
+
+        else {
+
+            await createDriver(form);
+
+        }
+
+        await loadDrivers();
+
+        setShowModal(false);
+
     }
 
-    setShowModal(false);
-  };
+    catch (error) {
+
+        console.error(error);
+
+        alert(
+
+            error.response?.data?.message ||
+
+            "Something went wrong."
+
+        );
+
+    }
+
+};
 
   return (
     <div className="space-y-6 pb-10">
@@ -202,7 +291,7 @@ const Drivers = () => {
         <AnimatePresence>
           {filteredDrivers.map((driver) => (
             <motion.div
-              key={driver.id}
+              key={driver._id}
               initial={{
                 opacity: 0,
                 y: 15,

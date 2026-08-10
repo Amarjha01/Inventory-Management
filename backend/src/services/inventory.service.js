@@ -11,7 +11,7 @@ class InventoryService {
 
   async getInventory() {
     return await inventoryRepository.findMany({
-      isActive: true,
+      // isActive: true,
     });
   }
 

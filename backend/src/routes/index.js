@@ -7,6 +7,7 @@ import inventoryRoutes from "./inventory.routes.js";
 import requirementRoutes from "./requirement.routes.js";
 import vehicleRoutes from "./vehicle.routes.js";
 import driverRoutes from "./driver.routes.js";
+import reports from "./report.routes.js"
 
 const router = Router();
 
@@ -35,5 +36,7 @@ router.use("/requirements", requirementRoutes);
 router.use("/vehicles", vehicleRoutes);
 
 router.use("/drivers", driverRoutes);
+
+router.use("/reports", reports);
 
 export default router;

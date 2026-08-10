@@ -6,6 +6,8 @@ import { MESSAGE } from "../constants/responseMessages.js";
 
 class VehicleService {
   async createVehicle(payload) {
+    console.log(payload);
+    return;
     return await vehicleRepository.create(payload);
   }
 

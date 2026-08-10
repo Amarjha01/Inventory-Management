@@ -9,6 +9,7 @@ import {
   MdInventory,
   MdPeople,
   MdSettings,
+  MdAssessment,
 } from "react-icons/md";
 
 import { FaTruckMoving, FaUsers } from "react-icons/fa";
@@ -50,11 +51,17 @@ const MainStoreNavbar = () => {
       icon: <HiOutlineBuildingStorefront size={22} />,
       path: "/store/kitchens",
     },
-    {
-      title: "Settings",
-      icon: <MdSettings size={22} />,
-      path: "/store/settings",
-    },
+     {
+    title: "Reports",
+    icon: <MdAssessment size={20} />,
+    path: "/store/reports",
+},
+    // {
+    //   title: "Settings",
+    //   icon: <MdSettings size={22} />,
+    //   path: "/store/settings",
+    // },
+   
   ];
 
   return (

@@ -1,8 +1,8 @@
 import { FiMinus, FiPlus } from "react-icons/fi";
+import { GiChipsBag } from "react-icons/gi";
+const QuantitySelector = ({ bagSize, value, onChange }) => {
 
-const QuantitySelector = ({ value, onChange }) => {
-
-    const increase = () => onChange(value + 1);
+    const increase = () => onChange(value + bagSize);
 
     const decrease = () => {
         if (value > 1) {
@@ -31,7 +31,6 @@ const QuantitySelector = ({ value, onChange }) => {
             >
                 <FiPlus />
             </button>
-
         </div>
 
     );

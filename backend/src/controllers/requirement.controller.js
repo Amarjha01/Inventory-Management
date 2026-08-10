@@ -89,32 +89,44 @@ export const updateRequirement = asyncHandler(async (req, res) => {
 });
 
 export const dispatchRequirement = asyncHandler(async (req, res) => {
-  const requirement = await requirementService.dispatchRequirement(
-    req.params.id,
 
-    req.body.vehicle,
+    try {
+      const requirement = await requirementService.dispatchRequirement({
 
-    req.body.driver,
+        requirementId: req.params.id,
 
-    req.user._id,
-  );
-  console.log(req.params);
-  
-console.log(req.body);
+        payload: req.body,
 
-  return ApiResponse.success(
-    res,
+        userId: req.user._id
 
-    "Requirement dispatched successfully",
+    });
 
-    requirement,
-  );
+    return ApiResponse.success(
+
+        res,
+
+        "Requirement dispatched successfully",
+
+        requirement
+
+    );
+    } catch (error) {
+      console.error(error);
+    }
+
 });
 
 export const receiveRequirement = asyncHandler(async (req, res) => {
-  const requirement = await requirementService.receiveRequirement(
-    req.params.id,
-  );
+  const requirement =
+    await requirementService.receiveRequirement(
+
+        req.params.id,
+
+        req.file,
+
+        req.user._id
+
+    );
 
   return ApiResponse.success(
     res,
