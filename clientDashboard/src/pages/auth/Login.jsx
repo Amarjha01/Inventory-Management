@@ -7,7 +7,7 @@ import { login } from "../../services/auth.service";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { FaPhone } from "react-icons/fa";
 import { TbLockPassword } from "react-icons/tb";
-import Toast from "../../utils/toast";
+import Toast from "../../utils/Toast";
 import toast, { Toaster } from "react-hot-toast";
 import { storage } from "../../utils/storage";
 
