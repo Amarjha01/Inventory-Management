@@ -75,7 +75,7 @@ class RequirementRepository {
   async findLatestKitchenRequirement(kitchenId) {
     return await Requirement.findOne({
       kitchen: kitchenId,
-      status: "Out For Delivery",
+      status: { $in: ["Out For Delivery", "Submitted"] }
     })
 
       .sort({

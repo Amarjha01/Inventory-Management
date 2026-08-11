@@ -20,6 +20,8 @@ export const MESSAGE = Object.freeze({
 
     LOGIN_SUCCESS: "Login successful",
 
+    LOGOUT_SUCCESS:"Logout successful",
+
     INVALID_CREDENTIALS: "Invalid phone or password",
 
     AUTH_REQUIRED: "Authentication required",

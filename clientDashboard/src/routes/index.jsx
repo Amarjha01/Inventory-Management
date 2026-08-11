@@ -39,7 +39,7 @@ const AppRoutes = () => {
 <Route
     path="/new-requirement"
     element={
-        <ProtectedRoute roles={["Kitchen Incharge"]}>
+        <ProtectedRoute roles={["Kitchen Incharge","Store Incharge"]}>
             <NewRequirement />
         </ProtectedRoute>
     }
@@ -48,7 +48,7 @@ const AppRoutes = () => {
 <Route
     path="/history"
     element={
-        <ProtectedRoute roles={["Kitchen Incharge"]}>
+        <ProtectedRoute roles={["Kitchen Incharge","Store Incharge"]}>
             <PreviousRequirement />
         </ProtectedRoute>
     }
@@ -57,7 +57,7 @@ const AppRoutes = () => {
 <Route
     path="/track"
     element={
-        <ProtectedRoute roles={["Kitchen Incharge"]}>
+        <ProtectedRoute roles={["Kitchen Incharge","Store Incharge"]}>
             <TrackRequirement />
         </ProtectedRoute>
     }
@@ -66,7 +66,7 @@ const AppRoutes = () => {
 <Route
     path="/requirements/:id"
     element={
-        <ProtectedRoute roles={["Kitchen Incharge"]}>
+        <ProtectedRoute roles={["Kitchen Incharge" ,"Store Incharge"]}>
             <RequirementDetails />
         </ProtectedRoute>
     }
@@ -81,7 +81,6 @@ const AppRoutes = () => {
             roles={[
                 "Admin",
                 "Store Supervisor",
-                "Store Incharge"
             ]}
         >
             <MainStoreLayout />
