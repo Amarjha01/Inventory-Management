@@ -14,6 +14,9 @@ import {
 import { getInventory } from "../../../services/inventory.service";
 
 import { getVehicles } from "../../../services/vehicle.service";
+
+import {getDrivers} from "../../../services/driver.service"
+
 import InfoRow from "../../../components/shared/ui/InfoRow";
 import DispatchDetails from "../../../components/shared/dispatch/DispatchDetails";
 
@@ -30,9 +33,14 @@ const RequirementWorkspace = () => {
 
   const [vehicles, setVehicles] = useState([]);
 
+  const [drivers, setDrivers] = useState([]);
+
   const [remarks, setRemarks] = useState("");
 
   const [vehicleId, setVehicleId] = useState("");
+
+  const [driverId, setDriverId] = useState("");
+// console.log(drivers);
 
   // manual
   const [manualVehicleNumber, setManualVehicleNumber] = useState("");
@@ -47,14 +55,17 @@ const RequirementWorkspace = () => {
 
   const loadData = async () => {
     try {
-      const [requirementData, inventoryData, vehicleData] = await Promise.all([
+      const [requirementData, inventoryData, vehicleData , driverData] = await Promise.all([
         getRequirementById(id),
 
         getInventory(),
 
         getVehicles(),
-      ]);
 
+        getDrivers()
+      ]);
+      // console.log("requirementData" , requirementData , "inventoryData" , inventoryData , "vehicleData" , vehicleData , "driverData" , driverData );
+      
       setRequirement({
         ...requirementData,
 
@@ -68,10 +79,11 @@ const RequirementWorkspace = () => {
       setInventory(inventoryData);
 
       setVehicles(vehicleData);
-
+      setDrivers(driverData);
       setRemarks(requirementData.publicRemarks || "");
 
       setVehicleId(requirementData.vehicle?._id || "");
+      setDriverId(requirementData.driver?._id || "")
     } catch (error) {
       console.error(error);
     } finally {
@@ -131,13 +143,10 @@ const isReceived =
     try {
       const payload = {
         vehicleId,
-
         manualVehicleNumber,
-
+        driverId,
         manualDriverName,
-
         manualDriverPhone,
-
         remarks,
 
         items: requirement.items.map((item) => ({
@@ -148,7 +157,6 @@ const isReceived =
         })),
       };
       console.log(payload);
-
       await dispatchRequirement(requirement._id, payload);
 
       alert("Requirement dispatched successfully.");
@@ -336,7 +344,29 @@ const isReceived =
 
         <Card>
           <h3 className="text-lg font-semibold mb-4">Driver Details</h3>
+               <select
+            value={driverId}
+            onChange={(e) => setDriverId(e.target.value)}
+            className="w-full border rounded-xl px-3 py-3"
+          >
+            <option value="">Select Driver</option>
 
+            {drivers
+
+              .filter((driver) => driver.isActive)
+
+              .map((driver) => (
+                <option key={driver._id} value={driver._id}>
+                  {driver.name}
+
+                  {" - "}
+
+                  {driver.phone}
+                </option>
+              ))}
+          </select>
+
+          <div className="my-5 text-center text-gray-500">OR</div>
           <input
             type="text"
             placeholder="Driver Name"

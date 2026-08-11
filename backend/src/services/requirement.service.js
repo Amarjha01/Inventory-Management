@@ -158,7 +158,7 @@ class RequirementService {
   }
 
   async prepareDriver(payload) {
-    let driver = await driverRepository.findByPhone(payload.manualDriverPhone);
+    let driver = await driverRepository.findByPhone(payload.manualDriverPhone) || await driverRepository.findById(payload.driverId);
 
     if (!driver) {
       driver = await driverRepository.create({

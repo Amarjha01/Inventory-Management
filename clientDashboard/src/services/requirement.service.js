@@ -27,6 +27,7 @@ export const getRequirements = async () => {
 
 export const getRequirementById = async (id) => {
   const { data } = await api.get(`${ENDPOINTS.REQUIREMENTS}/${id}`);
+console.log(data);
 
   const requirementData = data.data;
   return requirementData;

@@ -6,7 +6,6 @@ import authService from "../services/auth.service.js";
 import { MESSAGE } from "../constants/responseMessages.js";
 
 export const login = asyncHandler(async (req, res) => {
-    console.log("req data:" , req.body);
     
     const result = await authService.login(req.body);
 
@@ -23,3 +22,17 @@ export const login = asyncHandler(async (req, res) => {
         result.user
     );
 });
+
+export const logout = asyncHandler(async(req , res)=>{
+    res.clearCookie("accessToken", {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  path: "/",
+});
+
+return ApiResponse.success(
+    res,
+    MESSAGE.LOGOUT_SUCCESS
+)
+})

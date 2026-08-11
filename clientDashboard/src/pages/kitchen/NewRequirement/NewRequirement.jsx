@@ -20,6 +20,7 @@ import {
   getLatestKitchenRequirement,
 } from "../../../services/requirement.service";
 import Card from "../../../components/shared/ui/Card";
+import toast from "react-hot-toast";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -96,7 +97,7 @@ const addItem = (item) => {
 
   const handleSubmit = async () => {
     if (!selectedItems.length) {
-      alert("Please select at least one item.");
+      toast.error('Please select at least one item.')
       return;
     }
 
@@ -113,11 +114,12 @@ const addItem = (item) => {
       };
 
       const requirement = await createRequirement(payload);
-
+      toast.success("Submited");
       navigate(`/requirements/${requirement._id}`);
     } catch (error) {
       console.error(error);
-      alert(error.response?.data?.message || "Failed to create requirement.");
+      toast.error(error.response?.data?.message || "Failed to create requirement.")
+      // alert(error.response?.data?.message || "Failed to create requirement.");
     }
   };
 
@@ -280,7 +282,7 @@ const addItem = (item) => {
           <div>
             <p className="text-sm text-gray-500">Selected Items</p>
 
-            <p className="text-2xl font-bold text-teal-600">
+            <p className="text-2xl font-bold text-teal-600 ">
               {selectedItems.length}
             </p>
           </div>
@@ -288,7 +290,7 @@ const addItem = (item) => {
           <Button
             onClick={handleSubmit}
             disabled={!selectedItems.length}
-            className="px-8"
+            className="px-8 cursor-pointer "
           >
             Submit Requirement
           </Button>
