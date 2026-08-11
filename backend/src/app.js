@@ -18,7 +18,7 @@ app.use(cookieParser())
 app.use(
     cors({
     credentials: true,
-    origin: ['http://localhost:5173','http://localhost:5000']
+    origin: ['http://localhost:5173','http://localhost:5000' , 'https://esf.axeiro.com']
 })
 )
 app.use("/api/v1", routes);
