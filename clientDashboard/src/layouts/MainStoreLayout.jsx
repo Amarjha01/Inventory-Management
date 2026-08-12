@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import MainStoreNavigation from "../components/mainStore/layout/MainStoreNavigation";
+import Toast from "../utils/Toast";
 
 const MainStoreLayout = () => {
 
@@ -9,7 +10,7 @@ const MainStoreLayout = () => {
             <MainStoreNavigation />
 
             <main className="px-4 py-5 pb-24">
-
+                    <Toast />
                 <Outlet />
 
             </main>
