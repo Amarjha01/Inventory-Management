@@ -20,6 +20,8 @@ import {
 import { getKitchens } from "../../../services/kitchen.service";
 import Loader from "../../../components/shared/ui/Loader";
 import { HiOutlineBuildingStorefront } from "react-icons/hi2";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import toast from "react-hot-toast";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -28,11 +30,15 @@ const Users = () => {
 
   const [loading, setLoading] = useState(true);
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const [search, setSearch] = useState("");
 
   const [showModal, setShowModal] = useState(false);
 
   const [editingUser, setEditingUser] = useState(null);
+
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -160,18 +166,28 @@ const Users = () => {
   };
 
   const handleSave = async () => {
+    setIsSaving(true)
     if (!form.name || !form.phone || (!editingUser && !form.password)) {
-      alert("Please fill all required fields.");
-
+      toast.error("Please fill all required fields.")
       return;
+      setIsSaving(false)
     }
 
     if (
       ["Kitchen Incharge", "Store Incharge"].includes(form.role) &&
       !form.kitchenId
     ) {
-      alert("Please select a kitchen.");
-
+      toast("Please select a kitchen.", {
+  icon: "⚠️",
+  style: {
+    border: "1px solid #f59e0b",
+    padding: "16px",
+    color: "#92400e",
+    background: "#fffbeb",
+  },
+});
+      // alert();
+      setIsSaving(false)
       return;
     }
 
@@ -201,14 +217,14 @@ const Users = () => {
       } else {
         await createUser(payload);
       }
-
+      toast.success("user added")
       await fetchData();
-
+      setIsSaving(false)
       setShowModal(false);
     } catch (error) {
       console.error(error);
-
-      alert(error.response?.data?.message || "Something went wrong.");
+      toast.error(error.response?.data?.message || "Something went wrong.")
+      // alert();
     }
   };
 
@@ -322,14 +338,24 @@ const Users = () => {
               className="w-full border rounded-xl p-3 outline-none"
             />
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={form.password}
-              onChange={handleChange}
-              className="w-full border rounded-xl p-3 outline-none"
-            />
+            <div className="relative">
+      <input
+        type={showPassword ? "text" : "password"}
+        name="password"
+        placeholder="Password"
+        value={form.password}
+        onChange={handleChange}
+        className="w-full border rounded-xl p-3 pr-12 outline-none"
+      />
+
+      <button
+        type="button"
+        onClick={() => setShowPassword(!showPassword)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+      >
+        {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+      </button>
+    </div>
 
             <select
               name="role"
@@ -385,8 +411,8 @@ const Users = () => {
             </select>
 
             <div className="flex gap-3 pt-2">
-              <Button className="flex-1" onClick={handleSave}>
-                Save
+              <Button className="flex-1" disabled={isSaving} onClick={handleSave}>
+                {isSaving ? "Saving...." : "Save"}
               </Button>
 
               <Button

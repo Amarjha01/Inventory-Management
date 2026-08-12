@@ -38,6 +38,8 @@ const NewRequirement = () => {
   const [remarks, setRemarks] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [activeRequirement, setActiveRequirement] = useState(null);
+  const [isLoading , setIsLoading] = useState(false);
+
   useEffect(() => {
     fetchLatestKitchenRequirement();
     fetchInventory();
@@ -96,8 +98,10 @@ const addItem = (item) => {
   };
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     if (!selectedItems.length) {
       toast.error('Please select at least one item.')
+      setIsLoading(false);
       return;
     }
 
@@ -114,9 +118,11 @@ const addItem = (item) => {
       };
 
       const requirement = await createRequirement(payload);
+      setIsLoading(false);
       toast.success("Submited");
       navigate(`/requirements/${requirement._id}`);
     } catch (error) {
+      setIsLoading(false);
       console.error(error);
       toast.error(error.response?.data?.message || "Failed to create requirement.")
       // alert(error.response?.data?.message || "Failed to create requirement.");
@@ -289,10 +295,10 @@ const addItem = (item) => {
 
           <Button
             onClick={handleSubmit}
-            disabled={!selectedItems.length}
-            className="px-8 cursor-pointer "
+            disabled={!selectedItems.length || isLoading}
+            className={`px-8  ${!selectedItems.length || isLoading ? "cursor-not-allowed" : "cursor-pointer"}`}
           >
-            Submit Requirement
+            {isLoading ? "submitting..." : "Submit Requirement"}
           </Button>
         </div>
       </div>
