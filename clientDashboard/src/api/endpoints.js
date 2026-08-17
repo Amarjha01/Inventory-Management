@@ -2,7 +2,8 @@ export const ENDPOINTS = {
 
     AUTH: {
 
-        LOGIN: "/auth/login"
+        LOGIN: "/auth/login",
+        RESETPASSWORD: "/auth/setNewPassword"
 
     },
 

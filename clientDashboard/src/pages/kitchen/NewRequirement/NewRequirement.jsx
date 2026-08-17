@@ -21,6 +21,7 @@ import {
 } from "../../../services/requirement.service";
 import Card from "../../../components/shared/ui/Card";
 import toast from "react-hot-toast";
+import RequirementTypeSelector from "../../../components/kitchen/requirement/RequirementTypeSelector";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -39,11 +40,17 @@ const NewRequirement = () => {
   const [showModal, setShowModal] = useState(false);
   const [activeRequirement, setActiveRequirement] = useState(null);
   const [isLoading , setIsLoading] = useState(false);
+  const [requirementType, setRequirementType] = useState("");
 
   useEffect(() => {
     fetchLatestKitchenRequirement();
-    fetchInventory();
   }, []);
+  const handleRequirementType = async (type)=>{
+    setRequirementType(type);
+    if (type === "RM") {
+      fetchInventory();
+    }
+  }
   const fetchLatestKitchenRequirement = async () => {
     try {
       const latestRequirement = await getLatestKitchenRequirement();
@@ -194,7 +201,11 @@ const addItem = (item) => {
       >
         <KitchenInfo />
       </motion.div>
-
+      
+    <RequirementTypeSelector
+        value={requirementType}
+        onChange={handleRequirementType}
+      />
       {/* Items Toolbar */}
       <motion.div
         variants={fadeUp}

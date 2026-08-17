@@ -5,6 +5,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import userService from "../services/user.service.js";
 
 import { MESSAGE } from "../constants/responseMessages.js";
+import userRepository from "../repositories/user.repository.js";
 
 export const createUser = asyncHandler(async (req, res) => {
   console.log(req.body);

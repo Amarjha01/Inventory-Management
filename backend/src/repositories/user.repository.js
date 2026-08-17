@@ -1,6 +1,13 @@
 import User from "../models/user.js";
 
 class UserRepository {
+  async updateMany(){
+    return await User.updateMany(
+      {},
+      {$set:{isFirstLogin:true}}
+    )
+  }
+
   async create(payload) {
     return await User.create(payload);
   }
@@ -20,6 +27,12 @@ class UserRepository {
   async findById(id) {
     return await User.findById(id).populate("kitchenId").lean();
   }
+
+  async findByIdWithPassword(id) {
+
+    return await User.findById(id)
+        .select("+password");
+}
 
   async findByPhone(phone) {
     return await User.findOne({
@@ -72,5 +85,7 @@ class UserRepository {
     ).lean();
   }
 }
+
+
 
 export default new UserRepository();

@@ -21,64 +21,84 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
-    if (!phone || phone.length !== 10) {
-      setError("Please enter a valid 10-digit phone number.");
-      return;
-    }
+  if (!phone || phone.length !== 10) {
+    setError("Please enter a valid 10-digit phone number.");
+    return;
+  }
 
-    if (!password) {
-      setError("Please enter your password.");
-      return;
-    }
+  if (!password) {
+    setError("Please enter your password.");
+    return;
+  }
 
-    try {
-      setError("");
-      setLoading(true);
+  try {
+    setError("");
+    setLoading(true);
 
-      const response = await login(phone, password);
-        toast.success("Login successful!");
-      localStorage.setItem("user", JSON.stringify(response));
+    const response = await login(phone, password);
 
-      switch (response.role) {
-        case "Kitchen Incharge":
-        case "Store Incharge":
-          navigate("/new-requirement");
-          break;
+    toast.success("Login successful!");
 
-        case "Store Supervisor":
-        case "Admin":
-          navigate("/store");
-          break;
+    localStorage.setItem("user", JSON.stringify(response));
 
-        default:
-          navigate("/login");
-      }
-    } catch (err) {
-            toast.error(`Invalid phone number or password.`);  
-      setError(err?.message || "Invalid phone number or password.");
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(()=>{
-     const user = storage.getUser();
-     if(user){
-        switch (user.role) {
-        case "Kitchen Incharge":
-        case "Store Incharge":
-          navigate("/new-requirement");
-          break;
+    redirectUser(response);
+  } catch (err) {
+    toast.error("Invalid phone number or password.");
 
-        case "Store Supervisor":
-        case "Admin":
-          navigate("/store");
-          break;
+    setError(err?.message || "Invalid phone number or password.");
+  } finally {
+    setLoading(false);
+  }
+};
 
-        default:
-          navigate("/login");
-      }
-     }
-  })
+  const redirectUser = (user) => {
+  if (!user) return;
+
+  if (user.isFirstLogin) {
+    navigate("/resetpass", { replace: true });
+    return;
+  }
+
+  switch (user.role) {
+    case "Kitchen Incharge":
+    case "Store Incharge":
+      navigate("/new-requirement", { replace: true });
+      break;
+
+    case "Store Supervisor":
+    case "Admin":
+      navigate("/store", { replace: true });
+      break;
+
+    default:
+      navigate("/login", { replace: true });
+  }
+};
+  useEffect(() => {
+  const user = storage.getUser();
+
+  if (!user) return;
+
+  if (user.isFirstLogin) {
+    navigate("/resetpass", { replace: true });
+    return;
+  }
+
+  switch (user.role) {
+    case "Kitchen Incharge":
+    case "Store Incharge":
+      navigate("/new-requirement", { replace: true });
+      break;
+
+    case "Store Supervisor":
+    case "Admin":
+      navigate("/store", { replace: true });
+      break;
+
+    default:
+      navigate("/login", { replace: true });
+  }
+}, [navigate]);
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 flex items-center justify-center px-4 py-8">
       {/* Background decorations */}

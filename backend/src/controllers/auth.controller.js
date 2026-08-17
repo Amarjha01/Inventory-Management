@@ -23,6 +23,24 @@ export const login = asyncHandler(async (req, res) => {
     );
 });
 
+export const changePassword = asyncHandler(async (req, res) => {
+
+    const { newPassword } = req.body;
+    console.log("newPassword" , newPassword);
+    
+    const user = await authService.changePassword(
+        req.user._id,
+        newPassword
+    );
+  console.log("user" , user);
+  
+    return ApiResponse.success(
+        res,
+        "Password changed successfully",
+        user
+    );
+});
+
 export const logout = asyncHandler(async(req , res)=>{
     res.clearCookie("accessToken", {
   httpOnly: true,
