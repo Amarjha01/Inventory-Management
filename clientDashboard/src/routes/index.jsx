@@ -18,6 +18,7 @@ import RequirementWorkspace from "../pages/MainStore/RequirementWorkspace/Requir
 import Kitchens from "../pages/MainStore/Kitchens/Kitchens.jsx";
 import Users from "../pages/MainStore/Users/Users.jsx";
 import Reports from "../pages/MainStore/Reports/Reports.jsx";
+import PasswordResetForm from "../pages/auth/PasswordResetForm.jsx";
 
 
 const AppRoutes = () => {
@@ -26,6 +27,7 @@ const AppRoutes = () => {
       {/* <Route path="/" element={<Language />} /> */}
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/resetpass" element={<PasswordResetForm />} />
 
       {/* <Route
     path="/dashboard"

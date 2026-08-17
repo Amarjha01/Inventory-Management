@@ -15,6 +15,17 @@ export const login = async (phone, password) => {
     return response.data.data;
 
 };
+export const resetPassword = async ( newPassword) => {
+
+    const response = await api.post(ENDPOINTS.AUTH.RESETPASSWORD, {
+
+        newPassword
+
+    });
+
+    return response.data.data;
+
+};
 
 export const logout = async () => {
 

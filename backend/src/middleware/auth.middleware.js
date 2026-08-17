@@ -5,7 +5,8 @@ import userRepository from "../repositories/user.repository.js";
 const authenticate = async (req, res, next) => {
   try {
     const token = req.cookies?.accessToken;
-
+    console.log("token received" , token);
+    
     if (!token) {
       throw new ApiError(401, "Authentication required");
     }
