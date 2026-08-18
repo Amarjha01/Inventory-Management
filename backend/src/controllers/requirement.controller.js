@@ -31,9 +31,7 @@ export const getRequirements = asyncHandler(async (req, res) => {
   );
 });
 export const getAllKitchenRequirements = asyncHandler(async (req, res) => {
-  console.log("here API reached1");
   const requirements = await requirementService.allKitchenRequirements();
-  console.log(requirements);
   
   return ApiResponse.success(
     res,

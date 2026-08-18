@@ -283,6 +283,10 @@ const isReceived =
                 </div>
               );
             })}
+           <span className="whitespace-pre-line wrap-break text-2xl space-y-1">
+  {requirement.remarks}
+</span>
+
           </div>
         </Card>
 

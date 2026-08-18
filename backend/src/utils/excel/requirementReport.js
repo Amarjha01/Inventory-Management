@@ -1,147 +1,236 @@
 import ExcelJS from "exceljs";
 
-export default async function createRequirementWorkbook(requirements){
+export default async function createRequirementWorkbook(requirements) {
+  const workbook = new ExcelJS.Workbook();
 
-    const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet("Requirements");
 
-    const sheet = workbook.addWorksheet("Requirements");
+  // ------------------------------------
+  // Helpers
+  // ------------------------------------
 
-    //------------------------------------
-    // Dynamic inventory columns
-    //------------------------------------
+  const valueOrZero = (value) => {
+    if (value === undefined || value === null || value === "") {
+      return 0;
+    }
 
-    const inventoryMap = new Map();
+    return value;
+  };
 
-    requirements.forEach(requirement=>{
+  // ------------------------------------
+  // Dynamic inventory columns
+  // ------------------------------------
 
-        requirement.items.forEach(item=>{
+  const inventoryMap = new Map();
 
-            inventoryMap.set(
+  requirements.forEach((requirement) => {
+    requirement.items?.forEach((item) => {
+      if (!item.inventoryId) return;
 
-                item.inventoryId._id.toString(),
+      inventoryMap.set(item.inventoryId._id.toString(), item.inventoryId.name);
+    });
+  });
 
-                item.inventoryId.name
+  const inventoryColumns = [...inventoryMap.values()];
 
-            );
+  // ------------------------------------
+  // Columns
+  // ------------------------------------
 
-        });
+  const columns = [
+    "Requirement No",
+    "Kitchen",
+    "District",
+    "Date",
+    ...inventoryColumns,
+    "Vehicle",
+    "Driver",
+    "Created By",
+    "Status",
+  ];
 
+  sheet.addRow(columns);
+
+  // ------------------------------------
+  // Add requirement rows
+  // ------------------------------------
+
+  requirements.forEach((requirement) => {
+    const row = [];
+
+    row.push(valueOrZero(requirement.requirementNumber));
+
+    row.push(valueOrZero(requirement.kitchen?.name));
+
+    row.push(valueOrZero(requirement.kitchen?.district));
+
+    row.push(requirement.createdAt ? new Date(requirement.createdAt) : 0);
+
+    // --------------------------------
+    // Inventory quantities
+    // --------------------------------
+
+    inventoryColumns.forEach((column) => {
+      const item = requirement.items?.find(
+        (x) => x.inventoryId?.name === column,
+      );
+
+      row.push(valueOrZero(item?.dispatchedQuantity));
     });
 
-    const inventoryColumns=[...inventoryMap.values()];
+    // --------------------------------
+    // Dispatch information
+    // --------------------------------
 
-    //------------------------------------
+    row.push(valueOrZero(requirement.dispatch?.vehicle?.vehicleNumber));
 
-    const columns=[
+    row.push(valueOrZero(requirement.dispatch?.driver?.name));
 
-        "Requirement No",
+    row.push(valueOrZero(requirement.createdBy?.name));
 
-        "Kitchen",
+    row.push(valueOrZero(requirement.status));
 
-        "District",
+    sheet.addRow(row);
+  });
 
-        "Date",
+  // ------------------------------------
+  // Header styling
+  // ------------------------------------
 
-        ...inventoryColumns,
+  const headerRow = sheet.getRow(1);
 
-        "Vehicle",
+  headerRow.font = {
+    bold: true,
+    color: {
+      argb: "FFFFFF",
+    },
+  };
 
-        "Driver",
+  headerRow.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: {
+      argb: "1F4E78",
+    },
+  };
 
-        "Created By",
+  headerRow.alignment = {
+    horizontal: "center",
+    vertical: "middle",
+    wrapText: true,
+  };
 
-        "Status"
+  headerRow.height = 30;
 
-    ];
+  // ------------------------------------
+  // Style all cells
+  // ------------------------------------
 
-    sheet.addRow(columns);
+  sheet.eachRow((row, rowNumber) => {
+    row.eachCell((cell) => {
+      cell.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+        wrapText: true,
+      };
 
-    //------------------------------------
-
-    requirements.forEach(requirement=>{
-
-        const row=[];
-
-        row.push(requirement.requirementNumber);
-
-        row.push(requirement.kitchen.name);
-
-        row.push(requirement.kitchen.district);
-
-        row.push(
-
-            new Date(requirement.createdAt)
-
-                .toLocaleDateString()
-
-        );
-
-        //--------------------------------
-
-        inventoryColumns.forEach(column=>{
-
-            const item=requirement.items.find(
-
-                x=>x.inventoryId.name===column
-
-            );
-
-            row.push(
-
-                item
-
-                    ? item.dispatchedQuantity ?? ""
-
-                    : ""
-
-            );
-
-        });
-
-        //--------------------------------
-
-        row.push(
-
-            requirement.dispatch?.vehicle?.vehicleNumber || ""
-
-        );
-
-        row.push(
-
-            requirement.dispatch?.driver?.name || ""
-
-        );
-
-        row.push(
-
-            requirement.createdBy.name
-
-        );
-
-        row.push(
-
-            requirement.status
-
-        );
-
-        sheet.addRow(row);
-
+      cell.border = {
+        top: {
+          style: "thin",
+          color: {
+            argb: "D9E1F2",
+          },
+        },
+        left: {
+          style: "thin",
+          color: {
+            argb: "D9E1F2",
+          },
+        },
+        bottom: {
+          style: "thin",
+          color: {
+            argb: "D9E1F2",
+          },
+        },
+        right: {
+          style: "thin",
+          color: {
+            argb: "D9E1F2",
+          },
+        },
+      };
     });
 
-    //------------------------------------
+    // Alternate row color
+    if (rowNumber > 1 && rowNumber % 2 === 0) {
+      row.eachCell((cell) => {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: {
+            argb: "F5F9FC",
+          },
+        };
+      });
+    }
+  });
 
-    sheet.getRow(1).font={
+  // ------------------------------------
+  // Date formatting
+  // ------------------------------------
 
-        bold:true,
+  const dateColumnIndex = 4;
 
-    };
+  sheet.getColumn(dateColumnIndex).eachCell((cell, rowNumber) => {
+    if (rowNumber > 1 && cell.value !== 0) {
+      cell.numFmt = "dd-mm-yyyy";
+    }
+  });
 
-    sheet.columns.forEach(column=>{
+  // ------------------------------------
+  // Column widths
+  // ------------------------------------
 
-        column.width=20;
+  sheet.columns.forEach((column) => {
+    let maxLength = 0;
 
+    column.eachCell({ includeEmpty: true }, (cell) => {
+      const value = cell.value;
+
+      let length = 0;
+
+      if (value instanceof Date) {
+        length = 12;
+      } else if (value !== null && value !== undefined) {
+        length = String(value).length;
+      }
+
+      maxLength = Math.max(maxLength, length);
     });
 
-    return workbook;
+    column.width = Math.min(Math.max(maxLength + 2, 12), 30);
+  });
 
+  // ------------------------------------
+  // Freeze header
+  // ------------------------------------
+
+  sheet.views = [
+    {
+      state: "frozen",
+      ySplit: 1,
+    },
+  ];
+
+  // ------------------------------------
+  // Auto filter
+  // ------------------------------------
+
+  sheet.autoFilter = {
+    from: "A1",
+    to: `${String.fromCharCode(64 + columns.length)}1`,
+  };
+
+  return workbook;
 }

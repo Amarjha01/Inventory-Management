@@ -92,7 +92,9 @@ router.patch(
 
     authorize(
         ROLE.KITCHEN_INCHARGE,
-        ROLE.STORE_INCHARGE
+        ROLE.STORE_INCHARGE,
+        ROLE.STORE_SUPERVISOR,
+        ROLE.ADMIN
     ),
 
     upload.single("gatePass"),

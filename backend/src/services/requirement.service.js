@@ -21,8 +21,6 @@ class RequirementService {
     return await requirementRepository.findMany({ kitchen: kitchenId });
   }
   async allKitchenRequirements() {
-    console.log("here API reached");
-
     return await requirementRepository.findMany();
   }
 
