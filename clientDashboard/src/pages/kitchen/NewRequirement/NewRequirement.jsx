@@ -39,23 +39,23 @@ const NewRequirement = () => {
   const [remarks, setRemarks] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [activeRequirement, setActiveRequirement] = useState(null);
-  const [isLoading , setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [requirementType, setRequirementType] = useState("");
 
   useEffect(() => {
     fetchLatestKitchenRequirement();
   }, []);
-  const handleRequirementType = async (type)=>{
+  const handleRequirementType = async (type) => {
     setRequirementType(type);
     if (type === "RM") {
       fetchInventory();
     }
-  }
+  };
   const fetchLatestKitchenRequirement = async () => {
     try {
-      const latestRequirement = await getLatestKitchenRequirement();
+      // const latestRequirement = await getLatestKitchenRequirement();
 
-      setActiveRequirement(latestRequirement);
+      // setActiveRequirement(latestRequirement);
     } catch (error) {
       console.error(error);
     } finally {
@@ -73,17 +73,17 @@ const NewRequirement = () => {
     }
   };
 
-const addItem = (item) => {
+  const addItem = (item) => {
     if (selectedItems.some((i) => i._id === item._id)) return;
 
     setSelectedItems((prev) => [
-        ...prev,
-        {
-            ...item,
-            quantity: item.bagSize,
-        },
+      ...prev,
+      {
+        ...item,
+        quantity: item.bagSize,
+      },
     ]);
-};
+  };
 
   const updateQuantity = (_id, quantity) => {
     if (quantity < 1) quantity = 1;
@@ -107,7 +107,7 @@ const addItem = (item) => {
   const handleSubmit = async () => {
     setIsLoading(true);
     if (!selectedItems.length) {
-      toast.error('Please select at least one item.')
+      toast.error("Please select at least one item.");
       setIsLoading(false);
       return;
     }
@@ -131,60 +131,41 @@ const addItem = (item) => {
     } catch (error) {
       setIsLoading(false);
       console.error(error);
-      toast.error(error.response?.data?.message || "Failed to create requirement.")
+      toast.error(
+        error.response?.data?.message || "Failed to create requirement.",
+      );
       // alert(error.response?.data?.message || "Failed to create requirement.");
     }
   };
 
   if (loading) return <Loader />;
 
-  if (activeRequirement) {
+  // if (activeRequirement) {
+  //   return (
+  //     <DashboardLayout>
+  //       <PageHeader
+  //         title="New Requirement"
+  //         subtitle="Create material requirement"
+  //       />
 
-    return (
+  //       <Card>
+  //         <h2 className="text-lg font-semibold">
+  //           You already have an active requirement.
+  //         </h2>
 
-        <DashboardLayout>
+  //         <p className="text-gray-600 mt-2">
+  //           Requirement Number: {activeRequirement.requirementNumber}
+  //         </p>
 
-            <PageHeader
-                title="New Requirement"
-                subtitle="Create material requirement"
-            />
+  //         <p className="text-gray-600">Status: {activeRequirement.status}</p>
 
-            <Card>
-
-                <h2 className="text-lg font-semibold">
-
-                    You already have an active requirement.
-
-                </h2>
-
-                <p className="text-gray-600 mt-2">
-
-                    Requirement Number: {activeRequirement.requirementNumber}
-
-                </p>
-
-                <p className="text-gray-600">
-
-                    Status: {activeRequirement.status}
-
-                </p>
-
-                <Button
-                    className="mt-5"
-                    onClick={() =>
-                        navigate(`/track`)
-                    }
-                >
-                    Track Requirement
-                </Button>
-
-            </Card>
-
-        </DashboardLayout>
-
-    );
-
-}
+  //         <Button className="mt-5" onClick={() => navigate(`/track`)}>
+  //           Track Requirement
+  //         </Button>
+  //       </Card>
+  //     </DashboardLayout>
+  //   );
+  // }
 
   return (
     <DashboardLayout>
@@ -201,8 +182,8 @@ const addItem = (item) => {
       >
         <KitchenInfo />
       </motion.div>
-      
-    <RequirementTypeSelector
+
+      <RequirementTypeSelector
         value={requirementType}
         onChange={handleRequirementType}
       />

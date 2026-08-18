@@ -113,13 +113,13 @@ class RequirementService {
 
       const vehicle = await vehicleRepository.findById(VID);
 
-      await vehicleRepository.update(
-        vehicle._id,
+      // await vehicleRepository.update(
+      //   vehicle._id,
 
-        {
-          isActive: false,
-        },
-      );
+      //   {
+      //     isActive: false,
+      //   },
+      // );
 
       return vehicle;
     }
@@ -140,16 +140,16 @@ class RequirementService {
 
         vehicleName: "Contract Vehicle",
 
-        isAvailable: false,
+        // isAvailable: false,
       });
     } else {
-      await vehicleRepository.update(
-        vehicle._id,
+      // await vehicleRepository.update(
+      //   vehicle._id,
 
-        {
-          isAvailable: false,
-        },
-      );
+      //   {
+      //     isAvailable: false,
+      //   },
+      // );
     }
 
     return vehicle;

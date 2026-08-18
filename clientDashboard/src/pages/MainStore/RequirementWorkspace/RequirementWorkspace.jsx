@@ -49,6 +49,8 @@ const RequirementWorkspace = () => {
 
   const [manualDriverPhone, setManualDriverPhone] = useState("");
 
+  const [isDispatching, setIsDispatching] = useState(false);
+
   useEffect(() => {
     loadData();
   }, [id]);
@@ -140,6 +142,7 @@ const isReceived =
   };
 
   const handleSave = async () => {
+    setIsDispatching(true)
     try {
       const payload = {
         vehicleId,
@@ -156,13 +159,14 @@ const isReceived =
           unit:item.unit
         })),
       };
-      console.log(payload);
       await dispatchRequirement(requirement._id, payload);
+      setIsDispatching(false)
 
       alert("Requirement dispatched successfully.");
 
       navigate("/store/requirements");
     } catch (error) {
+      setIsDispatching(false)
       console.error(error);
 
       alert(error.response?.data?.message || "Failed to dispatch.");
@@ -442,7 +446,7 @@ const isReceived =
     onClick={handleSave}
 >
 
-    Dispatch Requirement
+    {isDispatching ? "Dispatching...." : " Dispatch Requirement "}
 
 </Button>
 
