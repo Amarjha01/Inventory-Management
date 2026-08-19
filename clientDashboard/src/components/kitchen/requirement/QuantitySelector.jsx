@@ -1,58 +1,88 @@
+import { useEffect, useState } from "react";
 import { FiMinus, FiPlus } from "react-icons/fi";
 
 const QuantitySelector = ({ bagSize, value, onChange }) => {
+  const [inputValue, setInputValue] = useState(String(value ?? ""));
+
+  // Sync with parent when value changes externally
+  useEffect(() => {
+    setInputValue(value === "" || value == null ? "" : String(value));
+  }, [value]);
+
   const increase = () => {
-    onChange(value + bagSize);
+    const currentValue = Number(inputValue) || 0;
+    const newValue = currentValue + bagSize;
+
+    setInputValue(String(newValue));
+    onChange(newValue);
   };
 
   const decrease = () => {
-    if (value > bagSize) {
-      onChange(value - bagSize);
+    const currentValue = Number(inputValue) || 0;
+
+    if (currentValue > bagSize) {
+      const newValue = currentValue - bagSize;
+
+      setInputValue(String(newValue));
+      onChange(newValue);
     }
   };
 
   const handleInputChange = (e) => {
-    const inputValue = e.target.value;
+    const newValue = e.target.value;
 
-    // Allow empty input while typing
-    if (inputValue === "") {
+    // Allow user to completely clear the input
+    if (newValue === "") {
+      setInputValue("");
       onChange("");
       return;
     }
 
-    const quantity = Number(inputValue);
-
-    if (!Number.isNaN(quantity) && quantity >= bagSize) {
-      onChange(quantity);
+    // Only allow positive integers
+    if (!/^\d+$/.test(newValue)) {
+      return;
     }
+
+    setInputValue(newValue);
+
+    // Don't enforce bagSize while typing
+    onChange(Number(newValue));
   };
 
   const handleBlur = () => {
-    // Prevent invalid/empty quantity after leaving the input
-    if (!value || value < bagSize) {
+    const quantity = Number(inputValue);
+
+    // Empty or invalid → restore minimum
+    if (!inputValue || Number.isNaN(quantity) || quantity < bagSize) {
+      setInputValue(String(bagSize));
       onChange(bagSize);
+      return;
     }
+
+    onChange(quantity);
   };
+
+  const currentValue = Number(inputValue) || 0;
 
   return (
     <div className="flex items-center gap-3">
       <button
         type="button"
         onClick={decrease}
-        disabled={!value || value <= bagSize}
+        disabled={!inputValue || currentValue <= bagSize}
         className="w-9 h-9 rounded-lg bg-gray-200 flex items-center justify-center disabled:opacity-50"
       >
         <FiMinus />
       </button>
 
       <input
-        type="number"
-        min={bagSize}
-        step={bagSize}
-        value={value}
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        value={inputValue}
         onChange={handleInputChange}
         onBlur={handleBlur}
-        className="w-16 h-9 text-center font-semibold border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-teal-500"
+        className="w-20 h-10 text-center text-xl font-semibold border-2 border-teal-500 rounded-lg outline-none focus:ring-2 focus:ring-teal-500"
       />
 
       <button
