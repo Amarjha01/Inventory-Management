@@ -275,7 +275,7 @@ const NewRequirement = () => {
       </motion.div>
 
       {/* Sticky Footer */}
-      <div className="sticky bottom-4 mt-8">
+      <div className=" bottom-4 mt-8">
         <div className="rounded-2xl bg-white border shadow-lg p-4 flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-500">Selected Items</p>

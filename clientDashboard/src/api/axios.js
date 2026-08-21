@@ -1,10 +1,10 @@
 import axios from "axios";
 import { storage } from "../utils/storage";
 import { Await} from "react-router-dom";
+const base_url =  import.meta.env.VITE_SERVER_BASE_URL;
 const api = axios.create({
-
-    // baseURL: "http://localhost:5000/api/v1",
-    baseURL: "https://esfserver.axeiro.com/api/v1",
+    baseURL: base_url,
+    // baseURL: "https://esfserver.axeiro.com/api/v1",
     withCredentials: true,
     headers: {
         "Content-Type": "application/json"

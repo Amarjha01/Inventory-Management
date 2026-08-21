@@ -16,6 +16,8 @@ import VehicleCard from "../../../components/kitchen/requirement/VehicleCard";
 import { getRequirementById } from "../../../services/requirement.service";
 import DispatchDetails from "../../../components/shared/dispatch/DispatchDetails";
 
+import EditGatePassImage from "../../../components/shared/dispatch/EditGatePassImage";
+
 const sectionAnimation = {
   initial: {
     opacity: 0,
@@ -33,12 +35,14 @@ const RequirementDetails = () => {
 
   const [loading, setLoading] = useState(true);
   const [requirement, setRequirement] = useState(null);
+  const [isReceived , setIsReceived] = useState(false)
 
   useEffect(() => {
     const loadRequirement = async () => {
       try {
         const data = await getRequirementById(id);
         setRequirement(data);
+        setIsReceived(data.status === "Received")
       } catch (error) {
         console.error(error);
       } finally {
@@ -92,7 +96,27 @@ const RequirementDetails = () => {
           <RequirementHeader requirement={requirement} />
         </motion.div>
       <DispatchDetails requirement={requirement}/>
-      
+      {/* {isReceived && (
+  <a
+    href={`https://esfserver.axeiro.com/uploads/requirements/${requirement.gatePass.image}`}
+    download={requirement.gatePass.image}
+  >
+    <img
+      src={`https://esfserver.axeiro.com/uploads/requirements/${requirement.gatePass.image}`}
+      alt="Gate Pass"
+      className="w-full rounded-xl border cursor-pointer"
+    />
+  </a>)} */}
+      {isReceived && requirement?.gatePass?.image && (
+  <EditGatePassImage
+    requirement={requirement}
+    onSuccess={(updatedRequirement) => {
+      setRequirement(updatedRequirement);
+      setIsReceived(updatedRequirement.status === "Received");
+    }}
+  />
+)}
+
       </div>
     </DashboardLayout>
   );

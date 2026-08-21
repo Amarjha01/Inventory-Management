@@ -1,31 +1,26 @@
 import Requirement from "../models/requirement.js";
 
 class ReportRepository {
-
-    async getRequirements(filter) {
-
-        return Requirement.find(filter)
-
-            .populate("kitchen")
-
-            .populate("createdBy")
-
-            .populate("items.inventoryId")
-
-            .populate("dispatch.vehicle")
-
-            .populate("dispatch.driver")
-
-            .sort({
-
-                createdAt: 1,
-
-            })
-
-            .lean();
-
-    }
-
+  async getRequirements(filter) {
+    return Requirement.find(filter)
+      .populate("kitchen", "_id name district")
+      .populate("createdBy", "_id name")
+      .populate(
+        "items.inventoryId",
+        "_id name",
+      )
+      .populate(
+        "dispatch.vehicle",
+        "_id vehicleNumber",
+      )
+      .populate(
+        "dispatch.driver",
+        "_id name",
+      )
+      .sort({
+        createdAt: 1,
+      });
+  }
 }
 
 export default new ReportRepository();

@@ -134,3 +134,18 @@ export const receiveRequirement = asyncHandler(async (req, res) => {
     requirement,
   );
 });
+
+export const editGatePass = asyncHandler(async (req, res) => {
+  const requirement = await requirementService.editGatePass(
+    req.params.id,
+    req.file,
+    req.user._id
+  );
+
+  return ApiResponse.success(
+    res,
+    "Gate pass updated successfully",
+    requirement
+  );
+});
+

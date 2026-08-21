@@ -78,3 +78,16 @@ export const receiveRequirement = async (id, formData) => {
 
   return response.data.data;
 };
+export const updateGatePassImage = async (id, formData) => {
+  const response = await api.patch(
+    `/requirements/${id}/gate-pass`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data.data;
+};

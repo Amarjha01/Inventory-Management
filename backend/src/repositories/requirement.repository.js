@@ -1,9 +1,13 @@
 import Requirement from "../models/requirement.js";
 
 class RequirementRepository {
-  async create(payload) {
-    return await Requirement.create(payload);
-  }
+async create(payload) {
+  const requirement = await Requirement.create(payload);
+
+  await requirement.populate("kitchen");
+
+  return requirement;
+}
 
   async findMany(filter = {}) {
     

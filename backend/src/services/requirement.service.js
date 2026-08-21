@@ -10,16 +10,45 @@ import requirementRepository from "../repositories/requirement.repository.js";
 import vehicleRepository from "../repositories/vehicle.repository.js";
 import inventoryRepository from "../repositories/inventory.repository.js";
 import driverRepository from "../repositories/driver.repository.js";
+import notificationService from "../modules/notifications/notification.service.js";
+import userRepository from "../repositories/user.repository.js";
+import { ROLE } from "../constants/roles.js";
 class RequirementService {
-  async createRequirement(payload) {
-    payload.requirementNumber = generateRequirementNumber();
+async createRequirement(payload) {
+  payload.requirementNumber = generateRequirementNumber();
 
-    return await requirementRepository.create(payload);
+  const requirement =
+    await requirementRepository.create(payload);
+
+     const users = await userRepository.findByRoles([
+    ROLE.ADMIN,
+    ROLE.STORE_SUPERVISOR,
+]);
+
+console.log("users at requirement 28" , users);
+
+const userIds = users.map(
+    (user) => user._id,
+);
+  try {
+    await notificationService.notifyRequirementCreated(
+      userIds,
+      requirement,
+    );
+  } catch (error) {
+    console.error(
+      "Requirement notification failed:",
+      error,
+    );
   }
+
+  return requirement;
+}
 
   async getRequirements(kitchenId) {
     return await requirementRepository.findMany({ kitchen: kitchenId });
   }
+
   async allKitchenRequirements() {
     return await requirementRepository.findMany();
   }
@@ -61,7 +90,6 @@ class RequirementService {
   }
 
   async dispatchRequirement({ requirementId, payload, userId }) {
-    console.log("payload at service", payload);
 
     const requirement = await requirementRepository.findById(requirementId);
 
@@ -69,13 +97,6 @@ class RequirementService {
       throw new ApiError(404, "Requirement not found");
     }
 
-    // if (requirement.status !== REQUIREMENT_STATUS.APPROVED) {
-    //   throw new ApiError(
-    //     400,
-
-    //     "Requirement is not ready for dispatch",
-    //   );
-    // }
 
     const vehicle = await this.prepareVehicle(payload);
 
@@ -83,7 +104,7 @@ class RequirementService {
 
     await this.dispatchInventory(payload.items);
 
-    return await requirementRepository.update(
+    const updatedRequirement = await requirementRepository.update(
       requirementId,
 
       {
@@ -104,6 +125,27 @@ class RequirementService {
         },
       },
     );
+
+    const users = await userRepository.findByKitchenId(updatedRequirement.kitchen._id);
+    console.log('users at requirement 128' , users);
+    
+    const userIds = users.map(
+    (user) => user._id,
+);
+
+ try {
+    await notificationService.notifyRequirementDispatched(
+      userIds,
+      requirement,
+    );
+  } catch (error) {
+    console.error(
+      "Dispatch notification failed:",
+      error,
+    );
+  }
+
+    return updatedRequirement
   }
 
   async prepareVehicle(payload) {
@@ -183,13 +225,13 @@ class RequirementService {
         );
       }
 
-      if (item.dispatchedQuantity > inventory.quantity) {
-        throw new ApiError(
-          400,
+      // if (item.dispatchedQuantity > inventory.quantity) {
+      //   throw new ApiError(
+      //     400,
 
-          `${inventory.name} has insufficient stock`,
-        );
-      }
+      //     `${inventory.name} has insufficient stock`,
+      //   );
+      // }
 
       await inventoryRepository.update(
         inventory._id,
@@ -256,6 +298,39 @@ class RequirementService {
       },
     );
   }
+
+async editGatePass(id, file, userId) {
+  const requirement = await requirementRepository.findById(id);
+
+  if (!requirement) {
+    throw new ApiError(404, "Requirement not found");
+  }
+
+  if (requirement.status !== REQUIREMENT_STATUS.RECEIVED) {
+    throw new ApiError(
+      400,
+      "Gate pass can only be edited after receiving the requirement."
+    );
+  }
+
+  if (!file) {
+    throw new ApiError(400, "Gate pass image is required.");
+  }
+
+  return await requirementRepository.update(id, {
+    gatePass: {
+      ...(requirement.gatePass || {}),
+
+      image: file.filename,
+
+      uploadedBy: userId,
+
+      uploadedAt: new Date(),
+    },
+  });
+}
+
+
 }
 
 export default new RequirementService();

@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Card from "../../../components/shared/ui/Card";
 import Button from "../../../components/shared/ui/Button";
 import Loader from "../../../components/shared/ui/Loader";
-
+const base_url =  import.meta.env.VITE_SERVER_BASE_URL;
 import {
   getRequirementById,
   dispatchRequirement,
@@ -15,7 +15,7 @@ import { getInventory } from "../../../services/inventory.service";
 
 import { getVehicles } from "../../../services/vehicle.service";
 
-import {getDrivers} from "../../../services/driver.service"
+import { getDrivers } from "../../../services/driver.service";
 
 import InfoRow from "../../../components/shared/ui/InfoRow";
 import DispatchDetails from "../../../components/shared/dispatch/DispatchDetails";
@@ -40,7 +40,7 @@ const RequirementWorkspace = () => {
   const [vehicleId, setVehicleId] = useState("");
 
   const [driverId, setDriverId] = useState("");
-// console.log(drivers);
+  // console.log(drivers);
 
   // manual
   const [manualVehicleNumber, setManualVehicleNumber] = useState("");
@@ -57,17 +57,18 @@ const RequirementWorkspace = () => {
 
   const loadData = async () => {
     try {
-      const [requirementData, inventoryData, vehicleData , driverData] = await Promise.all([
-        getRequirementById(id),
+      const [requirementData, inventoryData, vehicleData, driverData] =
+        await Promise.all([
+          getRequirementById(id),
 
-        getInventory(),
+          getInventory(),
 
-        getVehicles(),
+          getVehicles(),
 
-        getDrivers()
-      ]);
+          getDrivers(),
+        ]);
       // console.log("requirementData" , requirementData , "inventoryData" , inventoryData , "vehicleData" , vehicleData , "driverData" , driverData );
-      
+
       setRequirement({
         ...requirementData,
 
@@ -85,17 +86,15 @@ const RequirementWorkspace = () => {
       setRemarks(requirementData.publicRemarks || "");
 
       setVehicleId(requirementData.vehicle?._id || "");
-      setDriverId(requirementData.driver?._id || "")
+      setDriverId(requirementData.driver?._id || "");
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
-const isDispatched =
-    requirement?.status === "Out For Delivery";
-const isReceived =
-    requirement?.status === "Received";
+  const isDispatched = requirement?.status === "Out For Delivery";
+  const isReceived = requirement?.status === "Received";
   const inventoryMap = useMemo(() => {
     const map = {};
 
@@ -128,9 +127,7 @@ const isReceived =
           quantity = 0;
         }
 
-        if (quantity > item.quantity) {
-          quantity = item.quantity;
-        }
+       
 
         return {
           ...item,
@@ -142,7 +139,7 @@ const isReceived =
   };
 
   const handleSave = async () => {
-    setIsDispatching(true)
+    setIsDispatching(true);
     try {
       const payload = {
         vehicleId,
@@ -156,17 +153,17 @@ const isReceived =
           inventoryId: item.inventoryId._id,
           quantity: item.quantity,
           dispatchedQuantity: item.dispatchedQuantity,
-          unit:item.unit
+          unit: item.unit,
         })),
       };
       await dispatchRequirement(requirement._id, payload);
-      setIsDispatching(false)
+      setIsDispatching(false);
 
       alert("Requirement dispatched successfully.");
 
       navigate("/store/requirements");
     } catch (error) {
-      setIsDispatching(false)
+      setIsDispatching(false);
       console.error(error);
 
       alert(error.response?.data?.message || "Failed to dispatch.");
@@ -271,9 +268,8 @@ const isReceived =
 
                     <input
                       type="number"
-                      disabled={isDispatched||isReceived}
+                      disabled={isDispatched || isReceived}
                       min={0}
-                      max={item.quantity}
                       value={item.dispatchedQuantity}
                       onChange={(e) =>
                         updateDispatchQuantity(
@@ -287,114 +283,111 @@ const isReceived =
                 </div>
               );
             })}
-           <span className="whitespace-pre-line wrap-break text-2xl space-y-1">
-  {requirement.remarks}
-</span>
-
+            <span className="whitespace-pre-line wrap-break text-2xl space-y-1">
+              {requirement.remarks}
+            </span>
           </div>
         </Card>
 
+        {isDispatched || isReceived ? (
+          <>
+            <DispatchDetails requirement={requirement} />
 
-            {isDispatched || isReceived ? (
+            {isReceived && (
+  <a
+    href={`${base_url}/uploads/${requirement.gatePass.image}`}
+    download={requirement.gatePass.image}
+  >
+    <img
+      src={`${base_url}/uploads/requirements/${requirement.gatePass.image}`}
+      alt="Gate Pass"
+      className="w-full rounded-xl border cursor-pointer"
+    />
+  </a>)}
+          </>
+        ) : (
+          <>
+            <Card>
+              <h3 className="text-lg font-semibold mb-4">Vehicle Details</h3>
 
-<>
-<DispatchDetails requirement={requirement}/>
+              <label className="block text-sm mb-2">Registered Vehicle</label>
 
-{isReceived && 
-<img
-    src={`http://esfserver.axeiro.com/uploads/requirements/${requirement.gatePass.image}`}
-    alt="Gate Pass"
-    className="w-full rounded-xl border"
-/>
-}
+              <select
+                value={vehicleId}
+                onChange={(e) => setVehicleId(e.target.value)}
+                className="w-full border rounded-xl px-3 py-3"
+              >
+                <option value="">Select Vehicle</option>
 
-</>
-) : (
+                {vehicles
 
-<>
- <Card>
-          <h3 className="text-lg font-semibold mb-4">Vehicle Details</h3>
+                  .filter((vehicle) => vehicle.isActive)
 
-          <label className="block text-sm mb-2">Registered Vehicle</label>
+                  .map((vehicle) => (
+                    <option key={vehicle._id} value={vehicle._id}>
+                      {vehicle.vehicleNumber}
 
-          <select
-            value={vehicleId}
-            onChange={(e) => setVehicleId(e.target.value)}
-            className="w-full border rounded-xl px-3 py-3"
-          >
-            <option value="">Select Vehicle</option>
+                      {" - "}
 
-            {vehicles
+                      {vehicle.vehicleName}
+                    </option>
+                  ))}
+              </select>
 
-              .filter((vehicle) => vehicle.isActive)
+              <div className="my-5 text-center text-gray-500">OR</div>
 
-              .map((vehicle) => (
-                <option key={vehicle._id} value={vehicle._id}>
-                  {vehicle.vehicleNumber}
+              <input
+                type="text"
+                placeholder="Vehicle Number"
+                value={manualVehicleNumber}
+                onChange={(e) => setManualVehicleNumber(e.target.value)}
+                className="w-full border rounded-xl px-3 py-3 mb-3"
+              />
+            </Card>
 
-                  {" - "}
+            <Card>
+              <h3 className="text-lg font-semibold mb-4">Driver Details</h3>
+              <select
+                value={driverId}
+                onChange={(e) => setDriverId(e.target.value)}
+                className="w-full border rounded-xl px-3 py-3"
+              >
+                <option value="">Select Driver</option>
 
-                  {vehicle.vehicleName}
-                </option>
-              ))}
-          </select>
+                {drivers
 
-          <div className="my-5 text-center text-gray-500">OR</div>
+                  .filter((driver) => driver.isActive)
 
-          <input
-            type="text"
-            placeholder="Vehicle Number"
-            value={manualVehicleNumber}
-            onChange={(e) => setManualVehicleNumber(e.target.value)}
-            className="w-full border rounded-xl px-3 py-3 mb-3"
-          />
-        </Card>
+                  .map((driver) => (
+                    <option key={driver._id} value={driver._id}>
+                      {driver.name}
 
-        <Card>
-          <h3 className="text-lg font-semibold mb-4">Driver Details</h3>
-               <select
-            value={driverId}
-            onChange={(e) => setDriverId(e.target.value)}
-            className="w-full border rounded-xl px-3 py-3"
-          >
-            <option value="">Select Driver</option>
+                      {" - "}
 
-            {drivers
+                      {driver.phone}
+                    </option>
+                  ))}
+              </select>
 
-              .filter((driver) => driver.isActive)
+              <div className="my-5 text-center text-gray-500">OR</div>
+              <input
+                type="text"
+                placeholder="Driver Name"
+                value={manualDriverName}
+                onChange={(e) => setManualDriverName(e.target.value)}
+                className="w-full border rounded-xl px-3 py-3 mb-3"
+              />
 
-              .map((driver) => (
-                <option key={driver._id} value={driver._id}>
-                  {driver.name}
-
-                  {" - "}
-
-                  {driver.phone}
-                </option>
-              ))}
-          </select>
-
-          <div className="my-5 text-center text-gray-500">OR</div>
-          <input
-            type="text"
-            placeholder="Driver Name"
-            value={manualDriverName}
-            onChange={(e) => setManualDriverName(e.target.value)}
-            className="w-full border rounded-xl px-3 py-3 mb-3"
-          />
-
-          <input
-            type="text"
-            placeholder="Driver Phone Number"
-            value={manualDriverPhone}
-            onChange={(e) => setManualDriverPhone(e.target.value)}
-            className="w-full border rounded-xl px-3 py-3"
-          />
-        </Card>
-</>
-
-)}
-       
+              <input
+                type="text"
+                placeholder="Driver Phone Number"
+                value={manualDriverPhone}
+                onChange={(e) => setManualDriverPhone(e.target.value)}
+                className="w-full border rounded-xl px-3 py-3"
+              />
+            </Card>
+          </>
+        )}
 
         <Card>
           <h3 className="text-lg font-semibold mb-4">Dispatch Remarks</h3>
@@ -440,17 +433,10 @@ const isReceived =
         </Card>
 
         {!isDispatched && !isReceived && (
-
-<Button
-    className="w-full"
-    onClick={handleSave}
->
-
-    {isDispatching ? "Dispatching...." : " Dispatch Requirement "}
-
-</Button>
-
-)}
+          <Button className="w-full" onClick={handleSave}>
+            {isDispatching ? "Dispatching...." : " Dispatch Requirement "}
+          </Button>
+        )}
       </div>
     );
   }

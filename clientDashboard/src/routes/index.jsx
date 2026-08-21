@@ -19,7 +19,8 @@ import Kitchens from "../pages/MainStore/Kitchens/Kitchens.jsx";
 import Users from "../pages/MainStore/Users/Users.jsx";
 import Reports from "../pages/MainStore/Reports/Reports.jsx";
 import PasswordResetForm from "../pages/auth/PasswordResetForm.jsx";
-
+import Settings from "../pages/MainStore/Settings/Settings.jsx";
+import KitchenSettings from "../pages/kitchen/Settings/Settings.jsx"
 
 const AppRoutes = () => {
   return (
@@ -70,6 +71,15 @@ const AppRoutes = () => {
     element={
         <ProtectedRoute roles={["Kitchen Incharge" ,"Store Incharge"]}>
             <RequirementDetails />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/settings"
+    element={
+        <ProtectedRoute roles={["Kitchen Incharge","Store Incharge"]}>
+            <KitchenSettings />
         </ProtectedRoute>
     }
 />
@@ -130,6 +140,10 @@ const AppRoutes = () => {
    <Route
     path="reports"
     element={<Reports />}
+    />
+   <Route
+    path="settings"
+    element={<Settings />}
     />
 
 </Route>

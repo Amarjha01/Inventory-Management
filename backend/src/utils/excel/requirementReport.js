@@ -1,9 +1,14 @@
 import ExcelJS from "exceljs";
 
-export default async function createRequirementWorkbook(requirements) {
+export default async function createRequirementWorkbook(
+  requirements,
+  filters = {},
+) {
   const workbook = new ExcelJS.Workbook();
 
   const sheet = workbook.addWorksheet("Requirements");
+
+  const { status } = filters;
 
   // ------------------------------------
   // Helpers
@@ -17,6 +22,49 @@ export default async function createRequirementWorkbook(requirements) {
     return value;
   };
 
+  const getId = (value) => {
+    if (!value) return null;
+
+    if (typeof value === "object" && value._id) {
+      return value._id.toString();
+    }
+
+    return value.toString();
+  };
+
+  const getItemName = (item) => {
+    if (!item?.inventoryId) {
+      return null;
+    }
+
+    if (typeof item.inventoryId === "object" && item.inventoryId.name) {
+      return item.inventoryId.name;
+    }
+
+    return null;
+  };
+
+  // ------------------------------------
+  // Quantity based on status
+  // ------------------------------------
+
+  const getQuantity = (item) => {
+    if (status === "Submitted") {
+      return item?.quantity ?? 0;
+    }
+
+    if (status === "Out For Delivery") {
+      return item?.dispatchedQuantity ?? 0;
+    }
+
+    if (status === "Received") {
+      return item?.receivedQuantity ?? 0;
+    }
+
+    // When "All Statuses" is selected
+    return item?.quantity ?? 0;
+  };
+
   // ------------------------------------
   // Dynamic inventory columns
   // ------------------------------------
@@ -25,13 +73,19 @@ export default async function createRequirementWorkbook(requirements) {
 
   requirements.forEach((requirement) => {
     requirement.items?.forEach((item) => {
-      if (!item.inventoryId) return;
+      const inventoryId = getId(item.inventoryId);
 
-      inventoryMap.set(item.inventoryId._id.toString(), item.inventoryId.name);
+      const inventoryName = getItemName(item);
+
+      if (!inventoryId || !inventoryName) {
+        return;
+      }
+
+      inventoryMap.set(inventoryId, inventoryName);
     });
   });
 
-  const inventoryColumns = [...inventoryMap.values()];
+  const inventoryColumns = [...inventoryMap.entries()];
 
   // ------------------------------------
   // Columns
@@ -42,7 +96,9 @@ export default async function createRequirementWorkbook(requirements) {
     "Kitchen",
     "District",
     "Date",
-    ...inventoryColumns,
+
+    ...inventoryColumns.map(([, name]) => name),
+
     "Vehicle",
     "Driver",
     "Created By",
@@ -52,7 +108,7 @@ export default async function createRequirementWorkbook(requirements) {
   sheet.addRow(columns);
 
   // ------------------------------------
-  // Add requirement rows
+  // Rows
   // ------------------------------------
 
   requirements.forEach((requirement) => {
@@ -67,19 +123,19 @@ export default async function createRequirementWorkbook(requirements) {
     row.push(requirement.createdAt ? new Date(requirement.createdAt) : 0);
 
     // --------------------------------
-    // Inventory quantities
+    // Item quantities
     // --------------------------------
 
-    inventoryColumns.forEach((column) => {
-      const item = requirement.items?.find(
-        (x) => x.inventoryId?.name === column,
-      );
+    inventoryColumns.forEach(([inventoryId]) => {
+      const item = requirement.items?.find((requirementItem) => {
+        return getId(requirementItem.inventoryId) === inventoryId;
+      });
 
-      row.push(valueOrZero(item?.dispatchedQuantity));
+      row.push(getQuantity(item));
     });
 
     // --------------------------------
-    // Dispatch information
+    // Dispatch
     // --------------------------------
 
     row.push(valueOrZero(requirement.dispatch?.vehicle?.vehicleNumber));
@@ -123,7 +179,7 @@ export default async function createRequirementWorkbook(requirements) {
   headerRow.height = 30;
 
   // ------------------------------------
-  // Style all cells
+  // Cell styling
   // ------------------------------------
 
   sheet.eachRow((row, rowNumber) => {
@@ -162,7 +218,6 @@ export default async function createRequirementWorkbook(requirements) {
       };
     });
 
-    // Alternate row color
     if (rowNumber > 1 && rowNumber % 2 === 0) {
       row.eachCell((cell) => {
         cell.fill = {
@@ -180,9 +235,7 @@ export default async function createRequirementWorkbook(requirements) {
   // Date formatting
   // ------------------------------------
 
-  const dateColumnIndex = 4;
-
-  sheet.getColumn(dateColumnIndex).eachCell((cell, rowNumber) => {
+  sheet.getColumn(4).eachCell((cell, rowNumber) => {
     if (rowNumber > 1 && cell.value !== 0) {
       cell.numFmt = "dd-mm-yyyy";
     }
@@ -195,19 +248,24 @@ export default async function createRequirementWorkbook(requirements) {
   sheet.columns.forEach((column) => {
     let maxLength = 0;
 
-    column.eachCell({ includeEmpty: true }, (cell) => {
-      const value = cell.value;
+    column.eachCell(
+      {
+        includeEmpty: true,
+      },
+      (cell) => {
+        const value = cell.value;
 
-      let length = 0;
+        let length = 0;
 
-      if (value instanceof Date) {
-        length = 12;
-      } else if (value !== null && value !== undefined) {
-        length = String(value).length;
-      }
+        if (value instanceof Date) {
+          length = 12;
+        } else if (value !== null && value !== undefined) {
+          length = String(value).length;
+        }
 
-      maxLength = Math.max(maxLength, length);
-    });
+        maxLength = Math.max(maxLength, length);
+      },
+    );
 
     column.width = Math.min(Math.max(maxLength + 2, 12), 30);
   });
@@ -227,9 +285,25 @@ export default async function createRequirementWorkbook(requirements) {
   // Auto filter
   // ------------------------------------
 
+  const getExcelColumnName = (columnNumber) => {
+    let result = "";
+
+    while (columnNumber > 0) {
+      const remainder = (columnNumber - 1) % 26;
+
+      result = String.fromCharCode(65 + remainder) + result;
+
+      columnNumber = Math.floor((columnNumber - 1) / 26);
+    }
+
+    return result;
+  };
+
+  const lastColumn = getExcelColumnName(columns.length);
+
   sheet.autoFilter = {
     from: "A1",
-    to: `${String.fromCharCode(64 + columns.length)}1`,
+    to: `${lastColumn}1`,
   };
 
   return workbook;

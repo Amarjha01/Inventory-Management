@@ -56,11 +56,11 @@ const MainStoreNavbar = () => {
     icon: <MdAssessment size={20} />,
     path: "/store/reports",
 },
-    // {
-    //   title: "Settings",
-    //   icon: <MdSettings size={22} />,
-    //   path: "/store/settings",
-    // },
+    {
+      title: "Settings",
+      icon: <MdSettings size={22} />,
+      path: "/store/settings",
+    },
    
   ];
 
@@ -93,7 +93,7 @@ const MainStoreNavbar = () => {
               <h2 className="text-sm font-bold text-gray-900">Main Store Hajipur Industrial Area</h2>
 
               <p className="hidden md:block text-[10px] text-gray-500">
-                BALAJI AGRO EXIM AND COLD STORAGE PRIVATE LIMITED
+                Plot Number B6768 Jandaha Road
               </p>
             </div>
           </div>

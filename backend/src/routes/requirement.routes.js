@@ -9,6 +9,7 @@ import {
   dispatchRequirement,
   receiveRequirement,
   getAllKitchenRequirements,
+  editGatePass,
 } from "../controllers/requirement.controller.js";
 
 import authenticate from "../middleware/auth.middleware.js";
@@ -100,6 +101,19 @@ router.patch(
     upload.single("gatePass"),
 
     receiveRequirement
+);
+
+router.patch(
+    "/:id/gate-pass",
+
+    authorize(
+        ROLE.KITCHEN_INCHARGE,
+        ROLE.STORE_INCHARGE,
+    ),
+
+    upload.single("gatePass"),
+
+    editGatePass
 );
 
 export default router;
