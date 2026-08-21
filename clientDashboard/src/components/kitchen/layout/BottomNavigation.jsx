@@ -3,7 +3,8 @@ import {
     MdDashboard,
     MdInventory,
     MdHistory,
-    MdLocalShipping
+    MdLocalShipping,
+    MdSettings
 } from "react-icons/md";
 
 const BottomNavigation = () => {
@@ -32,7 +33,12 @@ const BottomNavigation = () => {
             title: "Track",
             icon: <MdLocalShipping size={24} />,
             path: "/track"
-        }
+        },
+        {
+            title: "Settings",
+            icon: <MdSettings size={24} />,
+            path: "/settings",
+        },
 
     ];
 
@@ -40,7 +46,7 @@ const BottomNavigation = () => {
 
         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
 
-            <div className="grid grid-cols-3 h-16">
+            <div className="grid grid-cols-4 h-16">
 
                 {menus.map((menu) => (
 

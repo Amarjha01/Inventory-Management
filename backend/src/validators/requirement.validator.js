@@ -1,9 +1,38 @@
 import { body } from "express-validator";
 
-export const createRequirementValidator = [
-  body("kitchen").notEmpty().withMessage("Kitchen is required"),
+const requirementSubmissionTimeValidator = () => {
+  return body().custom(() => {
+    const now = new Date();
 
-  body("remarks").optional().trim(),
+    const currentMinutes =
+      now.getHours() * 60 + now.getMinutes();
+
+    const startMinutes = 5 * 60;  // 05:00 AM
+    const endMinutes = 18 * 60;   // 06:00 PM
+
+    if (
+      currentMinutes < startMinutes ||
+      currentMinutes > endMinutes
+    ) {
+      throw new Error(
+        "Requirement can only be submitted between 05:00 AM and 06:00 PM."
+      );
+    }
+
+    return true;
+  });
+};
+
+export const createRequirementValidator = [
+  requirementSubmissionTimeValidator(),
+
+  body("kitchen")
+    .notEmpty()
+    .withMessage("Kitchen is required"),
+
+  body("remarks")
+    .optional()
+    .trim(),
 
   body("items")
     .isArray({ min: 1 })
@@ -13,13 +42,22 @@ export const createRequirementValidator = [
     .notEmpty()
     .withMessage("Inventory item is required"),
 
-  body("items.*.quantity").isNumeric().withMessage("Quantity must be numeric"),
+  body("items.*.quantity")
+    .isNumeric()
+    .withMessage("Quantity must be numeric"),
 
-  body("items.*.unit").trim().notEmpty().withMessage("Unit is required"),
+  body("items.*.unit")
+    .trim()
+    .notEmpty()
+    .withMessage("Unit is required"),
 ];
 
 export const updateRequirementValidator = [
-  body("remarks").optional().trim(),
+  body("remarks")
+    .optional()
+    .trim(),
 
-  body("items").optional().isArray(),
+  body("items")
+    .optional()
+    .isArray(),
 ];

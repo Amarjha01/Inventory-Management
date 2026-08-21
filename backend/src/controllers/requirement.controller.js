@@ -31,9 +31,7 @@ export const getRequirements = asyncHandler(async (req, res) => {
   );
 });
 export const getAllKitchenRequirements = asyncHandler(async (req, res) => {
-  console.log("here API reached1");
   const requirements = await requirementService.allKitchenRequirements();
-  console.log(requirements);
   
   return ApiResponse.success(
     res,
@@ -136,3 +134,18 @@ export const receiveRequirement = asyncHandler(async (req, res) => {
     requirement,
   );
 });
+
+export const editGatePass = asyncHandler(async (req, res) => {
+  const requirement = await requirementService.editGatePass(
+    req.params.id,
+    req.file,
+    req.user._id
+  );
+
+  return ApiResponse.success(
+    res,
+    "Gate pass updated successfully",
+    requirement
+  );
+});
+

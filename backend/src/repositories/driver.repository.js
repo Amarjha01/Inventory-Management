@@ -14,9 +14,11 @@ class DriverRepository {
   }
 
   async findById(id) {
+    if (!id) return;
     return await Driver.findById(id).lean();
   }
   async findByPhone(phone) {
+    if(!phone) return;
     return await Driver.findOne({phone}).lean();
   }
 

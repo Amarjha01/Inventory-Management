@@ -69,7 +69,7 @@ const Inventory = () => {
       minimumStock: "",
       bagSize: "",
       unit: "",
-      isActive: "",
+      isActive: true,
       image: "",
     });
 
@@ -109,6 +109,7 @@ const Inventory = () => {
     try {
       const payload = {
         ...form,
+        isActive:true,
         quantity: Number(form.quantity),
         minimumStock: Number(form.minimumStock),
       };

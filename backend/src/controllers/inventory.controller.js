@@ -6,8 +6,10 @@ import inventoryService from "../services/inventory.service.js";
 import { MESSAGE } from "../constants/responseMessages.js";
 
 export const createInventory = asyncHandler(async (req, res) => {
+   console.log(req.body);
   const item = await inventoryService.createInventory(req.body);
-
+ 
+  
   return ApiResponse.created(res, MESSAGE.CREATED, item);
 });
 

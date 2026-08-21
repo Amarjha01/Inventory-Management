@@ -19,6 +19,7 @@ const PasswordResetForm = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting , setIsSubmitting] = useState(false)
 
   const isLengthValid = password.length >= 8;
   const hasNumber = /\d/.test(password);
@@ -61,10 +62,12 @@ const PasswordResetForm = () => {
 }, [navigate]);
 
  const handleSubmit = async (e) => {
+  setIsSubmitting(true)
   e.preventDefault();
 
   if (!isPasswordValid) {
     setSubmitted(false);
+    setIsSubmitting(false)
     return;
   }
 
@@ -81,7 +84,7 @@ const PasswordResetForm = () => {
     setSubmitted(true);
 
     toast.success("Password reset successfully!");
-
+    setIsSubmitting(false)
     // Update local user state/storage if needed
     const user = storage.getUser();
 
@@ -91,9 +94,10 @@ const PasswordResetForm = () => {
         isFirstLogin: false,
       });
     }
-
+    setIsSubmitting(false)
     navigate("/new-requirement", { replace: true });
   } catch (error) {
+    setIsSubmitting(false);
     console.error("Password reset failed:", error);
 
     setSubmitted(false);
@@ -129,7 +133,7 @@ const PasswordResetForm = () => {
           Create New Password ( नया पासवर्ड बनाएं )
         </h2>
 
-        <p className="mb-6 text-sm text-gray-500">
+        <p className="mb-6 text-sm text-gray-500 flex flex-col">
           Choose a strong password for your account.
           <span>अपने अकाउंट के लिए एक मज़बूत पासवर्ड चुनें।</span>
         </p>
@@ -272,7 +276,7 @@ const PasswordResetForm = () => {
             disabled={!isPasswordValid || password !== confirmPassword}
           >
             <FiCheckCircle size={18} />
-            Set Password
+            {isSubmitting ? "Submitting..." :  "Set Password"}
           </motion.button>
 
           {/* Success */}

@@ -24,6 +24,7 @@ class UserRepository {
   async findAll() {
     return await User.find().populate("kitchenId").lean();
   }
+  
   async findById(id) {
     return await User.findById(id).populate("kitchenId").lean();
   }
@@ -41,6 +42,23 @@ class UserRepository {
       .select("+password")
       .populate("kitchenId");
   }
+ 
+  async findByRoles(roles) {
+  return await User.find({
+    role: {
+      $in: roles,
+    },
+    isActive: true,
+  })
+    .select("_id name role")
+    .lean();
+}
+
+async findByKitchenId(kitchenId) {
+  return await User.find({
+    kitchenId: kitchenId,
+  });
+}
 
   async update(id, payload) {
     return await User.findByIdAndUpdate(
@@ -85,6 +103,7 @@ class UserRepository {
     ).lean();
   }
 }
+ 
 
 
 

@@ -2,36 +2,32 @@ import asyncHandler from "../utils/asyncHandler.js";
 
 import reportService from "../services/report.service.js";
 
-export const downloadRequirementReport = asyncHandler(
+export const getRequirementReportOptions =
+  asyncHandler(async (req, res) => {
+    const data =
+      await reportService.getRequirementReportOptions(
+        req.query,
+      );
 
-    async (req, res) => {
+    res.status(200).json(data);
+  });
 
-        const workbook = await reportService.downloadRequirementReport(
 
-            req.query
 
-        );
 
-        res.setHeader(
+export const downloadRequirementReport = asyncHandler(async (req, res) => {
+  const workbook = await reportService.downloadRequirementReport(req.query);
 
-            "Content-Type",
+  const filename = `requirements-${Date.now()}.xlsx`;
 
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  res.setHeader(
+    "Content-Type",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  );
 
-        );
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
 
-        res.setHeader(
+  await workbook.xlsx.write(res);
 
-            "Content-Disposition",
-
-            `attachment; filename=requirements-${Date.now()}.xlsx`
-
-        );
-
-        await workbook.xlsx.write(res);
-
-        res.end();
-
-    }
-
-);
+  res.end();
+});

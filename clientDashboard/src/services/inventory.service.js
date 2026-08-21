@@ -16,7 +16,6 @@ export const getInventoryById = async (id) => {
 export const createInventory = async (payload) => {
   const { data } = await api.post(
     ENDPOINTS.INVENTORY,
-
     payload,
   );
 

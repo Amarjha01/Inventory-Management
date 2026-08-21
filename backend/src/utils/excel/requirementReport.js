@@ -1,147 +1,310 @@
 import ExcelJS from "exceljs";
 
-export default async function createRequirementWorkbook(requirements){
+export default async function createRequirementWorkbook(
+  requirements,
+  filters = {},
+) {
+  const workbook = new ExcelJS.Workbook();
 
-    const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet("Requirements");
 
-    const sheet = workbook.addWorksheet("Requirements");
+  const { status } = filters;
 
-    //------------------------------------
-    // Dynamic inventory columns
-    //------------------------------------
+  // ------------------------------------
+  // Helpers
+  // ------------------------------------
 
-    const inventoryMap = new Map();
+  const valueOrZero = (value) => {
+    if (value === undefined || value === null || value === "") {
+      return 0;
+    }
 
-    requirements.forEach(requirement=>{
+    return value;
+  };
 
-        requirement.items.forEach(item=>{
+  const getId = (value) => {
+    if (!value) return null;
 
-            inventoryMap.set(
+    if (typeof value === "object" && value._id) {
+      return value._id.toString();
+    }
 
-                item.inventoryId._id.toString(),
+    return value.toString();
+  };
 
-                item.inventoryId.name
+  const getItemName = (item) => {
+    if (!item?.inventoryId) {
+      return null;
+    }
 
-            );
+    if (typeof item.inventoryId === "object" && item.inventoryId.name) {
+      return item.inventoryId.name;
+    }
 
-        });
+    return null;
+  };
 
+  // ------------------------------------
+  // Quantity based on status
+  // ------------------------------------
+
+  const getQuantity = (item) => {
+    if (status === "Submitted") {
+      return item?.quantity ?? 0;
+    }
+
+    if (status === "Out For Delivery") {
+      return item?.dispatchedQuantity ?? 0;
+    }
+
+    if (status === "Received") {
+      return item?.receivedQuantity ?? 0;
+    }
+
+    // When "All Statuses" is selected
+    return item?.quantity ?? 0;
+  };
+
+  // ------------------------------------
+  // Dynamic inventory columns
+  // ------------------------------------
+
+  const inventoryMap = new Map();
+
+  requirements.forEach((requirement) => {
+    requirement.items?.forEach((item) => {
+      const inventoryId = getId(item.inventoryId);
+
+      const inventoryName = getItemName(item);
+
+      if (!inventoryId || !inventoryName) {
+        return;
+      }
+
+      inventoryMap.set(inventoryId, inventoryName);
+    });
+  });
+
+  const inventoryColumns = [...inventoryMap.entries()];
+
+  // ------------------------------------
+  // Columns
+  // ------------------------------------
+
+  const columns = [
+    "Requirement No",
+    "Kitchen",
+    "District",
+    "Date",
+
+    ...inventoryColumns.map(([, name]) => name),
+
+    "Vehicle",
+    "Driver",
+    "Created By",
+    "Status",
+  ];
+
+  sheet.addRow(columns);
+
+  // ------------------------------------
+  // Rows
+  // ------------------------------------
+
+  requirements.forEach((requirement) => {
+    const row = [];
+
+    row.push(valueOrZero(requirement.requirementNumber));
+
+    row.push(valueOrZero(requirement.kitchen?.name));
+
+    row.push(valueOrZero(requirement.kitchen?.district));
+
+    row.push(requirement.createdAt ? new Date(requirement.createdAt) : 0);
+
+    // --------------------------------
+    // Item quantities
+    // --------------------------------
+
+    inventoryColumns.forEach(([inventoryId]) => {
+      const item = requirement.items?.find((requirementItem) => {
+        return getId(requirementItem.inventoryId) === inventoryId;
+      });
+
+      row.push(getQuantity(item));
     });
 
-    const inventoryColumns=[...inventoryMap.values()];
+    // --------------------------------
+    // Dispatch
+    // --------------------------------
 
-    //------------------------------------
+    row.push(valueOrZero(requirement.dispatch?.vehicle?.vehicleNumber));
 
-    const columns=[
+    row.push(valueOrZero(requirement.dispatch?.driver?.name));
 
-        "Requirement No",
+    row.push(valueOrZero(requirement.createdBy?.name));
 
-        "Kitchen",
+    row.push(valueOrZero(requirement.status));
 
-        "District",
+    sheet.addRow(row);
+  });
 
-        "Date",
+  // ------------------------------------
+  // Header styling
+  // ------------------------------------
 
-        ...inventoryColumns,
+  const headerRow = sheet.getRow(1);
 
-        "Vehicle",
+  headerRow.font = {
+    bold: true,
+    color: {
+      argb: "FFFFFF",
+    },
+  };
 
-        "Driver",
+  headerRow.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: {
+      argb: "1F4E78",
+    },
+  };
 
-        "Created By",
+  headerRow.alignment = {
+    horizontal: "center",
+    vertical: "middle",
+    wrapText: true,
+  };
 
-        "Status"
+  headerRow.height = 30;
 
-    ];
+  // ------------------------------------
+  // Cell styling
+  // ------------------------------------
 
-    sheet.addRow(columns);
+  sheet.eachRow((row, rowNumber) => {
+    row.eachCell((cell) => {
+      cell.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+        wrapText: true,
+      };
 
-    //------------------------------------
-
-    requirements.forEach(requirement=>{
-
-        const row=[];
-
-        row.push(requirement.requirementNumber);
-
-        row.push(requirement.kitchen.name);
-
-        row.push(requirement.kitchen.district);
-
-        row.push(
-
-            new Date(requirement.createdAt)
-
-                .toLocaleDateString()
-
-        );
-
-        //--------------------------------
-
-        inventoryColumns.forEach(column=>{
-
-            const item=requirement.items.find(
-
-                x=>x.inventoryId.name===column
-
-            );
-
-            row.push(
-
-                item
-
-                    ? item.dispatchedQuantity ?? ""
-
-                    : ""
-
-            );
-
-        });
-
-        //--------------------------------
-
-        row.push(
-
-            requirement.dispatch?.vehicle?.vehicleNumber || ""
-
-        );
-
-        row.push(
-
-            requirement.dispatch?.driver?.name || ""
-
-        );
-
-        row.push(
-
-            requirement.createdBy.name
-
-        );
-
-        row.push(
-
-            requirement.status
-
-        );
-
-        sheet.addRow(row);
-
+      cell.border = {
+        top: {
+          style: "thin",
+          color: {
+            argb: "D9E1F2",
+          },
+        },
+        left: {
+          style: "thin",
+          color: {
+            argb: "D9E1F2",
+          },
+        },
+        bottom: {
+          style: "thin",
+          color: {
+            argb: "D9E1F2",
+          },
+        },
+        right: {
+          style: "thin",
+          color: {
+            argb: "D9E1F2",
+          },
+        },
+      };
     });
 
-    //------------------------------------
+    if (rowNumber > 1 && rowNumber % 2 === 0) {
+      row.eachCell((cell) => {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: {
+            argb: "F5F9FC",
+          },
+        };
+      });
+    }
+  });
 
-    sheet.getRow(1).font={
+  // ------------------------------------
+  // Date formatting
+  // ------------------------------------
 
-        bold:true,
+  sheet.getColumn(4).eachCell((cell, rowNumber) => {
+    if (rowNumber > 1 && cell.value !== 0) {
+      cell.numFmt = "dd-mm-yyyy";
+    }
+  });
 
-    };
+  // ------------------------------------
+  // Column widths
+  // ------------------------------------
 
-    sheet.columns.forEach(column=>{
+  sheet.columns.forEach((column) => {
+    let maxLength = 0;
 
-        column.width=20;
+    column.eachCell(
+      {
+        includeEmpty: true,
+      },
+      (cell) => {
+        const value = cell.value;
 
-    });
+        let length = 0;
 
-    return workbook;
+        if (value instanceof Date) {
+          length = 12;
+        } else if (value !== null && value !== undefined) {
+          length = String(value).length;
+        }
 
+        maxLength = Math.max(maxLength, length);
+      },
+    );
+
+    column.width = Math.min(Math.max(maxLength + 2, 12), 30);
+  });
+
+  // ------------------------------------
+  // Freeze header
+  // ------------------------------------
+
+  sheet.views = [
+    {
+      state: "frozen",
+      ySplit: 1,
+    },
+  ];
+
+  // ------------------------------------
+  // Auto filter
+  // ------------------------------------
+
+  const getExcelColumnName = (columnNumber) => {
+    let result = "";
+
+    while (columnNumber > 0) {
+      const remainder = (columnNumber - 1) % 26;
+
+      result = String.fromCharCode(65 + remainder) + result;
+
+      columnNumber = Math.floor((columnNumber - 1) / 26);
+    }
+
+    return result;
+  };
+
+  const lastColumn = getExcelColumnName(columns.length);
+
+  sheet.autoFilter = {
+    from: "A1",
+    to: `${lastColumn}1`,
+  };
+
+  return workbook;
 }

@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { FiSearch, FiFileText, FiPackage } from "react-icons/fi";
+import {
+  FiSearch,
+  FiFileText,
+  FiPackage,
+} from "react-icons/fi";
 
 import Card from "../../../components/shared/ui/Card";
 import Loader from "../../../components/shared/ui/Loader";
@@ -15,13 +19,19 @@ const Requirements = () => {
   const [requirements, setRequirements] = useState([]);
   const [search, setSearch] = useState("");
 
+  const [activeStatus, setActiveStatus] =
+    useState("Submitted");
+
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await getAllKitchenRequirements();
-        setRequirements(data);
+        const data =
+          await getAllKitchenRequirements();
+
+        setRequirements(data || []);
       } catch (error) {
         console.error(error);
+        setRequirements([]);
       } finally {
         setLoading(false);
       }
@@ -30,26 +40,91 @@ const Requirements = () => {
     load();
   }, []);
 
-  const filteredRequirements = useMemo(() => {
-    if (!search) return requirements;
+  // =========================================================
+  // STATUS TABS
+  // =========================================================
 
-    return requirements.filter((item) =>
-      JSON.stringify(item).toLowerCase().includes(search.toLowerCase()),
+  const statusTabs = [
+    {
+      value: "Submitted",
+      label: "Submitted",
+    },
+    {
+      value: "Out For Delivery",
+      label: "Out For Delivery",
+    },
+    {
+      value: "Received",
+      label: "Received",
+    },
+  ];
+
+  // =========================================================
+  // STATUS COUNTS
+  // =========================================================
+
+  const statusCounts = useMemo(() => {
+    return {
+      Submitted: requirements.filter(
+        (item) =>
+          item.status === "Submitted",
+      ).length,
+
+      "Out For Delivery":
+        requirements.filter(
+          (item) =>
+            item.status ===
+            "Out For Delivery",
+        ).length,
+
+      Received: requirements.filter(
+        (item) =>
+          item.status === "Received",
+      ).length,
+    };
+  }, [requirements]);
+
+  // =========================================================
+  // FILTER REQUIREMENTS
+  // =========================================================
+
+  const filteredRequirements = useMemo(() => {
+    let result = requirements.filter(
+      (item) =>
+        item.status === activeStatus,
     );
-  }, [requirements, search]);
+
+    if (search.trim()) {
+      const searchValue =
+        search.trim().toLowerCase();
+
+      result = result.filter((item) =>
+        JSON.stringify(item)
+          .toLowerCase()
+          .includes(searchValue),
+      );
+    }
+
+    return result;
+  }, [
+    requirements,
+    activeStatus,
+    search,
+  ]);
+
+  // =========================================================
+  // STATUS STYLE
+  // =========================================================
 
   const statusStyle = (status) => {
     switch (status) {
-      case "SUBMITTED":
+      case "Submitted":
         return "bg-yellow-100 text-yellow-700";
 
-      case "APPROVED":
-        return "bg-blue-100 text-blue-700";
-
-      case "OUT_FOR_DELIVERY":
+      case "Out For Delivery":
         return "bg-purple-100 text-purple-700";
 
-      case "RECEIVED":
+      case "Received":
         return "bg-green-100 text-green-700";
 
       default:
@@ -57,126 +132,265 @@ const Requirements = () => {
     }
   };
 
+  // =========================================================
+  // LOADING
+  // =========================================================
+
   if (loading) {
     return <Loader />;
   }
 
   return (
     <div className="space-y-5">
-      {/* Header */}
+
+      {/* =====================================================
+          HEADER
+      ====================================================== */}
+
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{
+          opacity: 0,
+          y: 15,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
         className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
       >
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Requirements</h1>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Requirements
+          </h1>
 
-          <p className="text-gray-500">Manage kitchen material requests</p>
+          <p className="text-gray-500">
+            Manage kitchen material requests
+          </p>
         </div>
 
         <div className="flex items-center gap-2 rounded-xl bg-teal-50 px-4 py-2 text-teal-700">
           <FiFileText />
 
-          <span className="font-semibold">{requirements.length}</span>
+          <span className="font-semibold">
+            {filteredRequirements.length}
+          </span>
 
-          <span className="text-sm">Requests</span>
+          <span className="text-sm">
+            Requests
+          </span>
         </div>
       </motion.div>
 
-      {/* Search */}
+      {/* =====================================================
+          STATUS TABS
+      ====================================================== */}
+
+      <div className="grid grid-cols-3 gap-2 rounded-2xl bg-gray-100 p-1">
+        {statusTabs.map((tab) => {
+          const active =
+            activeStatus === tab.value;
+
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => {
+                setActiveStatus(
+                  tab.value,
+                );
+
+                // Optional: clear search
+                setSearch("");
+              }}
+              className={`
+                rounded-xl
+                px-2
+                py-3
+                text-sm
+                font-semibold
+                transition-all
+                ${
+                  active
+                    ? "bg-white text-teal-700 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }
+              `}
+            >
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-center">
+                  {tab.label}
+                </span>
+
+                <span
+                  className={`
+                    text-xs
+                    ${
+                      active
+                        ? "text-teal-600"
+                        : "text-gray-400"
+                    }
+                  `}
+                >
+                  {statusCounts[
+                    tab.value
+                  ] || 0}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* =====================================================
+          SEARCH
+      ====================================================== */}
+
       <div className="relative">
-        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <FiSearch
+          className="
+            absolute
+            left-3
+            top-1/2
+            -translate-y-1/2
+            text-gray-400
+          "
+        />
 
         <input
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search requirement or kitchen..."
-          className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
+          onChange={(e) =>
+            setSearch(e.target.value)
+          }
+          placeholder={`Search ${activeStatus.toLowerCase()} requirement...`}
+          className="
+            w-full
+            rounded-xl
+            border
+            border-gray-200
+            bg-white
+            py-3
+            pl-10
+            pr-4
+            outline-none
+            focus:border-teal-500
+            focus:ring-4
+            focus:ring-teal-500/10
+          "
         />
       </div>
 
-      {/* Empty */}
+      {/* =====================================================
+          EMPTY
+      ====================================================== */}
+
       {filteredRequirements.length === 0 && (
         <div className="rounded-2xl border-2 border-dashed bg-gray-50 py-14 text-center">
           <FiPackage className="mx-auto text-5xl text-gray-300" />
 
           <h3 className="mt-3 font-semibold text-gray-700">
-            No Requirements Found
+            No {activeStatus} Requirements
           </h3>
 
           <p className="text-sm text-gray-500">
-            No kitchen requests available.
+            {search
+              ? "No requirements match your search."
+              : `No ${activeStatus.toLowerCase()} requirements available.`}
           </p>
         </div>
       )}
 
-      {/* Cards */}
-      <AnimatePresence>
+      {/* =====================================================
+          REQUIREMENT CARDS
+      ====================================================== */}
+
+      <AnimatePresence mode="popLayout">
         <div className="space-y-3">
-          {filteredRequirements.map((requirement) => (
-            <motion.div
-              key={requirement._id}
-              initial={{
-                opacity: 0,
-                y: 15,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              exit={{
-                opacity: 0,
-              }}
-              transition={{
-                duration: 0.25,
-              }}
-            >
-              <Card
-                onClick={() =>
-                  navigate(`/store/requirements/${requirement._id}`)
-                }
-                className="
-                  cursor-pointer
-                  transition-all
-                  hover:-translate-y-1
-                  hover:shadow-lg
-                "
+          {filteredRequirements.map(
+            (requirement) => (
+              <motion.div
+                key={requirement._id}
+                initial={{
+                  opacity: 0,
+                  y: 15,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                exit={{
+                  opacity: 0,
+                }}
+                transition={{
+                  duration: 0.25,
+                }}
+                layout
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="font-bold text-gray-800">
-                      {requirement.requirementNumber}
-                    </h2>
+                <Card
+                  onClick={() =>
+                    navigate(
+                      `/store/requirements/${requirement._id}`,
+                    )
+                  }
+                  className="
+                    cursor-pointer
+                    transition-all
+                    hover:-translate-y-1
+                    hover:shadow-lg
+                  "
+                >
+                  <div className="flex items-center justify-between gap-3">
 
-                    <p className="mt-1 text-sm text-gray-600">
-                      {requirement.kitchen?.name}
-                    </p>
+                    {/* LEFT */}
+                    <div className="min-w-0">
+                      <h2 className="font-bold text-gray-800">
+                        {
+                          requirement.requirementNumber
+                        }
+                      </h2>
 
-                    <p className="mt-1 text-xs text-gray-400">
-                      {new Date(requirement.createdAt).toLocaleString()}
-                    </p>
+                      <p className="mt-1 text-sm text-gray-600">
+                        {
+                          requirement
+                            .kitchen?.name
+                        }
+                      </p>
+
+                      <p className="mt-1 text-xs text-gray-400">
+                        {new Date(
+                          requirement.createdAt,
+                        ).toLocaleString()}
+                      </p>
+                    </div>
+
+                    {/* RIGHT */}
+                    <div className="text-right shrink-0">
+                      <span
+                        className={`
+                          inline-block
+                          rounded-full
+                          px-3
+                          py-1
+                          text-xs
+                          font-semibold
+                          ${statusStyle(
+                            requirement.status,
+                          )}
+                        `}
+                      >
+                        {requirement.status}
+                      </span>
+
+                      <p className="mt-2 text-xs text-gray-500">
+                        {requirement.items
+                          ?.length || 0}{" "}
+                        Items
+                      </p>
+                    </div>
                   </div>
-
-                  <div className="text-right">
-                    <span
-                      className={`
-                        rounded-full px-3 py-1
-                        text-xs font-semibold
-                        ${statusStyle(requirement.status)}
-                      `}
-                    >
-                      {requirement.status}
-                    </span>
-
-                    <p className="mt-2 text-xs text-gray-500">
-                      {requirement.items?.length || 0} Items
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
+                </Card>
+              </motion.div>
+            ),
+          )}
         </div>
       </AnimatePresence>
     </div>

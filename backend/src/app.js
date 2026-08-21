@@ -8,6 +8,8 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import notificationRoutes from "./modules/notifications/notification.routes.js";
+
 const app = express();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -59,13 +61,13 @@ app.use(
 app.use("/api/v1", routes);
 
 // ----------------------------------------
-// Set password page
+// Web Push Notification 
 // ----------------------------------------
 
-app.get("/set-password", (req, res) => {
-    res.render("setPassword");
-});
-
+app.use(
+  "/api/v1/notifications",
+  notificationRoutes,
+);
 // ----------------------------------------
 // 404
 // ----------------------------------------
