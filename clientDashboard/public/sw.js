@@ -59,7 +59,7 @@ self.addEventListener("push", (event) => {
     data: notificationData,
 
     // Prevent unlimited duplicate notifications
-    tag: notificationData.type || "esf-notification",
+    tag: notificationData.type+Date.now() || `esf-notification-${Date.now()}`,
 
     // Show again even if same tag exists
     renotify: true,
