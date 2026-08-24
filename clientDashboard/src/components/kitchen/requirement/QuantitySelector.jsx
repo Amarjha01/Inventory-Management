@@ -6,7 +6,9 @@ const QuantitySelector = ({ bagSize, value, onChange }) => {
 
   // Sync with parent when value changes externally
   useEffect(() => {
-    setInputValue(value === "" || value == null ? "" : String(value));
+    setInputValue(
+      value === "" || value == null ? "" : String(value)
+    );
   }, [value]);
 
   const increase = () => {
@@ -44,8 +46,6 @@ const QuantitySelector = ({ bagSize, value, onChange }) => {
     }
 
     setInputValue(newValue);
-
-    // Don't enforce bagSize while typing
     onChange(Number(newValue));
   };
 
@@ -53,7 +53,11 @@ const QuantitySelector = ({ bagSize, value, onChange }) => {
     const quantity = Number(inputValue);
 
     // Empty or invalid → restore minimum
-    if (!inputValue || Number.isNaN(quantity) || quantity < bagSize) {
+    if (
+      !inputValue ||
+      Number.isNaN(quantity) ||
+      quantity < bagSize
+    ) {
       setInputValue(String(bagSize));
       onChange(bagSize);
       return;
@@ -65,16 +69,34 @@ const QuantitySelector = ({ bagSize, value, onChange }) => {
   const currentValue = Number(inputValue) || 0;
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex shrink-0 items-center gap-1">
+      {/* Minus */}
       <button
         type="button"
         onClick={decrease}
         disabled={!inputValue || currentValue <= bagSize}
-        className="w-9 h-9 rounded-lg bg-gray-200 flex items-center justify-center disabled:opacity-50"
+        className="
+          flex
+          h-7
+          w-7
+          items-center
+          justify-center
+          rounded-md
+          bg-gray-100
+          text-gray-600
+          transition
+          hover:bg-gray-200
+          disabled:cursor-not-allowed
+          disabled:opacity-40
+
+          sm:h-8
+          sm:w-8
+        "
       >
-        <FiMinus />
+        <FiMinus className="text-[13px] sm:text-[14px]" />
       </button>
 
+      {/* Quantity Input */}
       <input
         type="text"
         inputMode="numeric"
@@ -82,15 +104,49 @@ const QuantitySelector = ({ bagSize, value, onChange }) => {
         value={inputValue}
         onChange={handleInputChange}
         onBlur={handleBlur}
-        className="w-20 h-10 text-center text-xl font-semibold border-2 border-teal-500 rounded-lg outline-none focus:ring-2 focus:ring-teal-500"
+        className="
+          h-8
+          w-[48px]
+          rounded-md
+          border
+          border-[#d9dce5]
+          bg-white
+          text-center
+          text-[13px]
+          font-bold
+          text-[#17213b]
+          outline-none
+          focus:border-[#7657e8]
+          focus:ring-2
+          focus:ring-[#7657e8]/10
+
+          sm:h-9
+          sm:w-[52px]
+          sm:text-[14px]
+        "
       />
 
+      {/* Plus */}
       <button
         type="button"
         onClick={increase}
-        className="w-9 h-9 rounded-lg bg-teal-600 text-white flex items-center justify-center"
+        className="
+          flex
+          h-7
+          w-7
+          items-center
+          justify-center
+          rounded-md
+          bg-[#6337e8]
+          text-white
+          transition
+          hover:bg-[#5428d3]
+
+          sm:h-8
+          sm:w-8
+        "
       >
-        <FiPlus />
+        <FiPlus className="text-[13px] sm:text-[14px]" />
       </button>
     </div>
   );

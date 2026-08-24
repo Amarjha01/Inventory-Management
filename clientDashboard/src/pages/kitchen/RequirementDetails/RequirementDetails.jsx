@@ -96,18 +96,7 @@ const RequirementDetails = () => {
           <RequirementHeader requirement={requirement} />
         </motion.div>
       <DispatchDetails requirement={requirement}/>
-      {/* {isReceived && (
-  <a
-    href={`https://esfserver.axeiro.com/uploads/requirements/${requirement.gatePass.image}`}
-    download={requirement.gatePass.image}
-  >
-    <img
-      src={`https://esfserver.axeiro.com/uploads/requirements/${requirement.gatePass.image}`}
-      alt="Gate Pass"
-      className="w-full rounded-xl border cursor-pointer"
-    />
-  </a>)} */}
-      {isReceived && requirement?.gatePass?.image && (
+      {isReceived && requirement?.gatePass[0]?.image && (
   <EditGatePassImage
     requirement={requirement}
     onSuccess={(updatedRequirement) => {
@@ -116,7 +105,6 @@ const RequirementDetails = () => {
     }}
   />
 )}
-
       </div>
     </DashboardLayout>
   );

@@ -56,7 +56,7 @@ const BottomNavigation = () => {
                         className={({ isActive }) =>
                             `flex flex-col items-center justify-center text-xs ${
                                 isActive
-                                    ? "text-teal-600"
+                                    ? "text-purple-600"
                                     : "text-gray-500"
                             }`
                         }

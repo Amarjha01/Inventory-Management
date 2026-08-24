@@ -11,6 +11,8 @@ import { FaToggleOn, FaToggleOff } from "react-icons/fa6";
 import Card from "../../../components/shared/ui/Card";
 import Button from "../../../components/shared/ui/Button";
 import Loader from "../../../components/shared/ui/Loader";
+import category from "../../../constants/category.js";
+
 
 import {
   getInventory,
@@ -25,11 +27,12 @@ const Inventory = () => {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-
+  const [isSaving , setIsSaving] = useState(false)
   const [isOn, setIsOn] = useState(false);
   const [form, setForm] = useState({
     name: "",
     hindiName: "",
+    requirementType:"",
     quantity: "",
     minimumStock: "",
     unit: "",
@@ -65,6 +68,7 @@ const Inventory = () => {
     setForm({
       name: "",
       hindiName: "",
+      requirementType:"",
       quantity: "",
       minimumStock: "",
       bagSize: "",
@@ -82,6 +86,7 @@ const Inventory = () => {
     setForm({
       name: item.name,
       hindiName: item.hindiName,
+      requirementType:item.requirementType,
       quantity: item.quantity,
       minimumStock: item.minimumStock,
       bagSize: item.bagSize,
@@ -101,8 +106,10 @@ const Inventory = () => {
   };
 
   const handleSave = async () => {
+    setIsSaving(true)
     if (!form.name || !form.unit) {
       alert("Please fill required fields.");
+      setIsSaving(false)
       return;
     }
 
@@ -121,9 +128,10 @@ const Inventory = () => {
       }
 
       await fetchInventory();
-
+      setIsSaving(false);
       setShowModal(false);
     } catch (error) {
+      setIsSaving(false);
       console.error(error);
     }
   };
@@ -365,28 +373,48 @@ const Inventory = () => {
                 {editingItem ? "Edit Item" : "Add Item"}
               </h2>
 
-              {[
-                ["name", "Item Name"],
-                ["hindiName", "Hindi Name"],
-                ["quantity", "Quantity"],
-                ["minimumStock", "Minimum Stock"],
-                ["bagSize", "Bag Size"],
-                ["unit", "Unit"],
-                ["image", "Image Name"],
-              ].map(([name, placeholder]) => (
-                <input
-                  key={name}
-                  name={name}
-                  value={form[name]}
-                  onChange={handleChange}
-                  placeholder={placeholder}
-                  className="w-full rounded-xl border p-3"
-                />
-              ))}
+             {[
+  ["name", "Item Name"],
+  ["hindiName", "Hindi Name"],
+  ["requirementType", "Category"],
+  ["quantity", "Quantity"],
+  ["minimumStock", "Minimum Stock"],
+  ["bagSize", "Bag Size"],
+  ["unit", "Unit"],
+  ["image", "Image Name"],
+].map(([name, placeholder]) =>
+  name === "requirementType" ? (
+    <select
+      key={name}
+      name={name}
+      value={form[name]}
+      onChange={handleChange}
+      className="w-full rounded-xl border p-3"
+    >
+      <option value="">Select Category</option>
+
+      {category.map((item) => (
+        <option key={item} value={item}>
+          {item}
+        </option>
+      ))}
+    </select>
+  ) : (
+    <input
+      key={name}
+      name={name}
+      value={form[name]}
+      onChange={handleChange}
+      placeholder={placeholder}
+      className="w-full rounded-xl border p-3"
+    />
+  )
+)}
+
 
               <div className="flex gap-3">
                 <Button className="flex-1" onClick={handleSave}>
-                  Save
+                  {isSaving ? "Saving..." : "Save"}
                 </Button>
 
                 <Button

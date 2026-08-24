@@ -28,6 +28,6 @@ export const storage = {
 
   // Logout
   logout: () => {
-    localStorage.clear();
+    localStorage.removeItem("user");
   },
 };

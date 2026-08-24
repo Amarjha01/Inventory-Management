@@ -1,15 +1,69 @@
 import { useState } from "react";
 import {
   MdNotifications,
-  MdNotificationsOff,
+  MdPhoneAndroid,
 } from "react-icons/md";
-
-import Button from "../ui/Button";
 
 import {
   enablePushNotifications,
   unsubscribeFromPushNotifications,
 } from "../../../services/notification.service";
+
+const Toggle = ({ enabled, loading, onClick }) => {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={enabled}
+      onClick={onClick}
+      disabled={loading}
+      className={`
+        relative
+        h-7
+        w-12
+        shrink-0
+        rounded-full
+        transition-all
+        duration-200
+        ease-in-out
+        focus:outline-none
+        focus:ring-2
+        focus:ring-emerald-200
+        ${
+          enabled
+            ? "bg-emerald-500"
+            : "bg-gray-300"
+        }
+        ${
+          loading
+            ? "cursor-wait opacity-60"
+            : "cursor-pointer"
+        }
+      `}
+    >
+      <span
+        className={`
+          absolute
+          top-1
+          h-5
+          w-5
+          rounded-full
+          bg-white
+          shadow-md
+          transition-all
+          duration-200
+          ease-in-out
+          ${
+            enabled
+              ? "left-6"
+              : "left-1"
+          }
+        `}
+      />
+    </button>
+  );
+};
+
 
 const NotificationSettings = ({
   enabled,
@@ -25,17 +79,18 @@ const NotificationSettings = ({
 
       await enablePushNotifications();
 
-      // Tell parent that notification was successfully enabled
       onChange(true);
     } catch (error) {
-      console.error("Enable notification error:", error);
+      console.error(
+        "Enable notification error:",
+        error
+      );
 
       setError(
         error.message ||
           "Failed to enable notifications."
       );
 
-      // Make sure parent remains disabled
       onChange(false);
     } finally {
       setLoading(false);
@@ -49,10 +104,12 @@ const NotificationSettings = ({
 
       await unsubscribeFromPushNotifications();
 
-      // Tell parent that notification was successfully disabled
       onChange(false);
     } catch (error) {
-      console.error("Disable notification error:", error);
+      console.error(
+        "Disable notification error:",
+        error
+      );
 
       setError(
         error.response?.data?.message ||
@@ -64,70 +121,67 @@ const NotificationSettings = ({
     }
   };
 
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-4">
+  const handleToggle = () => {
+    if (enabled) {
+      handleDisable();
+    } else {
+      handleEnable();
+    }
+  };
 
-        {/* Icon */}
-        <div
-          className={`flex h-12 w-12 items-center justify-center rounded-xl ${
-            enabled
-              ? "bg-teal-50 text-teal-600"
-              : "bg-gray-100 text-gray-400"
-          }`}
-        >
-          {enabled ? (
-            <MdNotifications size={26} />
-          ) : (
-            <MdNotificationsOff size={26} />
-          )}
+  return (
+    <div>
+      {/* Browser Notifications */}
+      <div className="flex items-center gap-3 border-b border-gray-100 px-4 py-4">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+          <MdNotifications size={23} />
         </div>
 
-        {/* Information */}
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-gray-900">
-              Browser Notifications
-            </h3>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-semibold text-gray-900">
+            Browser Notifications
+          </h3>
 
-            <span
-              className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                enabled
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              {enabled ? "Enabled" : "Disabled"}
-            </span>
-          </div>
-
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-0.5 text-xs leading-5 text-gray-500">
             Receive important requirement updates
             directly in your browser.
           </p>
         </div>
 
-        {/* Action */}
-        {enabled ? (
-          <Button
-            onClick={handleDisable}
-            disabled={loading}
-          >
-            {loading ? "Disabling..." : "Disable"}
-          </Button>
-        ) : (
-          <Button
-            onClick={handleEnable}
-            disabled={loading}
-          >
-            {loading ? "Enabling..." : "Enable"}
-          </Button>
-        )}
+        <Toggle
+          enabled={enabled}
+          loading={loading}
+          onClick={handleToggle}
+        />
       </div>
+
+      {/* Push Notifications */}
+      {/* <div className="flex items-center gap-3 border-b border-gray-100 px-4 py-4">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+          <MdPhoneAndroid size={23} />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-semibold text-gray-900">
+            Push Notifications
+          </h3>
+
+          <p className="mt-0.5 text-xs leading-5 text-gray-500">
+            Receive updates when you're using the
+            app.
+          </p>
+        </div>
+
+        <Toggle
+          enabled={enabled}
+          loading={loading}
+          onClick={handleToggle}
+        />
+      </div> */}
 
       {/* Error */}
       {error && (
-        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="mx-4 mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-600">
           {error}
         </div>
       )}
