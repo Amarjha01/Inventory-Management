@@ -14,8 +14,7 @@ export const createInventory = asyncHandler(async (req, res) => {
 });
 
 export const getInventory = asyncHandler(async (req, res) => {
-  const inventory = await inventoryService.getInventory();
-
+  const inventory = await inventoryService.getInventory(req.query);
   return ApiResponse.success(res, MESSAGE.SUCCESS, inventory);
 });
 

@@ -245,88 +245,86 @@ const userIds = users.map(
     }
   }
 
-  async receiveRequirement(id, file, userId) {
-    const requirement = await requirementRepository.findById(id);
-
-    if (!requirement) {
-      throw new ApiError(404, "Requirement not found");
-    }
-
-    if (requirement.status !== REQUIREMENT_STATUS.OUT_FOR_DELIVERY) {
-      throw new ApiError(400, "Requirement is not out for delivery.");
-    }
-
-    // make vehicle available again
-
-    if (requirement.dispatch.vehicle) {
-      await vehicleRepository.update(
-        requirement.dispatch.vehicle,
-
-        {
-          isAvailable: true,
-        },
-      );
-    }
-
-    // make driver available again
-
-    if (requirement.dispatch.driver) {
-      await driverRepository.update(
-        requirement.dispatch.driver,
-
-        {
-          isAvailable: true,
-        },
-      );
-    }
-
-    return await this.updateRequirement(
-      id,
-
-      {
-        status: REQUIREMENT_STATUS.RECEIVED,
-
-        receivedAt: new Date(),
-
-        gatePass: {
-          image: file.filename,
-
-          uploadedBy: userId,
-
-          uploadedAt: new Date(),
-        },
-      },
-    );
-  }
-
-async editGatePass(id, file, userId) {
+  async receiveRequirement(id, files, userId) {
   const requirement = await requirementRepository.findById(id);
 
   if (!requirement) {
     throw new ApiError(404, "Requirement not found");
   }
 
-  if (requirement.status !== REQUIREMENT_STATUS.RECEIVED) {
-    throw new ApiError(
-      400,
-      "Gate pass can only be edited after receiving the requirement."
+  if (requirement.status !== REQUIREMENT_STATUS.OUT_FOR_DELIVERY) {
+    throw new ApiError(400, "Requirement is not out for delivery.");
+  }
+
+  if (!files || files.length === 0) {
+    throw new ApiError(400, "At least one gate pass image is required.");
+  }
+
+  if (files.length > 2) {
+    throw new ApiError(400, "Maximum 2 gate pass images are allowed.");
+  }
+
+  if (requirement.dispatch.vehicle) {
+    await vehicleRepository.update(
+      requirement.dispatch.vehicle,
+      {
+        isAvailable: true,
+      },
     );
   }
 
-  if (!file) {
-    throw new ApiError(400, "Gate pass image is required.");
+  if (requirement.dispatch.driver) {
+    await driverRepository.update(
+      requirement.dispatch.driver,
+      {
+        isAvailable: true,
+      },
+    );
   }
 
-  return await requirementRepository.update(id, {
-    gatePass: {
-      ...(requirement.gatePass || {}),
+  return await this.updateRequirement(
+    id,
+    {
+      status: REQUIREMENT_STATUS.RECEIVED,
 
-      image: file.filename,
+      receivedAt: new Date(),
 
-      uploadedBy: userId,
-
-      uploadedAt: new Date(),
+      gatePass: files.map((file) => ({
+        image: file.filename,
+        uploadedBy: userId,
+        uploadedAt: new Date(),
+      })),
     },
+  );
+}
+
+async editGatePass(id, files, userId) {
+  const requirement = await requirementRepository.findById(id);
+
+  if (!requirement) {
+    throw new ApiError(404, "Requirement not found");
+  }
+
+  if (!files || files.length === 0) {
+    throw new ApiError(
+      400,
+      "At least one gate pass image is required."
+    );
+  }
+
+  if (files.length > 2) {
+    throw new ApiError(
+      400,
+      "Maximum 2 gate pass images are allowed."
+    );
+  }
+
+  return await this.updateRequirement(id, {
+    gatePass: files.map((file) => ({
+      image: file.filename,
+      uploadedBy: userId,
+      uploadedAt: new Date(),
+    })),
   });
 }
 

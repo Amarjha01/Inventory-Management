@@ -104,35 +104,25 @@ const requirementSchema = new mongoose.Schema(
 
       default: null,
     },
- gatePass: {
-
+gatePass: [
+  {
     image: {
-
-        type: String,
-
-        default: ""
-
+      type: String,
+      required: true,
     },
 
     uploadedBy: {
-
-        type: mongoose.Schema.Types.ObjectId,
-
-        ref: "User",
-
-        default: null
-
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
 
     uploadedAt: {
-
-        type: Date,
-
-        default: null
-
-    }
-
-},
+      type: Date,
+      default: Date.now,
+    },
+  },
+],
   },
   {
     timestamps: true,
