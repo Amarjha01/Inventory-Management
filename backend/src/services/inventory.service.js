@@ -9,11 +9,15 @@ class InventoryService {
     return await inventoryRepository.create(payload);
   }
 
-  async getInventory() {
-    return await inventoryRepository.findMany({
-      // isActive: true,
-    });
-  }
+async getInventory(query) {
+  return await inventoryRepository.findMany({
+    ...(query.requirementType && {
+      requirementType: query.requirementType,
+    }),
+  });
+}
+
+
 
   async getInventoryById(id) {
     const item = await inventoryRepository.findById(id);

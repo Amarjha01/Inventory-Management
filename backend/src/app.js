@@ -50,9 +50,12 @@ app.use(
 );
 
 app.use(
-    "/uploads",
-    express.static(path.join(__dirname, "../uploads"))
+  "/api/v1/uploads",
+  express.static(
+    path.join(__dirname, "../uploads")
+  )
 );
+
 
 // ----------------------------------------
 // API routes

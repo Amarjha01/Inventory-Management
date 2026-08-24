@@ -89,31 +89,25 @@ router.patch(
 );
 
 router.patch(
-    "/:id/receive",
-
-    authorize(
-        ROLE.KITCHEN_INCHARGE,
-        ROLE.STORE_INCHARGE,
-        ROLE.STORE_SUPERVISOR,
-        ROLE.ADMIN
-    ),
-
-    upload.single("gatePass"),
-
-    receiveRequirement
+  "/:id/receive",
+  authorize(
+    ROLE.KITCHEN_INCHARGE,
+    ROLE.STORE_INCHARGE,
+    ROLE.STORE_SUPERVISOR,
+    ROLE.ADMIN
+  ),
+  upload.array("gatePass", 2),
+  receiveRequirement
 );
 
 router.patch(
-    "/:id/gate-pass",
-
-    authorize(
-        ROLE.KITCHEN_INCHARGE,
-        ROLE.STORE_INCHARGE,
-    ),
-
-    upload.single("gatePass"),
-
-    editGatePass
+  "/:id/gate-pass",
+  authorize(
+    ROLE.KITCHEN_INCHARGE,
+    ROLE.STORE_INCHARGE,
+  ),
+  upload.array("gatePass", 2),
+  editGatePass
 );
 
 export default router;

@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import env from "./env.js";
 
 import logger from "../utils/logger.js";
+import Requirement from "../models/requirement.js";
+import Inventory from "../models/inventory.js";
 
 const connectDatabase = async () => {
   try {
@@ -13,11 +15,24 @@ const connectDatabase = async () => {
     logger.info(
       `MongoDB Connected : ${connection.connection.host}`
     );
+
+    // // One-time migration
+    // const result = await Inventory.updateMany(
+    //   {
+    //     requirementType: { $exists: false },
+    //   },
+    //   {
+    //     $set: {
+    //       requirementType: "RM",
+    //     },
+    //   }
+    // );
+
+    // console.log(`Matched: ${result.matchedCount}`);
+    // console.log(`Modified: ${result.modifiedCount}`);
+
   } catch (error) {
-//     logger.error({
-//     message: error.message,
-//     stack: error.stack
-// });
+    console.log("error", error);
 
     process.exit(1);
   }

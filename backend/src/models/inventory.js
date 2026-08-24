@@ -13,19 +13,26 @@ const inventorySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    requirementType: {
+      type: String,
+      enum: ["RM", "BARTAN", "STATIONERY" , "MAINTENANCE"],
+      default: "RM",
+      required: true,
+      trim: true,
+    },
 
     image: {
       type: String,
       default: "",
     },
 
-    bagSize:{
-      type:Number,
-      required:true,
+    bagSize: {
+      type: Number,
+      required: true,
     },
 
     quantity: {
-      type:Number,
+      type: Number,
       required: true,
       default: 0,
       min: 0,

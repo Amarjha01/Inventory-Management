@@ -293,17 +293,25 @@ const RequirementWorkspace = () => {
           <>
             <DispatchDetails requirement={requirement} />
 
-            {isReceived && (
-  <a
-    href={`${base_url}/uploads/${requirement.gatePass.image}`}
-    download={requirement.gatePass.image}
-  >
-    <img
-      src={`${base_url}/uploads/requirements/${requirement.gatePass.image}`}
-      alt="Gate Pass"
-      className="w-full rounded-xl border cursor-pointer"
-    />
-  </a>)}
+            {isReceived && requirement.gatePass?.length > 0 && (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {requirement.gatePass.map((gatePass, index) => (
+      <a
+        key={gatePass.image || index}
+        href={`${base_url}/uploads/requirements/${gatePass.image}`}
+        download={gatePass.image}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img
+          src={`${base_url}/uploads/requirements/${gatePass.image}`}
+          alt={`Gate Pass ${index + 1}`}
+          className="w-full h-72 object-contain rounded-xl border cursor-pointer bg-gray-50"
+        />
+      </a>
+    ))}
+  </div>
+)}
           </>
         ) : (
           <>

@@ -22,10 +22,9 @@ const DispatchDetails = ({ requirement, onSuccess }) => {
 
         const formData = new FormData();
 
-        formData.append(
-            "gatePass",
-            gatePass
-        );
+  gatePass.forEach((file) => {
+    formData.append("gatePass", file);
+  });
 
         await receiveRequirement(
             requirement._id,

@@ -115,22 +115,15 @@ export const dispatchRequirement = asyncHandler(async (req, res) => {
 });
 
 export const receiveRequirement = asyncHandler(async (req, res) => {
-  const requirement =
-    await requirementService.receiveRequirement(
-
-        req.params.id,
-
-        req.file,
-
-        req.user._id
-
-    );
+  const requirement = await requirementService.receiveRequirement(
+    req.params.id,
+    req.files,
+    req.user._id
+  );
 
   return ApiResponse.success(
     res,
-
     "Requirement received successfully",
-
     requirement,
   );
 });
@@ -138,14 +131,14 @@ export const receiveRequirement = asyncHandler(async (req, res) => {
 export const editGatePass = asyncHandler(async (req, res) => {
   const requirement = await requirementService.editGatePass(
     req.params.id,
-    req.file,
+    req.files,
     req.user._id
   );
 
   return ApiResponse.success(
     res,
-    "Gate pass updated successfully",
-    requirement
+    "Gate pass images updated successfully",
+    requirement,
   );
 });
 

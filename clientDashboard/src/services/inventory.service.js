@@ -1,8 +1,15 @@
 import api from "../api/axios";
 import { ENDPOINTS } from "../api/endpoints";
 
-export const getInventory = async () => {
-  const { data } = await api.get(ENDPOINTS.INVENTORY);
+export const getInventory = async (type) => {
+  console.log("type" , type);
+  
+const { data } = await api.get(ENDPOINTS.INVENTORY, {
+  params: {
+    requirementType: type,
+  },
+});
+
   const inventoryData = data.data;
   return inventoryData;
 };
