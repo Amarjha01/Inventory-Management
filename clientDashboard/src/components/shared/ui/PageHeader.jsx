@@ -12,7 +12,7 @@ const PageHeader = ({ title, subtitle, imageUrl }) => {
         min-h-26
         overflow-hidden
         rounded-t-2xl
-
+        z-0
         bg-[var(--theme-header)]
 
         px-4
