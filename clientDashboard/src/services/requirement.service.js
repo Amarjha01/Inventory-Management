@@ -91,3 +91,11 @@ export const updateGatePassImage = async (id, formData) => {
 
   return response.data.data;
 };
+
+export const deletedRequirement = async(id)=>{
+  console.log(id);
+  const response = await api.delete("/requirements/delete-requirement" , { data: {
+      id,
+    }});
+  return response.data.data;
+}

@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import ProtectedRoute from "../components/shared/ProtectedRoute";
 
-import Language from "../pages/Language/Language.jsx";
 import Login from "../pages/auth/Login.jsx";
 import Dashboard from "../pages/kitchen/Dashboard/Dashboard.jsx";
 import NewRequirement from "../pages/kitchen/NewRequirement/NewRequirement.jsx";
@@ -21,7 +20,7 @@ import Reports from "../pages/MainStore/Reports/Reports.jsx";
 import PasswordResetForm from "../pages/auth/PasswordResetForm.jsx";
 import Settings from "../pages/MainStore/Settings/Settings.jsx";
 import KitchenSettings from "../pages/kitchen/Settings/Settings.jsx"
-
+import VehicleTracking from "../pages/VehicleTracking/VehicleTracking.jsx"
 const AppRoutes = () => {
   return (
     <Routes>
@@ -65,6 +64,10 @@ const AppRoutes = () => {
         </ProtectedRoute>
     }
 />
+ <Route
+        path="tracker"
+        element={<VehicleTracking />}
+    />
 
 <Route
     path="/requirements/:id"
@@ -123,6 +126,10 @@ const AppRoutes = () => {
     <Route
         path="vehicles"
         element={<Vehicles />}
+    />
+    <Route
+        path="tracker"
+        element={<VehicleTracking />}
     />
 
     <Route

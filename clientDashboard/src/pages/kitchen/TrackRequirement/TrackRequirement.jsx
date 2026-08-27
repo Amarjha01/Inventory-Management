@@ -92,7 +92,7 @@ const TrackRequirement = () => {
           <PageHeader
             title="Track Requirement"
             subtitle="Monitor your current material request"
-            imageUrl={'/ui/type/TRACKING.png'}
+            imageUrl='/ui/type/TRACKING.png'
           />
 
           <motion.div
@@ -184,6 +184,7 @@ const TrackRequirement = () => {
         <PageHeader
           title="Track Requirement"
           subtitle="Monitor your current material request"
+          imageUrl='/ui/type/TRACKING.png'
         />
 
         <div className="space-y-5">

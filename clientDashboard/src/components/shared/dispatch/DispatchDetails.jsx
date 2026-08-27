@@ -5,11 +5,12 @@ import DispatchItems from "./DispatchItems";
 import ReceiveRequirement from "./ReceiveRequirement";
 import { useNavigate } from "react-router-dom";
 import { receiveRequirement } from "../../../services/requirement.service";
+import VehicleTracking from "../../../pages/VehicleTracking/VehicleTracking";
 
 const DispatchDetails = ({ requirement, onSuccess }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
+  const [showMap , setShowMap] = useState(false);
   if (!requirement?.dispatch) {
     return null;
   }
@@ -56,10 +57,20 @@ const DispatchDetails = ({ requirement, onSuccess }) => {
 
 };
 
+function handleShowMap(){
+  setShowMap(!showMap)
+}
+
   return (
     <div className="space-y-5">
-      <DispatchInfo dispatch={requirement.dispatch} />
+      <DispatchInfo dispatch={requirement.dispatch} status={requirement.status} handleShowMap={handleShowMap}/>
 
+      {requirement?.dispatch?.vehicle?.tracker?.isActive 
+      && requirement.status === "Out For Delivery" && showMap &&
+      <div className="h-80% z-10">
+        <VehicleTracking id={requirement._id.toString()} />
+      </div>
+      }
       <DispatchItems items={requirement.items} />
 
       {requirement.status === "Out For Delivery" && (

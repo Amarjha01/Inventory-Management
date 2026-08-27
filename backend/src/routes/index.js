@@ -8,6 +8,7 @@ import requirementRoutes from "./requirement.routes.js";
 import vehicleRoutes from "./vehicle.routes.js";
 import driverRoutes from "./driver.routes.js";
 import reports from "./report.routes.js"
+import trackingRoutes from '../modules/tracking/tracking.routes.js'
 
 const router = Router();
 
@@ -38,5 +39,7 @@ router.use("/vehicles", vehicleRoutes);
 router.use("/drivers", driverRoutes);
 
 router.use("/reports", reports);
+
+router.use("/tracking", trackingRoutes);
 
 export default router;

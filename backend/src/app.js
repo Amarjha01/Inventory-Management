@@ -22,7 +22,7 @@ const __dirname = path.dirname(__filename);
 configureApplication(app);
 
 // ----------------------------------------
-// Body parsers
+// Body parsers   
 // ----------------------------------------
 
 app.use(express.json({ limit: "500kb" }));

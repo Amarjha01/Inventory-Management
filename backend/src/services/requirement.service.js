@@ -72,6 +72,7 @@ const userIds = users.map(
   }
 
   async updateRequirement(id, payload) {
+
     const requirement = await requirementRepository.update(
       id,
 
@@ -326,6 +327,10 @@ async editGatePass(id, files, userId) {
       uploadedAt: new Date(),
     })),
   });
+}
+
+async delete(id){
+return await requirementRepository.findByIdAndDelete(id) 
 }
 
 

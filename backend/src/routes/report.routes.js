@@ -20,6 +20,7 @@ router.get(
         ROLE.ADMIN,
         ROLE.STORE_SUPERVISOR
     ),
+    
   getRequirementReportOptions,
 );
 
