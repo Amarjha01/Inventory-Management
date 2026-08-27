@@ -51,6 +51,8 @@ async create(payload) {
   }
 
   async update(id, payload) {
+    console.log("id and payload at repositories" , id , payload);
+    
     return await Requirement.findByIdAndUpdate(
       id,
 
@@ -97,6 +99,10 @@ async create(payload) {
       .populate("dispatch.driver")
 
       .lean();
+  }
+
+  async findByIdAndDelete(id){
+    return await Requirement.findByIdAndDelete(id)
   }
 }
 

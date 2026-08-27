@@ -2,14 +2,19 @@ import { body } from "express-validator";
 
 const requirementSubmissionTimeValidator = () => {
   return body().custom(() => {
+
     const now = new Date();
+const istString = now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+const istDate = new Date(istString);
 
-    const currentMinutes =
-      now.getHours() * 60 + now.getMinutes();
+const currentMinutes = istDate.getHours() * 60 + istDate.getMinutes();
+console.log(currentMinutes); // Will correctly print ~1105 at 6:25 PM
 
+      
     const startMinutes = 5 * 60;  // 05:00 AM
     const endMinutes = 18 * 60;   // 06:00 PM
-
+    console.log("startMinutes" , startMinutes ,"endMinutes", endMinutes);
+    
     if (
       currentMinutes < startMinutes ||
       currentMinutes > endMinutes

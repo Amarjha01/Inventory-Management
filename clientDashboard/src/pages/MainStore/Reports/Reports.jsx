@@ -516,9 +516,7 @@ const Reports = () => {
               onChange={handleChange}
               className="w-full border rounded-xl p-3 bg-white"
             >
-              <option value="">
-                All Statuses
-              </option>
+              
 
               <option value="Submitted">
                 Submitted
@@ -587,14 +585,6 @@ const Reports = () => {
                 </span>{" "}
                 {filters.district ||
                   "All Districts"}
-              </p>
-
-              <p>
-                <span className="font-medium">
-                  Status:
-                </span>{" "}
-                {filters.status ||
-                  "All Statuses"}
               </p>
             </div>
           </div>

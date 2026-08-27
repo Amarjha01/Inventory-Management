@@ -7,6 +7,7 @@ import requirementService from "../services/requirement.service.js";
 import { MESSAGE } from "../constants/responseMessages.js";
 
 export const createRequirement = asyncHandler(async (req, res) => {
+  console.log("req.body at controller creat requirememnt" , req.body);
   const requirement = await requirementService.createRequirement(req.body);
 
   return ApiResponse.created(
@@ -71,10 +72,32 @@ export const getLatestKitchenRequirement = asyncHandler(async (req, res) => {
 });
 
 export const updateRequirement = asyncHandler(async (req, res) => {
+   console.log("payload for update quantity" , req.body);
+//   {
+//   kitchen: '6a8eb5fde02cf423de8eddd8',
+//   createdBy: '6a8eb38ae02cf423de8eddd5',
+//   remarks: '',
+//   items: [
+//     {
+//       inventoryId: '6a882ab534c31b8345e93a9b',
+//       quantity: 1,
+//       unit: 'Kg'
+//     }
+//   ]
+// }
+ const payload = {
+    $push: {
+      items: {
+        $each: req.body,
+      },
+    },
+  };
+ 
+
   const requirement = await requirementService.updateRequirement(
     req.params.id,
 
-    req.body,
+    payload
   );
 
   return ApiResponse.success(
@@ -139,6 +162,19 @@ export const editGatePass = asyncHandler(async (req, res) => {
     res,
     "Gate pass images updated successfully",
     requirement,
+  );
+});
+export const deletteRequirement = asyncHandler(async (req, res) => {
+  console.log("id to delete" , req.body);
+  
+  const deletedRequirement = await requirementService.delete(
+    req.body.id
+  );
+
+  return ApiResponse.success(
+    res,
+    "Requirement deleted successfully",
+    deletedRequirement,
   );
 });
 

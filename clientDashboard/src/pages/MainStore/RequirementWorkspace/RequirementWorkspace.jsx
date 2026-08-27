@@ -1,14 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
 import Card from "../../../components/shared/ui/Card";
 import Button from "../../../components/shared/ui/Button";
 import Loader from "../../../components/shared/ui/Loader";
-const base_url =  import.meta.env.VITE_SERVER_BASE_URL;
+
 import {
   getRequirementById,
   dispatchRequirement,
+  updateRequirement,
+  deletedRequirement,
 } from "../../../services/requirement.service";
 
 import { getInventory } from "../../../services/inventory.service";
@@ -19,7 +21,14 @@ import { getDrivers } from "../../../services/driver.service";
 
 import InfoRow from "../../../components/shared/ui/InfoRow";
 import DispatchDetails from "../../../components/shared/dispatch/DispatchDetails";
-
+import EditGatePassImage from "../../../components/shared/dispatch/EditGatePassImage";
+import { VscKebabVertical } from "react-icons/vsc";
+import { MdArchive, MdSendAndArchive } from "react-icons/md";
+import { TiDocumentAdd } from "react-icons/ti";
+import ItemSelectorModal from "../../../components/kitchen/requirement/ItemSelectorModal";
+import { AnimatePresence , motion } from "framer-motion";
+import ItemCard from "../../../components/kitchen/requirement/ItemCard";
+import { RiDeleteBin3Fill } from "react-icons/ri";
 const RequirementWorkspace = () => {
   const { id } = useParams();
 
@@ -50,10 +59,66 @@ const RequirementWorkspace = () => {
   const [manualDriverPhone, setManualDriverPhone] = useState("");
 
   const [isDispatching, setIsDispatching] = useState(false);
+  
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+
+  const [showModal, setShowModal] = useState(false);
+
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  const addItem = (item) => {
+    if (selectedItems.some((i) => i._id === item._id)) return;
+
+    setSelectedItems((prev) => [
+      ...prev,
+      {
+        ...item,
+        quantity: item.bagSize,
+      },
+    ]);
+  };
+
+  const updateQuantity = (_id, quantity) => {
+    if (quantity < 1) quantity = 1;
+
+    setSelectedItems((prev) =>
+      prev.map((item) =>
+        item._id === _id
+          ? {
+              ...item,
+              quantity,
+            }
+          : item,
+      ),
+    );
+  };
+
+  const removeItem = (_id) => {
+    setSelectedItems((prev) => prev.filter((item) => item._id !== _id));
+  };
 
   useEffect(() => {
     loadData();
   }, [id]);
+
+const dropdownRef = useRef(null);
+
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target)
+    ) {
+      setOpenDropdownId(null);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
 
   const loadData = async () => {
     try {
@@ -93,6 +158,7 @@ const RequirementWorkspace = () => {
       setLoading(false);
     }
   };
+
   const isDispatched = requirement?.status === "Out For Delivery";
   const isReceived = requirement?.status === "Received";
   const inventoryMap = useMemo(() => {
@@ -137,9 +203,35 @@ const RequirementWorkspace = () => {
       }),
     }));
   };
-
+    const handleDelete = async(id)=>{
+    
+    try {
+      const response =  await deletedRequirement(id)
+      alert("deleted successful")
+      window.location.href = "/store/requirements"
+    } catch (error) {
+      alert(response)
+    }
+  }
   const handleSave = async () => {
-    setIsDispatching(true);
+    if (!vehicleId && !manualVehicleNumber ) {
+      alert('please select vehicle or type manual')
+    }
+    if (!driverId && !manualDriverName ) {
+      alert('please select driver or type manual')
+    }
+    if(manualDriverName ?? !manualDriverPhone){
+      alert("please type phone number also.")
+    }
+  setIsDispatching(true);
+   const itemPayload = selectedItems.map((item) => ({
+    inventoryId: item._id,
+    quantity: item.quantity,
+    unit:item.unit
+
+  }));
+  const response = await updateRequirement(requirement._id , itemPayload )
+    
     try {
       const payload = {
         vehicleId,
@@ -173,6 +265,15 @@ const RequirementWorkspace = () => {
   if (loading) {
     return <Loader />;
   }
+  const handleHaveItemForLatter = async (id)=>{
+    console.log(id);
+    
+  }
+
+  const handleArchiveItem = async (id)=>{
+    console.log(id);
+
+  }
 
   if (requirement) {
     return (
@@ -192,6 +293,9 @@ const RequirementWorkspace = () => {
             <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
               {requirement.status}
             </span>
+            <button onClick={()=>{handleDelete(requirement._id)}} className=" cursor-pointer">
+                      <RiDeleteBin3Fill className=" text-2xl text-red-700"/>
+                     </button>
           </div>
 
           <div className="mt-6 space-y-4">
@@ -214,10 +318,44 @@ const RequirementWorkspace = () => {
             </div>
           </div>
         </Card>
-
+        <ItemSelectorModal
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          items={inventory}
+          selectedItems={selectedItems}
+          onSelect={addItem}
+        />
+        <AnimatePresence>
+                  {selectedItems.map((item, index) => (
+                    <motion.div
+                      key={item._id}
+                      layout
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -30 }}
+                      transition={{ duration: 0.25 }}
+                      className={
+                        index !== selectedItems.length - 1
+                          ? "border-b border-[#eeeeee]"
+                          : ""
+                      }
+                    >
+                      <ItemCard
+                        item={item}
+                        onQuantityChange={(qty) =>
+                          updateQuantity(item._id, qty)
+                        }
+                        onRemove={() => removeItem(item._id)}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
         <Card>
-          <h3 className="text-lg font-semibold mb-5">Requested Items</h3>
-
+          <span className=" flex justify-between">
+            <h3 className="text-lg font-semibold mb-5">Requested Items</h3>
+             <TiDocumentAdd onClick={()=>setShowModal(!showModal)} className="text-3xl cursor-pointer" />
+          </span>
+           
           <div className="space-y-5">
             {requirement.items.map((item) => {
               const stock = inventoryMap[item.inventoryId._id];
@@ -227,6 +365,7 @@ const RequirementWorkspace = () => {
                   key={item.inventoryId._id}
                   className="border rounded-xl p-4"
                 >
+                  
                   <div className="flex gap-4">
                     <img
                       src={`/items/${item.inventoryId.image}`}
@@ -241,6 +380,57 @@ const RequirementWorkspace = () => {
                         {item.inventoryId.hindiName}
                       </p>
                     </div>
+                   <div className="relative">
+ <div ref={dropdownRef} className="relative">
+  <VscKebabVertical
+    className="text-2xl cursor-pointer"
+    onClick={() =>
+      setOpenDropdownId((prev) =>
+        prev === item.inventoryId._id ? null : item.inventoryId._id
+      )
+    }
+  />
+
+  {openDropdownId === item.inventoryId._id && (
+    <div className="absolute right-0 top-8 z-50 w-40 rounded-lg border bg-white p-2 shadow-lg">
+      <button
+        type="button"
+        onMouseDown={(e) => {
+    e.stopPropagation();
+    handleHaveItemForLatter(item.inventoryId._id);
+    setOpenDropdownId(null);
+  }}
+        onClick={() => {
+          handleHaveItemForLatter(item.inventoryId._id);
+        }}
+        className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
+      >
+        <MdSendAndArchive />
+        Save For latter
+      </button>
+
+      <button
+        type="button"
+        onMouseDown={(e) => {
+    e.stopPropagation();
+    handleArchiveItem(item.inventoryId._id);
+    setOpenDropdownId(null);
+  }}
+        onClick={() => {
+          handleArchiveItem(item.inventoryId._id);
+        }}
+        className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
+      >
+        <MdArchive />
+        Archive
+      </button>
+    </div>
+  )}
+</div>
+
+
+</div>
+
                   </div>
 
                   <div className="grid grid-cols-2 gap-5 mt-5">
@@ -250,6 +440,7 @@ const RequirementWorkspace = () => {
                       <p className="font-semibold">
                         {item.quantity} {item.inventoryId.unit}
                       </p>
+                      
                     </div>
 
                     <div>
@@ -295,21 +486,15 @@ const RequirementWorkspace = () => {
 
             {isReceived && requirement.gatePass?.length > 0 && (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    {requirement.gatePass.map((gatePass, index) => (
-      <a
-        key={gatePass.image || index}
-        href={`${base_url}/uploads/requirements/${gatePass.image}`}
-        download={gatePass.image}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <img
-          src={`${base_url}/uploads/requirements/${gatePass.image}`}
-          alt={`Gate Pass ${index + 1}`}
-          className="w-full h-72 object-contain rounded-xl border cursor-pointer bg-gray-50"
-        />
-      </a>
-    ))}
+   {isReceived && (
+    <EditGatePassImage
+      requirement={requirement}
+      onSuccess={(updatedRequirement) => {
+        setRequirement(updatedRequirement);
+      }}
+    />
+)}
+
   </div>
 )}
           </>

@@ -16,7 +16,11 @@ const vehicleSchema = new mongoose.Schema(
             required: true,
             trim: true
         },
-
+        tracker:{
+            provider:String,
+            envKey:String,
+            isActive:Boolean,
+        },
         driver: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Driver",

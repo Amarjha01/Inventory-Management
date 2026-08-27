@@ -15,9 +15,9 @@ import VehicleCard from "../../../components/kitchen/requirement/VehicleCard";
 
 import { getRequirementById } from "../../../services/requirement.service";
 import DispatchDetails from "../../../components/shared/dispatch/DispatchDetails";
+import { RiDeleteBin3Fill } from "react-icons/ri";
 
-import EditGatePassImage from "../../../components/shared/dispatch/EditGatePassImage";
-
+const base_url =  import.meta.env.VITE_SERVER_BASE_URL;
 const sectionAnimation = {
   initial: {
     opacity: 0,
@@ -97,13 +97,22 @@ const RequirementDetails = () => {
         </motion.div>
       <DispatchDetails requirement={requirement}/>
       {isReceived && requirement?.gatePass[0]?.image && (
-  <EditGatePassImage
-    requirement={requirement}
-    onSuccess={(updatedRequirement) => {
-      setRequirement(updatedRequirement);
-      setIsReceived(updatedRequirement.status === "Received");
-    }}
-  />
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {requirement.gatePass.map((gatePass, index) => (
+          <a
+            key={gatePass.image || index}
+            href={`${base_url}/uploads/requirements/${gatePass.image}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src={`${base_url}/uploads/requirements/${gatePass.image}`}
+              alt={`Gate Pass ${index + 1}`}
+              className="w-full h-72 object-contain rounded-xl border cursor-pointer bg-gray-50"
+            />
+          </a>
+        ))}
+      </div>
 )}
       </div>
     </DashboardLayout>

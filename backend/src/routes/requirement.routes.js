@@ -10,6 +10,7 @@ import {
   receiveRequirement,
   getAllKitchenRequirements,
   editGatePass,
+  deletteRequirement,
 } from "../controllers/requirement.controller.js";
 
 import authenticate from "../middleware/auth.middleware.js";
@@ -103,11 +104,19 @@ router.patch(
 router.patch(
   "/:id/gate-pass",
   authorize(
-    ROLE.KITCHEN_INCHARGE,
-    ROLE.STORE_INCHARGE,
+    ROLE.STORE_SUPERVISOR,
+    ROLE.ADMIN
   ),
   upload.array("gatePass", 2),
   editGatePass
 );
 
+router.delete(
+  "/delete-requirement",
+  authorize(
+    ROLE.ADMIN,
+    ROLE.STORE_SUPERVISOR
+  ),
+  deletteRequirement
+)
 export default router;

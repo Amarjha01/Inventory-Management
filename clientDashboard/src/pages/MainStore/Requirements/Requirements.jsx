@@ -348,12 +348,22 @@ const Requirements = () => {
                         }
                       </h2>
 
-                      <p className="mt-1 text-sm text-gray-600">
+                      <span className="mt-1 text-sm text-gray-600 flex gap-1">
+                        
+                        <p className="mt-2 text-xs text-gray-500">
                         {
                           requirement
                             .kitchen?.name
                         }
                       </p>
+                        <p className="mt-2 text-xs text-gray-500">
+                        {
+                          requirement
+                            .createdBy?.name
+                        }
+                      </p>  
+                      </span>
+                        
 
                       <p className="mt-1 text-xs text-gray-400">
                         {new Date(
@@ -380,7 +390,7 @@ const Requirements = () => {
                         {requirement.status}
                       </span>
 
-                      <p className="mt-2 text-xs text-gray-500">
+                      <p className="mt-2 text-xs text-gray-900">
                         {requirement.items
                           ?.length || 0}{" "}
                         Items

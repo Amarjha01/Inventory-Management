@@ -1,20 +1,24 @@
 import Card from "../ui/Card";
 import InfoRow from "../ui/InfoRow";
-
+import { FaTruck } from "react-icons/fa";
 const DispatchInfo = ({
     dispatch,
+    status,
+    handleShowMap
 }) => {
 
     return (
 
         <Card>
 
-            <h3 className="text-lg font-semibold mb-5">
+           <div className=" flex justify-between">
+             <h3 className="text-lg font-semibold mb-5">
 
                 Dispatch Details
 
             </h3>
-
+            {dispatch?.vehicle?.tracker?.isActive && status === "Out For Delivery" && <FaTruck className="text-3xl text-[#151c4e] cursor-pointer" onClick={handleShowMap} />}
+           </div>
             <InfoRow
                 label="Vehicle Number"
                 value={dispatch.vehicle?.vehicleNumber}

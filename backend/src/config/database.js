@@ -5,6 +5,7 @@ import env from "./env.js";
 import logger from "../utils/logger.js";
 import Requirement from "../models/requirement.js";
 import Inventory from "../models/inventory.js";
+import Vehicle from "../models/vehicle.js";
 
 const connectDatabase = async () => {
   try {
@@ -16,14 +17,18 @@ const connectDatabase = async () => {
       `MongoDB Connected : ${connection.connection.host}`
     );
 
-    // // One-time migration
-    // const result = await Inventory.updateMany(
+    // One-time migration
+    // const result = await Vehicle.updateMany(
     //   {
-    //     requirementType: { $exists: false },
+    //     tracker: { $exists: false },
     //   },
     //   {
     //     $set: {
-    //       requirementType: "RM",
+    //       tracker: {
+    //         provider:"",
+    //         envKey:"",
+    //         isActive:false
+    //       },
     //     },
     //   }
     // );
