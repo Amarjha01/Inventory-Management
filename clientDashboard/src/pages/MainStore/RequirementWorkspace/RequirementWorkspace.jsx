@@ -29,6 +29,9 @@ import ItemSelectorModal from "../../../components/kitchen/requirement/ItemSelec
 import { AnimatePresence , motion } from "framer-motion";
 import ItemCard from "../../../components/kitchen/requirement/ItemCard";
 import { RiDeleteBin3Fill } from "react-icons/ri";
+import { FaSave } from "react-icons/fa";
+import { FiLoader } from "react-icons/fi";
+import toast from "react-hot-toast";
 const RequirementWorkspace = () => {
   const { id } = useParams();
 
@@ -58,7 +61,9 @@ const RequirementWorkspace = () => {
 
   const [manualDriverPhone, setManualDriverPhone] = useState("");
 
+  // for loader
   const [isDispatching, setIsDispatching] = useState(false);
+  const [isAddingItems , setIsAddingItems] = useState(false)
   
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
@@ -203,64 +208,104 @@ useEffect(() => {
       }),
     }));
   };
-    const handleDelete = async(id)=>{
-    
-    try {
-      const response =  await deletedRequirement(id)
-      alert("deleted successful")
-      window.location.href = "/store/requirements"
-    } catch (error) {
-      alert(response)
-    }
+
+  const handleDelete = async (id) => {
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this requirement?"
+  );
+
+  if (!confirmed) {
+    return;
   }
-  const handleSave = async () => {
-    if (!vehicleId && !manualVehicleNumber ) {
-      alert('please select vehicle or type manual')
-    }
-    if (!driverId && !manualDriverName ) {
-      alert('please select driver or type manual')
-    }
-    if(manualDriverName ?? !manualDriverPhone){
-      alert("please type phone number also.")
-    }
-  setIsDispatching(true);
-   const itemPayload = selectedItems.map((item) => ({
+
+  try {
+    await deletedRequirement(id);
+    toast.success("Deleted successfully")
+    window.location.href = "/store/requirements";
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      error.response?.data?.message ||
+      "Failed to delete requirement"
+    );
+  }
+};
+
+  const handleSaveItem = async()=>{
+     const itemPayload = selectedItems.map((item) => ({
     inventoryId: item._id,
     quantity: item.quantity,
-    unit:item.unit
-
+    unit: item.unit,
   }));
-    
-    try {
-      const payload = {
-        vehicleId,
-        manualVehicleNumber,
-        driverId,
-        manualDriverName,
-        manualDriverPhone,
-        remarks,
+  setIsAddingItems(true)
+   try {
+    const updatedRequirement = await updateRequirement(requirement._id, itemPayload);
+    setRequirement(updatedRequirement.data);
+    setSelectedItems([])
+    setIsAddingItems(false)
+    toast.success(updatedRequirement.message)
+   } catch (error) {
+    toast.error(error.message)
+    setIsAddingItems(false)
+   }
 
-        items: requirement.items.map((item) => ({
-          inventoryId: item.inventoryId._id,
-          quantity: item.quantity,
-          dispatchedQuantity: item.dispatchedQuantity,
-          unit: item.unit,
-        })),
-      };
-      // await updateRequirement(requirement._id , itemPayload )
-      await dispatchRequirement(requirement._id, payload);
-      setIsDispatching(false);
+  }
+ const handleSave = async () => {
+  // Vehicle validation
+  if (!vehicleId && !manualVehicleNumber) {
+    alert("Please select a vehicle or type a manual vehicle number.");
+    return;
+  }
 
-      alert("Requirement dispatched successfully.");
+  // Driver validation
+  if (!driverId && !manualDriverName) {
+    alert("Please select a driver or type a manual driver name.");
+    return;
+  }
 
-      navigate("/store/requirements");
-    } catch (error) {
-      setIsDispatching(false);
-      console.error(error);
+  // Manual driver phone validation
+  if (manualDriverName && !manualDriverPhone) {
+    alert("Please type the driver's phone number also.");
+    return;
+  }
 
-      alert(error.response?.data?.message || "Failed to dispatch.");
-    }
-  };
+  setIsDispatching(true);
+
+  try {
+    const payload = {
+      vehicleId,
+      manualVehicleNumber,
+      driverId,
+      manualDriverName,
+      manualDriverPhone,
+      remarks,
+
+      items: requirement.items.map((item) => ({
+        inventoryId: item.inventoryId._id,
+        quantity: item.quantity,
+        dispatchedQuantity: item.dispatchedQuantity,
+        unit: item.unit,
+      })),
+    };
+
+    await dispatchRequirement(requirement._id, payload);
+
+    alert("Requirement dispatched successfully.");
+
+    navigate("/store/requirements");
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      error.response?.data?.message ||
+        "Failed to dispatch."
+    );
+  } finally {
+    setIsDispatching(false);
+  }
+};
+
 
   if (loading) {
     return <Loader />;
@@ -293,9 +338,27 @@ useEffect(() => {
             <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
               {requirement.status}
             </span>
-            <button onClick={()=>{handleDelete(requirement._id)}} className=" cursor-pointer">
-                      <RiDeleteBin3Fill className=" text-2xl text-red-700"/>
-                     </button>
+            <button
+  type="button"
+  onClick={() => handleDelete(requirement._id)}
+  title="Delete requirement"
+  className="
+    group
+    flex h-9 w-9
+    items-center justify-center
+    rounded-lg
+    text-red-600
+    transition-all duration-200
+    hover:bg-red-50
+    hover:text-red-700
+    active:scale-95
+  "
+>
+  <RiDeleteBin3Fill
+    className="text-2xl cursor-pointer transition-transform duration-200 group-hover:scale-110"
+  />
+</button>
+
           </div>
 
           <div className="mt-6 space-y-4">
@@ -350,7 +413,13 @@ useEffect(() => {
                     </motion.div>
                   ))}
                 </AnimatePresence>
+                 {selectedItems.length >0 && (
+            <button  className=" text-blue-600 cursor-pointer text-3xl">
+            {isAddingItems ?<FiLoader className="animate-spin" /> : <FaSave onClick={handleSaveItem}/>}
+            </button>
+          )}
         <Card>
+         
           <span className=" flex justify-between">
             <h3 className="text-lg font-semibold mb-5">Requested Items</h3>
              <TiDocumentAdd onClick={()=>setShowModal(!showModal)} className="text-3xl cursor-pointer" />
@@ -392,7 +461,7 @@ useEffect(() => {
   />
 
   {openDropdownId === item.inventoryId._id && (
-    <div className="absolute right-0 top-8 z-50 w-40 rounded-lg border bg-white p-2 shadow-lg">
+    <div className="absolute right-0 top-8 z-50 w-50 rounded-lg border bg-white p-2 shadow-lg">
       <button
         type="button"
         onMouseDown={(e) => {
@@ -626,10 +695,21 @@ useEffect(() => {
         </Card>
 
         {!isDispatched && !isReceived && (
-          <Button className="w-full" onClick={handleSave}>
-            {isDispatching ? "Dispatching...." : " Dispatch Requirement "}
-          </Button>
-        )}
+  <Button
+    className="w-full"
+    onClick={handleSave}
+    disabled={isDispatching}
+  >
+    {isDispatching ? (
+      <span className=" flex justify-center items-center gap-1 ">
+        Dispatching... <FiLoader className="animate-spin text-2xl" />
+      </span>
+    ) : (
+      "Dispatch Requirement"
+    )}
+  </Button>
+)}
+
       </div>
     );
   }
