@@ -25,11 +25,11 @@ export const login = asyncHandler(async (req, res) => {
 
 export const changePassword = asyncHandler(async (req, res) => {
 
-    const { newPassword } = req.body;
+    const { newPassword  , id } = req.body;
     console.log("newPassword" , newPassword);
     
     const user = await authService.changePassword(
-        req.user._id,
+        id,
         newPassword
     );
   console.log("user" , user);

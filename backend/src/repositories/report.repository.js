@@ -1,10 +1,16 @@
 import Requirement from "../models/requirement.js";
 
 class ReportRepository {
-  async getRequirements(filter) {
+  async getRequirements(filter = {}) {
     return Requirement.find(filter)
-      .populate("kitchen", "_id name district")
-      .populate("createdBy", "_id name")
+      .populate(
+        "kitchen",
+        "_id name district",
+      )
+      .populate(
+        "createdBy",
+        "_id name",
+      )
       .populate(
         "items.inventoryId",
         "_id name",

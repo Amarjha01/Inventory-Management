@@ -199,16 +199,16 @@ const Users = () => {
         language: form.language,
         isActive: form.status === "Active",
       };
-
+     
       if (["Kitchen Incharge", "Store Incharge"].includes(form.role)) {
         payload.kitchenId = form.kitchenId;
       }
 
-      if (!editingUser) {
+      if (form.password) {
         payload.password = form.password;
       }
 
-      if (editingUser) {
+      if (editingUser ) {
         await updateUser(
           editingUser._id,
 

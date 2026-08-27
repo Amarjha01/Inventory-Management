@@ -80,17 +80,17 @@ class AuthService {
         );
     }
 
-    const passwordMatched = await comparePassword(
-      newPassword,
-        user.password
-    );
+    // const passwordMatched = await comparePassword(
+    //   newPassword,
+    //     user.password
+    // );
 
-    if (passwordMatched) {
-        throw new ApiError(
-            422,
-            "The new password cannot be the same as any previously used password."
-        );
-    }
+    // if (passwordMatched) {
+    //     throw new ApiError(
+    //         422,
+    //         "The new password cannot be the same as any previously used password."
+    //     );
+    // }
 
     const hashedPassword = await hashPassword(
         newPassword
