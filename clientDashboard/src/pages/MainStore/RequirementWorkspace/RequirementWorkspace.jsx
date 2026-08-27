@@ -230,9 +230,11 @@ useEffect(() => {
     unit:item.unit
 
   }));
-  const response = await updateRequirement(requirement._id , itemPayload )
-    
-    try {
+  // const response = await updateRequirement(requirement._id , itemPayload )
+  // console.log(response);
+  
+    if (response.success === true) {
+      try {
       const payload = {
         vehicleId,
         manualVehicleNumber,
@@ -253,13 +255,16 @@ useEffect(() => {
 
       alert("Requirement dispatched successfully.");
 
-      navigate("/store/requirements");
+      // navigate("/store/requirements");
     } catch (error) {
       setIsDispatching(false);
       console.error(error);
 
       alert(error.response?.data?.message || "Failed to dispatch.");
     }
+    }
+    
+    
   };
 
   if (loading) {

@@ -117,7 +117,7 @@ const ReceiveRequirement = ({ loading = false, onReceive }) => {
         disabled={gatePass.length === 0 || loading}
         onClick={() => onReceive(gatePass)}
       >
-        {loading ? "Uploading..." : "Mark as Received"}
+        {loading ? "Uploading..." : "Mark as Received ( सामान प्राप्त हुआ )"}
       </Button>
     </Card>
   );
