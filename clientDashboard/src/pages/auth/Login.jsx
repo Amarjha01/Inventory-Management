@@ -67,6 +67,7 @@ const Login = () => {
 
     case "Store Supervisor":
     case "Admin":
+    case "district coordinator":
       navigate("/store", { replace: true });
       break;
 
@@ -92,6 +93,7 @@ const Login = () => {
 
     case "Store Supervisor":
     case "Admin":
+    case "district coordinator":
       navigate("/store", { replace: true });
       break;
 

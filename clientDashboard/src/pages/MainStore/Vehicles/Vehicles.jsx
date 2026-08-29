@@ -17,6 +17,9 @@ import {
   createVehicle,
   updateVehicle,
 } from "../../../services/vehicle.service";
+import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
+import { themes } from "../../../components/shared/ui/Theme";
+import PageHeader from "../../../components/shared/ui/PageHeader";
 
 const Vehicles = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -126,7 +129,15 @@ const Vehicles = () => {
   return (
     <div className="space-y-6 pb-10">
       {/* Header */}
-
+    <ThemeProvider
+      theme={themes.VEHICLES}
+      className="min-h-full pb-24"
+    >
+      <PageHeader
+            title="Vehicles"
+            subtitle="Manage delivery vehicles"
+            imageUrl={'/ui/VEHICLES.png'}
+          />
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -365,6 +376,7 @@ const Vehicles = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      </ThemeProvider>
     </div>
   );
 };

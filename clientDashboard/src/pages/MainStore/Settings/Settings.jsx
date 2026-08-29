@@ -4,7 +4,9 @@ import Card from "../../../components/shared/ui/Card";
 import NotificationSettings from "../../../components/shared/notifications/NotificationSettings";
 import api from "../../../api/axios";
 import { storage } from "../../../utils/storage";
-
+import PageHeader from "../../../components/shared/ui/PageHeader";
+import { themes } from "../../../components/shared/ui/Theme";
+import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
 const Settings = () => {
   // ----------------------------------------
   // Admin's own notification setting
@@ -264,20 +266,19 @@ const Settings = () => {
 
   return (
     <div className="space-y-6">
+       <ThemeProvider
+      theme={themes.SETTINGS}
+      className="min-h-full pb-24"
+    >
       {/* ----------------------------------------
           PAGE HEADER
       ----------------------------------------- */}
-
+      <PageHeader 
+      title={"Settings"} 
+      subtitle={"Manage notifications and administrator preferences."} 
+      imageUrl={'/ui/type/SETTING.png'}
+      />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Settings
-          </h1>
-
-          <p className="mt-1 text-sm text-gray-500">
-            Manage notifications and administrator preferences.
-          </p>
-        </div>
 
         {/* ----------------------------------------
             LOGOUT BUTTON
@@ -581,6 +582,7 @@ const Settings = () => {
           </div>
         </div>
       </Card>
+      </ThemeProvider>
     </div>
   );
 };

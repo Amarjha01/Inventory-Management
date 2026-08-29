@@ -1,7 +1,10 @@
 import { useState } from "react";
+
 import {
   MdNotifications,
-  MdPhoneAndroid,
+  MdCheckCircle,
+  MdErrorOutline,
+  MdInfoOutline,
 } from "react-icons/md";
 
 import {
@@ -9,12 +12,26 @@ import {
   unsubscribeFromPushNotifications,
 } from "../../../services/notification.service";
 
-const Toggle = ({ enabled, loading, onClick }) => {
+
+// ==================================================
+// TOGGLE
+// ==================================================
+
+const Toggle = ({
+  enabled,
+  loading,
+  onClick,
+}) => {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={enabled}
+      aria-label={
+        enabled
+          ? "Disable browser notifications"
+          : "Enable browser notifications"
+      }
       onClick={onClick}
       disabled={loading}
       className={`
@@ -25,15 +42,16 @@ const Toggle = ({ enabled, loading, onClick }) => {
         rounded-full
         transition-all
         duration-200
-        ease-in-out
         focus:outline-none
-        focus:ring-2
-        focus:ring-emerald-200
+        focus:ring-4
+        focus:ring-teal-500/10
+
         ${
           enabled
-            ? "bg-emerald-500"
+            ? "bg-teal-600"
             : "bg-gray-300"
         }
+
         ${
           loading
             ? "cursor-wait opacity-60"
@@ -41,6 +59,9 @@ const Toggle = ({ enabled, loading, onClick }) => {
         }
       `}
     >
+
+      {/* Knob */}
+
       <span
         className={`
           absolute
@@ -49,10 +70,10 @@ const Toggle = ({ enabled, loading, onClick }) => {
           w-5
           rounded-full
           bg-white
-          shadow-md
+          shadow-sm
           transition-all
           duration-200
-          ease-in-out
+
           ${
             enabled
               ? "left-6"
@@ -60,10 +81,15 @@ const Toggle = ({ enabled, loading, onClick }) => {
           }
         `}
       />
+
     </button>
   );
 };
 
+
+// ==================================================
+// NOTIFICATION SETTINGS
+// ==================================================
 
 const NotificationSettings = ({
   enabled,
@@ -71,6 +97,10 @@ const NotificationSettings = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // ==================================================
+  // ENABLE
+  // ==================================================
 
   const handleEnable = async () => {
     try {
@@ -97,6 +127,11 @@ const NotificationSettings = ({
     }
   };
 
+
+  // ==================================================
+  // DISABLE
+  // ==================================================
+
   const handleDisable = async () => {
     try {
       setLoading(true);
@@ -121,7 +156,14 @@ const NotificationSettings = ({
     }
   };
 
+
+  // ==================================================
+  // TOGGLE
+  // ==================================================
+
   const handleToggle = () => {
+    if (loading) return;
+
     if (enabled) {
       handleDisable();
     } else {
@@ -129,62 +171,329 @@ const NotificationSettings = ({
     }
   };
 
+
   return (
-    <div>
-      {/* Browser Notifications */}
-      <div className="flex items-center gap-3 border-b border-gray-100 px-4 py-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-          <MdNotifications size={23} />
+    <div className="space-y-4">
+
+      {/* =========================================
+          BROWSER NOTIFICATIONS
+      ========================================== */}
+
+      <div className="
+        rounded-2xl
+        border
+        border-gray-100
+        bg-gray-50/70
+        p-4
+      ">
+
+        <div className="
+          flex
+          items-center
+          gap-3
+        ">
+
+          {/* Icon */}
+
+          <div className={`
+            flex
+            h-11
+            w-11
+            shrink-0
+            items-center
+            justify-center
+            rounded-xl
+
+            ${
+              enabled
+                ? "bg-teal-50 text-teal-600"
+                : "bg-gray-100 text-gray-400"
+            }
+          `}>
+
+            <MdNotifications size={23} />
+
+          </div>
+
+
+          {/* Content */}
+
+          <div className="min-w-0 flex-1">
+
+            <div className="
+              flex
+              flex-wrap
+              items-center
+              gap-2
+            ">
+
+              <h3 className="
+                text-sm
+                font-semibold
+                text-gray-900
+              ">
+                Browser Notifications
+              </h3>
+
+              {/* Status */}
+
+              <span className={`
+                inline-flex
+                items-center
+                gap-1.5
+                rounded-full
+                px-2
+                py-0.5
+                text-[10px]
+                font-semibold
+
+                ${
+                  enabled
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-500"
+                }
+              `}>
+
+                <span className={`
+                  h-1.5
+                  w-1.5
+                  rounded-full
+
+                  ${
+                    enabled
+                      ? "bg-green-500"
+                      : "bg-gray-400"
+                  }
+                `} />
+
+                {enabled
+                  ? "Enabled"
+                  : "Disabled"}
+
+              </span>
+
+            </div>
+
+
+            <p className="
+              mt-1
+              text-xs
+              leading-5
+              text-gray-500
+            ">
+              Receive important requirement updates
+              directly in your browser.
+            </p>
+
+          </div>
+
+
+          {/* Toggle */}
+
+          <Toggle
+            enabled={enabled}
+            loading={loading}
+            onClick={handleToggle}
+          />
+
         </div>
 
-        <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-gray-900">
-            Browser Notifications
-          </h3>
 
-          <p className="mt-0.5 text-xs leading-5 text-gray-500">
-            Receive important requirement updates
-            directly in your browser.
-          </p>
-        </div>
+        {/* Loading */}
 
-        <Toggle
-          enabled={enabled}
-          loading={loading}
-          onClick={handleToggle}
-        />
+        {loading && (
+          <div className="
+            mt-3
+            flex
+            items-center
+            gap-2
+            border-t
+            border-gray-200
+            pt-3
+            text-[11px]
+            text-gray-500
+          ">
+
+            <span className="
+              h-3
+              w-3
+              animate-spin
+              rounded-full
+              border-2
+              border-gray-300
+              border-t-teal-600"
+            />
+
+            {enabled
+              ? "Disabling notifications..."
+              : "Enabling notifications..."}
+
+          </div>
+        )}
+
       </div>
 
-      {/* Push Notifications */}
-      {/* <div className="flex items-center gap-3 border-b border-gray-100 px-4 py-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-          <MdPhoneAndroid size={23} />
+
+      {/* =========================================
+          ENABLED INFORMATION
+      ========================================== */}
+
+      {enabled && !loading && !error && (
+
+        <div className="
+          flex
+          items-start
+          gap-3
+          rounded-xl
+          border
+          border-green-100
+          bg-green-50
+          px-3.5
+          py-3
+        ">
+
+          <MdCheckCircle
+            size={18}
+            className="
+              mt-0.5
+              shrink-0
+              text-green-600
+            "
+          />
+
+          <div>
+
+            <p className="
+              text-xs
+              font-semibold
+              text-green-800
+            ">
+              Notifications are active
+            </p>
+
+            <p className="
+              mt-0.5
+              text-[11px]
+              leading-4
+              text-green-700
+            ">
+              You'll receive important updates
+              from the store directly in this browser.
+            </p>
+
+          </div>
+
         </div>
 
-        <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-gray-900">
-            Push Notifications
-          </h3>
-
-          <p className="mt-0.5 text-xs leading-5 text-gray-500">
-            Receive updates when you're using the
-            app.
-          </p>
-        </div>
-
-        <Toggle
-          enabled={enabled}
-          loading={loading}
-          onClick={handleToggle}
-        />
-      </div> */}
-
-      {/* Error */}
-      {error && (
-        <div className="mx-4 mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-600">
-          {error}
-        </div>
       )}
+
+
+      {/* =========================================
+          DISABLED INFORMATION
+      ========================================== */}
+
+      {!enabled && !loading && !error && (
+
+        <div className="
+          flex
+          items-start
+          gap-3
+          rounded-xl
+          border
+          border-blue-100
+          bg-blue-50
+          px-3.5
+          py-3
+        ">
+
+          <MdInfoOutline
+            size={18}
+            className="
+              mt-0.5
+              shrink-0
+              text-blue-600
+            "
+          />
+
+          <div>
+
+            <p className="
+              text-xs
+              font-semibold
+              text-blue-800
+            ">
+              Notifications are disabled
+            </p>
+
+            <p className="
+              mt-0.5
+              text-[11px]
+              leading-4
+              text-blue-700
+            ">
+              Enable them to receive requirement
+              and delivery updates.
+            </p>
+
+          </div>
+
+        </div>
+
+      )}
+
+
+      {/* =========================================
+          ERROR
+      ========================================== */}
+
+      {error && (
+
+        <div className="
+          flex
+          items-start
+          gap-3
+          rounded-xl
+          border
+          border-red-200
+          bg-red-50
+          px-3.5
+          py-3
+        ">
+
+          <MdErrorOutline
+            size={18}
+            className="
+              mt-0.5
+              shrink-0
+              text-red-600
+            "
+          />
+
+          <div>
+
+            <p className="
+              text-xs
+              font-semibold
+              text-red-800
+            ">
+              Notification update failed
+            </p>
+
+            <p className="
+              mt-0.5
+              text-[11px]
+              leading-4
+              text-red-600
+            ">
+              {error}
+            </p>
+
+          </div>
+
+        </div>
+
+      )}
+
     </div>
   );
 };

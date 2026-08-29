@@ -3,78 +3,77 @@ import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 import {
-  MdMenu,
-  MdClose,
   MdAssignment,
   MdInventory,
   MdPeople,
   MdSettings,
   MdAssessment,
+  MdMoreHoriz,
+  MdClose,
 } from "react-icons/md";
 
 import { FaTruckMoving, FaUsers } from "react-icons/fa";
 import { HiOutlineBuildingStorefront } from "react-icons/hi2";
 import { storage } from "../../../utils/storage";
+const user = storage.getUser();
 const MainStoreNavbar = () => {
-    const user = storage.getUser();
-  const [open, setOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const location = useLocation();
 
-  const menus = [
+  const primaryMenus = [
     {
       title: "Requirements",
-      icon: <MdAssignment size={22} />,
+      icon: MdAssignment,
       path: "/store/requirements",
     },
     {
       title: "Inventory",
-      icon: <MdInventory size={22} />,
+      icon: MdInventory,
       path: "/store/inventory",
     },
     {
       title: "Vehicles",
-      icon: <FaTruckMoving size={22} />,
+      icon: FaTruckMoving,
       path: "/store/vehicles",
     },
     {
+      title: "Kitchens",
+      icon: HiOutlineBuildingStorefront,
+      path: "/store/kitchens",
+    },
+  ];
+
+  const moreMenus = [
+    {
       title: "Drivers",
-      icon: <MdPeople size={22} />,
+      icon: MdPeople,
       path: "/store/drivers",
     },
     {
       title: "Users",
-      icon: <FaUsers size={22} />,
+      icon: FaUsers,
       path: "/store/users",
     },
     {
-      title: "Kitchens",
-      icon: <HiOutlineBuildingStorefront size={22} />,
-      path: "/store/kitchens",
+      title: "Reports",
+      icon: MdAssessment,
+      path: "/store/reports",
     },
-     {
-    title: "Reports",
-    icon: <MdAssessment size={20} />,
-    path: "/store/reports",
-},
     {
       title: "Settings",
-      icon: <MdSettings size={22} />,
+      icon: MdSettings,
       path: "/store/settings",
     },
-   
   ];
+
+  const isMoreActive = moreMenus.some(
+    (menu) => location.pathname === menu.path
+  );
 
   return (
     <>
-      {/* Navbar */}
-      <header className="sticky top-0 z-40 border-b bg-white/90 backdrop-blur shadow-sm">
+       <header className="sticky top-2 mx-3 z-40  bg-white/30 backdrop-blur shadow-sm rounded-4xl">
         <div className="flex h-16 items-center justify-between px-5">
-          <button
-            onClick={() => setOpen(true)}
-            className="rounded-lg p-2 hover:bg-gray-100 transition"
-          >
-            <MdMenu size={28} />
-          </button>
 
           <div className="flex items-center gap-3">
             <img
@@ -82,18 +81,23 @@ const MainStoreNavbar = () => {
               alt="ESF Logo"
               className="h-10 w-auto object-contain hidden sm:block"
             />
+            <img
+              src="/ESF_Logo.png"
+              alt="ESF Logo"
+              className="h-10 w-auto object-contain sm:hidden"
+            />
 
-            <div className="hidden sm:block h-8 w-px bg-gray-200" />
+            <div className=" h-8 w-px bg-gray-200" />
 
             <div>
-               <p className="text-xs font-semibold text-teal-700">
+               <p className="text-xs font-semibold text-[#1d215c]">
                 Ekta Shakti Foundation
               </p>
               
               <h2 className="text-sm font-bold text-gray-900">Main Store Hajipur Industrial Area</h2>
 
               <p className="hidden md:block text-[10px] text-gray-500">
-                Plot Number B6768 Jandaha Road
+                Plot Number B67-68 Jandaha Road
               </p>
             </div>
           </div>
@@ -111,85 +115,204 @@ const MainStoreNavbar = () => {
         </div>
         </div>
       </header>
+      {/* Bottom Navigation */}
+      <nav
+        className="
+          fixed bottom-0 left-0 right-0 z-40
+          border-t border-gray-200
+          bg-white/95 backdrop-blur-xl
+          shadow-[0_-4px_20px_rgba(0,0,0,0.06)]
+          pb-[env(safe-area-inset-bottom)]
+        "
+      >
+        <div className="mx-auto flex h-[68px] max-w-2xl items-stretch px-2">
+          {/* Primary menus */}
+          {primaryMenus.map((menu) => {
+            const active = location.pathname === menu.path;
+            const Icon = menu.icon;
 
-      {/* Drawer */}
+            return (
+              <Link
+                key={menu.path}
+                to={menu.path}
+                className={`
+                  flex flex-1 flex-col items-center justify-center
+                  gap-1 rounded-xl
+                  transition-all duration-200
+                  ${
+                    active
+                      ? "text-[#1f225f]"
+                      : "text-gray-500 hover:text-gray-700"
+                  }
+                `}
+              >
+                <div
+                  className={`
+                    flex h-8 w-12 items-center justify-center rounded-full
+                    transition-all
+                    ${
+                      active
+                        ? "bg-[#1f225f]/10"
+                        : "bg-transparent"
+                    }
+                  `}
+                >
+                  <Icon size={22} />
+                </div>
+
+                <span
+                  className={`
+                    text-[10px] leading-none
+                    ${
+                      active
+                        ? "font-semibold text-[#1f225f]"
+                        : "font-medium"
+                    }
+                  `}
+                >
+                  {menu.title}
+                </span>
+              </Link>
+            );
+          })}
+
+          {/* More */}
+          <button
+            onClick={() => setMoreOpen((prev) => !prev)}
+            className={`
+              flex flex-1 flex-col items-center justify-center
+              gap-1 rounded-xl
+              transition-all duration-200
+              ${
+                isMoreActive || moreOpen
+                  ? "text-[#1f225f]"
+                  : "text-gray-500"
+              }
+            `}
+          >
+            <div
+              className={`
+                flex h-8 w-12 items-center justify-center rounded-full
+                ${
+                  isMoreActive || moreOpen
+                    ? "bg-[#1f225f]/10"
+                    : "bg-transparent"
+                }
+              `}
+            >
+              {moreOpen ? (
+                <MdClose size={23} />
+              ) : (
+                <MdMoreHoriz size={23} />
+              )}
+            </div>
+
+            <span
+              className={`
+                text-[10px] leading-none
+                ${
+                  isMoreActive || moreOpen
+                    ? "font-semibold text-[#1f225f]"
+                    : "font-medium"
+                }
+              `}
+            >
+              More
+            </span>
+          </button>
+        </div>
+      </nav>
+
+      {/* More Menu */}
       <AnimatePresence>
-        {open && (
+        {moreOpen && (
           <>
+            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setOpen(false)}
-              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+              onClick={() => setMoreOpen(false)}
+              className="
+                fixed inset-0 z-30
+                bg-black/20 backdrop-blur-[2px]
+              "
             />
 
-            <motion.aside
-              initial={{ x: -300 }}
-              animate={{ x: 0 }}
-              exit={{ x: -300 }}
-              transition={{ duration: 0.25 }}
-              className="fixed left-0 top-0 z-50 h-full w-72 bg-white shadow-xl"
+            {/* Bottom Sheet */}
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 30, opacity: 0 }}
+              transition={{
+                duration: 0.2,
+                ease: "easeOut",
+              }}
+              className="
+                fixed bottom-19 left-3 right-3 z-40
+                mx-auto max-w-2xl
+                overflow-hidden
+                rounded-2xl
+                border border-gray-100
+                bg-white/30
+                p-2
+                shadow-2xl
+                backdrop-blur-xl
+              "
             >
-              {/* Sidebar Header */}
-              <div className="flex h-16 items-center justify-between border-b px-5">
-                <div className="flex items-center gap-3">
-                  <img src="/ESF_full_logo.avif" alt="ESF" className="h-8" />
-
-                  <h2 className="font-bold text-gray-800">Store</h2>
-                </div>
-
-                <button
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg p-2 hover:bg-gray-100"
-                >
-                  <MdClose size={24} />
-                </button>
+              <div className="px-3 py-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  More
+                </p>
               </div>
 
-              {/* Menu */}
-              <nav className="mt-4 px-3 space-y-1">
-                {menus.map((menu) => {
+              <div className="grid grid-cols-2 gap-1">
+                {moreMenus.map((menu) => {
                   const active = location.pathname === menu.path;
+                  const Icon = menu.icon;
 
                   return (
                     <Link
                       key={menu.path}
                       to={menu.path}
-                      onClick={() => setOpen(false)}
+                      onClick={() => setMoreOpen(false)}
                       className={`
-                        flex items-center gap-4 rounded-xl px-4 py-3
-                        transition-all
+                        flex items-center gap-3
+                        rounded-xl px-4 py-3
+                        transition-colors
                         ${
                           active
-                            ? "bg-teal-50 text-teal-700 font-semibold"
-                            : "text-gray-600 hover:bg-gray-100"
+                            ? "bg-teal-50 text-[#1f225f]"
+                            : "text-gray-600 hover:bg-gray-50"
                         }
                       `}
                     >
-                      <span
-                        className={active ? "text-teal-600" : "text-gray-500"}
+                      <div
+                        className={`
+                          flex h-9 w-9 items-center justify-center
+                          rounded-lg
+                          ${
+                            active
+                              ? "bg-[#1f225f]/20 text-[#1f225f]"
+                              : "bg-gray-100 text-gray-500"
+                          }
+                        `}
                       >
-                        {menu.icon}
-                      </span>
+                        <Icon size={19} />
+                      </div>
 
-                      <span>{menu.title}</span>
+                      <span
+                        className={`text-sm ${
+                          active ? "font-semibold" : "font-medium"
+                        }`}
+                      >
+                        {menu.title}
+                      </span>
                     </Link>
                   );
                 })}
-              </nav>
-
-              {/* Footer */}
-              <div className="absolute bottom-5 left-5 right-5 rounded-xl bg-gray-50 p-4">
-                <p className="text-xs font-semibold text-gray-700">
-                  Ekta Shakti Foundation
-                </p>
-
-                <p className="mt-1 text-[11px] text-gray-500">
-                  Main Store Management
-                </p>
               </div>
-            </motion.aside>
+            </motion.div>
           </>
         )}
       </AnimatePresence>

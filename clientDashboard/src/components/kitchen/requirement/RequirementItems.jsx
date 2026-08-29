@@ -20,7 +20,7 @@ console.log(items);
                     items.map(item => (
 
                         <div
-                            key={item.inventoryId._id}
+                            key={item?.inventoryId?._id}
                             className="flex justify-between items-center"
                         >
 

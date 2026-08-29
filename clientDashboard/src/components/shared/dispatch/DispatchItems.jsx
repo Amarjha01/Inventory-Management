@@ -22,7 +22,7 @@ const DispatchItems = ({
                     items.map(item => (
 
                         <DispatchItemCard
-                            key={item.inventoryId._id}
+                            key={item?.inventoryId?._id}
                             item={item}
                         />
 

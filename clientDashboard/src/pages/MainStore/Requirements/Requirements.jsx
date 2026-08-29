@@ -11,6 +11,9 @@ import Card from "../../../components/shared/ui/Card";
 import Loader from "../../../components/shared/ui/Loader";
 
 import { getAllKitchenRequirements } from "../../../services/requirement.service";
+import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
+import { themes } from "../../../components/shared/ui/Theme";
+import PageHeader from "../../../components/shared/ui/PageHeader";
 
 const Requirements = () => {
   const navigate = useNavigate();
@@ -146,7 +149,15 @@ const Requirements = () => {
       {/* =====================================================
           HEADER
       ====================================================== */}
-
+        <ThemeProvider
+      theme={themes.REQUIREMENTS}
+      className="min-h-full pb-24"
+    >
+      <PageHeader
+            title="Requirements"
+            subtitle="Manage kitchen material requests"
+            imageUrl={'/ui/REQUIREMENTS.png'}
+          />
       <motion.div
         initial={{
           opacity: 0,
@@ -158,27 +169,8 @@ const Requirements = () => {
         }}
         className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
       >
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Requirements
-          </h1>
 
-          <p className="text-gray-500">
-            Manage kitchen material requests
-          </p>
-        </div>
 
-        <div className="flex items-center gap-2 rounded-xl bg-teal-50 px-4 py-2 text-teal-700">
-          <FiFileText />
-
-          <span className="font-semibold">
-            {filteredRequirements.length}
-          </span>
-
-          <span className="text-sm">
-            Requests
-          </span>
-        </div>
       </motion.div>
 
       {/* =====================================================
@@ -211,7 +203,7 @@ const Requirements = () => {
                 transition-all
                 ${
                   active
-                    ? "bg-white text-teal-700 shadow-sm"
+                    ? "bg-white text-(--theme-text) shadow-sm"
                     : "text-gray-500 hover:text-gray-700"
                 }
               `}
@@ -226,7 +218,7 @@ const Requirements = () => {
                     text-xs
                     ${
                       active
-                        ? "text-teal-600"
+                        ? "text-(--theme-text)"
                         : "text-gray-400"
                     }
                   `}
@@ -350,13 +342,19 @@ const Requirements = () => {
 
                       <span className="mt-1 text-sm text-gray-600 flex gap-1">
                         
-                        <p className="mt-2 text-xs text-gray-500">
+                        <p className="mt-2 text-xs text-gray-500"> 
+                        {
+                          requirement
+                            .kitchen?.district
+                        }
+                      </p>
+                        <p className="mt-2 text-xs text-gray-500"> | {" "}
                         {
                           requirement
                             .kitchen?.name
                         }
                       </p>
-                        <p className="mt-2 text-xs text-gray-500">
+                        <p className="mt-2 text-xs text-gray-500"> | {" "}
                         {
                           requirement
                             .createdBy?.name
@@ -403,6 +401,7 @@ const Requirements = () => {
           )}
         </div>
       </AnimatePresence>
+      </ThemeProvider>
     </div>
   );
 };

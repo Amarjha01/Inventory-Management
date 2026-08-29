@@ -178,8 +178,8 @@ const NewRequirement = () => {
       }}
       className="
         min-h-full
-        bg-[var(--theme-bg)]
-        text-[var(--theme-text)]
+        bg-(--theme-bg)
+        text-(--theme-text)
         transition-colors
         duration-500
       "

@@ -8,7 +8,7 @@ import { receiveRequirement } from "../../../services/requirement.service";
 import VehicleTracking from "../../../pages/VehicleTracking/VehicleTracking";
 import { useEffect } from "react";
 
-const DispatchDetails = ({ requirement, onSuccess }) => {
+const DispatchDetails = ({ requirement, onSuccess  , user}) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showMap , setShowMap] = useState(false);
@@ -108,7 +108,7 @@ useEffect(() => {
       <DispatchItems items={requirement.items} />
 
       {requirement.status === "Out For Delivery" && (
-        <ReceiveRequirement loading={loading} onReceive={handleReceive} />
+        <ReceiveRequirement loading={loading} onReceive={handleReceive} user={user} />
       )}
     </div>
   );

@@ -26,7 +26,12 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get("/", getDrivers);
+router.get("/", 
+  // authorize(
+  //   ROLE.ADMIN,
+  //   ROLE.STORE_SUPERVISOR
+  // ),
+  getDrivers);
 
 router.get("/:id", getDriverById);
 

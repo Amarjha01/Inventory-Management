@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 
-const ReceiveRequirement = ({ loading = false, onReceive }) => {
+const ReceiveRequirement = ({ loading = false, onReceive , user}) => {
   const [gatePass, setGatePass] = useState([]);
 
   const fileInputRef = useRef(null);
@@ -36,13 +36,17 @@ const ReceiveRequirement = ({ loading = false, onReceive }) => {
 
   return (
     <Card>
-      <h2 className="text-xl font-semibold">
+      {user.role !== "district coordinator"&&(
+        <>
+        <h2 className="text-xl font-semibold">
         Receive Requirement
       </h2>
 
       <p className="text-sm text-gray-500 mt-2 mb-6">
         Upload gate pass before marking this requirement as received.
       </p>
+        </>
+      )}
 
       <input
         ref={fileInputRef}
@@ -53,7 +57,7 @@ const ReceiveRequirement = ({ loading = false, onReceive }) => {
         onChange={handleSelect}
       />
 
-      {gatePass.length === 0 ? (
+      {gatePass.length === 0 && user.role !== "district coordinator"  ? (
         <div
           onClick={() => fileInputRef.current?.click()}
           className="cursor-pointer border-2 border-dashed border-blue-300 rounded-xl p-10 text-center hover:border-blue-500 hover:bg-blue-50 transition"
@@ -101,7 +105,7 @@ const ReceiveRequirement = ({ loading = false, onReceive }) => {
             ))}
           </div>
 
-          {gatePass.length < 2 && (
+          {gatePass.length < 2 && user.role !== "district coordinator" && (
             <Button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -112,13 +116,15 @@ const ReceiveRequirement = ({ loading = false, onReceive }) => {
         </div>
       )}
 
-      <Button
+      {user.role !== "district coordinator"&&(
+        <Button
         className="w-full mt-6"
         disabled={gatePass.length === 0 || loading}
         onClick={() => onReceive(gatePass)}
       >
         {loading ? "Uploading..." : "Mark as Received ( सामान प्राप्त हुआ )"}
       </Button>
+      )}
     </Card>
   );
 };

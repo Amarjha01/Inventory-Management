@@ -49,8 +49,10 @@ const userIds = users.map(
     return await requirementRepository.findMany({ kitchen: kitchenId });
   }
 
-  async allKitchenRequirements() {
-    return await requirementRepository.findMany();
+  async allKitchenRequirements(filter) {
+    console.log("filter" , filter);
+    
+    return await requirementRepository.findMany(filter);
   }
 
   async getRequirementById(id) {

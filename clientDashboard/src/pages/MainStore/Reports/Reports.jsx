@@ -7,6 +7,9 @@ import {
   getRequirementReportOptions,
   downloadRequirementReport,
 } from "../../../services/report.service";
+import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
+import PageHeader from "../../../components/shared/ui/PageHeader";
+import { themes } from "../../../components/shared/ui/Theme";
 
 const getToday = () => {
   return new Date().toISOString().split("T")[0];
@@ -431,22 +434,19 @@ const Reports = () => {
 
   return (
     <div className="space-y-6">
+       <ThemeProvider
+      theme={themes.EXCEL_REPORT}
+      className="min-h-full pb-24"
+    >
       {/* ======================================================
           HEADER
       ====================================================== */}
-      <Card>
-        <div>
-          <h1 className="text-2xl font-bold">
-            Requirements Reports
-          </h1>
-
-          <p className="text-gray-500 mt-1">
-            Generate and download requirement
-            reports in Excel format.
-          </p>
-        </div>
-      </Card>
-
+        <PageHeader
+            title="Requirements Reports"
+            subtitle="Generate and download requirement
+            reports in Excel format."
+            imageUrl={'/ui/EXCEL.png'}
+          />
       {/* ======================================================
           FILTERS
       ====================================================== */}
@@ -913,6 +913,7 @@ const Reports = () => {
           </Button>
         </div>
       </Card>
+      </ThemeProvider>
     </div>
   );
 };

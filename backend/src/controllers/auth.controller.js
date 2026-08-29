@@ -30,6 +30,7 @@ export const changePassword = asyncHandler(async (req, res) => {
     
     const user = await authService.changePassword(
         id,
+        req.user._id,
         newPassword
     );
   console.log("user" , user);

@@ -19,6 +19,7 @@ import { getVehicles } from "../../../services/vehicle.service";
 
 import { getDrivers } from "../../../services/driver.service";
 
+import { storage } from "../../../utils/storage";
 import InfoRow from "../../../components/shared/ui/InfoRow";
 import DispatchDetails from "../../../components/shared/dispatch/DispatchDetails";
 import EditGatePassImage from "../../../components/shared/dispatch/EditGatePassImage";
@@ -38,6 +39,8 @@ const RequirementWorkspace = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
+
+  const [user , setUser] = useState(storage.getUser())
 
   const [requirement, setRequirement] = useState(null);
 
@@ -427,26 +430,26 @@ useEffect(() => {
            
           <div className="space-y-5">
             {requirement.items.map((item) => {
-              const stock = inventoryMap[item.inventoryId._id];
+              const stock = inventoryMap[item?.inventoryId?._id];
 
               return (
                 <div
-                  key={item.inventoryId._id}
+                  key={item?.inventoryId?._id}
                   className="border rounded-xl p-4"
                 >
                   
                   <div className="flex gap-4">
                     <img
-                      src={`/items/${item.inventoryId.image}`}
-                      alt={item.inventoryId.name}
+                      src={`/items/${item?.inventoryId?.image}`}
+                      alt={item?.inventoryId?.name}
                       className="w-16 h-16 rounded-xl object-cover"
                     />
 
                     <div className="flex-1">
-                      <h4 className="font-semibold">{item.inventoryId.name}</h4>
+                      <h4 className="font-semibold">{item?.inventoryId?.name}</h4>
 
                       <p className="text-sm text-gray-500">
-                        {item.inventoryId.hindiName}
+                        {item?.inventoryId?.hindiName}
                       </p>
                     </div>
                    <div className="relative">
@@ -455,22 +458,22 @@ useEffect(() => {
     className="text-2xl cursor-pointer"
     onClick={() =>
       setOpenDropdownId((prev) =>
-        prev === item.inventoryId._id ? null : item.inventoryId._id
+        prev === item?.inventoryId?._id ? null : item?.inventoryId?._id
       )
     }
   />
 
-  {openDropdownId === item.inventoryId._id && (
+  {openDropdownId === item?.inventoryId?._id && (
     <div className="absolute right-0 top-8 z-50 w-50 rounded-lg border bg-white p-2 shadow-lg">
       <button
         type="button"
         onMouseDown={(e) => {
     e.stopPropagation();
-    handleHaveItemForLatter(item.inventoryId._id);
+    handleHaveItemForLatter(item?.inventoryId?._id);
     setOpenDropdownId(null);
   }}
         onClick={() => {
-          handleHaveItemForLatter(item.inventoryId._id);
+          handleHaveItemForLatter(item?.inventoryId?._id);
         }}
         className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
       >
@@ -482,11 +485,11 @@ useEffect(() => {
         type="button"
         onMouseDown={(e) => {
     e.stopPropagation();
-    handleArchiveItem(item.inventoryId._id);
+    handleArchiveItem(item?.inventoryId?._id);
     setOpenDropdownId(null);
   }}
         onClick={() => {
-          handleArchiveItem(item.inventoryId._id);
+          handleArchiveItem(item?.inventoryId?._id);
         }}
         className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
       >
@@ -507,7 +510,7 @@ useEffect(() => {
                       <p className="text-xs text-gray-500">Requested</p>
 
                       <p className="font-semibold">
-                        {item.quantity} {item.inventoryId.unit}
+                        {item?.quantity} {item?.inventoryId?.unit}
                       </p>
                       
                     </div>
@@ -516,7 +519,7 @@ useEffect(() => {
                       <p className="text-xs text-gray-500">Available Stock</p>
 
                       <p className="font-semibold text-green-600">
-                        {stock?.quantity || 0} {item.inventoryId.unit}
+                        {/* {stock?.quantity || 0} {item?.inventoryId?.unit} */}
                       </p>
                     </div>
                   </div>
@@ -530,10 +533,10 @@ useEffect(() => {
                       type="number"
                       disabled={isDispatched || isReceived}
                       min={0}
-                      value={item.dispatchedQuantity}
+                      value={item?.dispatchedQuantity}
                       onChange={(e) =>
                         updateDispatchQuantity(
-                          item.inventoryId._id,
+                          item?.inventoryId?._id,
                           e.target.value,
                         )
                       }
@@ -549,11 +552,11 @@ useEffect(() => {
           </div>
         </Card>
 
-        {isDispatched || isReceived ? (
+        {isDispatched || isReceived  ?(
           <>
-            <DispatchDetails requirement={requirement} />
+            <DispatchDetails requirement={requirement} user={user}/>
 
-            {isReceived && requirement.gatePass?.length > 0 && (
+            {isReceived && requirement.gatePass?.length > 0 && user.role !== "district coordinator" && (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
    {isReceived && (
     <EditGatePassImage
@@ -568,7 +571,8 @@ useEffect(() => {
 )}
           </>
         ) : (
-          <>
+        user.role !== "district coordinator" && (
+            <>
             <Card>
               <h3 className="text-lg font-semibold mb-4">Vehicle Details</h3>
 
@@ -649,9 +653,11 @@ useEffect(() => {
               />
             </Card>
           </>
+        )
         )}
 
-        <Card>
+        {user.role !== "district coordinator" && (
+          <Card>
           <h3 className="text-lg font-semibold mb-4">Dispatch Remarks</h3>
 
           <textarea
@@ -663,6 +669,8 @@ useEffect(() => {
             className="w-full border rounded-xl p-3 resize-none disabled:bg-gray-100 disabled:text-gray-500"
           />
         </Card>
+        )}
+
         <Card>
           <h3 className="text-lg font-semibold mb-4">Activity History</h3>
 
@@ -694,7 +702,7 @@ useEffect(() => {
           )}
         </Card>
 
-        {!isDispatched && !isReceived && (
+        {!isDispatched && !isReceived && user.role !== "district coordinator" && (
   <Button
     className="w-full"
     onClick={handleSave}
