@@ -10,7 +10,7 @@ import { TbLockPassword } from "react-icons/tb";
 import Toast from "../../utils/Toast";
 import toast from "react-hot-toast";
 import { storage } from "../../utils/storage";
-
+import InstallPrompt from "../../components/shared/InstallPrompt";
 const Login = () => {
   const navigate = useNavigate();
 
@@ -102,9 +102,11 @@ const Login = () => {
   }
 }, [navigate]);
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen relative overflow-hidden bg-linear-to-br from-slate-950 via-blue-950 to-indigo-950 flex items-center justify-center px-4 py-8">
+      <span className=" fixed top-1 right-3">
+            <InstallPrompt />
+      </span>
       {/* Background decorations */}
-
       <div className="absolute -top-32 -left-32 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl" />
       <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl" />

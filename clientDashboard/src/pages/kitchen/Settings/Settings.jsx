@@ -25,6 +25,7 @@ import toast from "react-hot-toast";
 import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
 import {themes} from "../../../components/shared/ui/Theme";
 import PageHeader from "../../../components/shared/ui/PageHeader";
+import InstallPrompt from "../../../components/shared/InstallPrompt";
 const Settings = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(true);
@@ -438,6 +439,7 @@ const Settings = () => {
 
         </div>
       </div>
+      <InstallPrompt />
       </ThemeProvider>
     </DashboardLayout>
   );

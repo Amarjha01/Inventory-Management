@@ -7,6 +7,7 @@ import { storage } from "../../../utils/storage";
 import PageHeader from "../../../components/shared/ui/PageHeader";
 import { themes } from "../../../components/shared/ui/Theme";
 import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
+import InstallPrompt from "../../../components/shared/InstallPrompt";
 const Settings = () => {
   // ----------------------------------------
   // Admin's own notification setting
@@ -582,6 +583,7 @@ const Settings = () => {
           </div>
         </div>
       </Card>
+      <InstallPrompt />
       </ThemeProvider>
     </div>
   );

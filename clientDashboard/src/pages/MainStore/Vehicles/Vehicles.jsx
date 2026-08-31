@@ -143,11 +143,6 @@ const Vehicles = () => {
         animate={{ opacity: 1, y: 0 }}
         className="flex justify-between items-center"
       >
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Vehicles</h1>
-
-          <p className="text-gray-500">Manage delivery vehicles</p>
-        </div>
 
         <Button onClick={openAddModal} className="flex items-center gap-2">
           <MdAdd size={20} />
