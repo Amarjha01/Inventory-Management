@@ -22,6 +22,10 @@ import Loader from "../../../components/shared/ui/Loader";
 import { HiOutlineBuildingStorefront } from "react-icons/hi2";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import toast from "react-hot-toast";
+import DISTRICTS from "../../../constants/districts.js"
+import ThemeProvider from "../../../components/shared/ui/ThemeProvider.jsx";
+import PageHeader from "../../../components/shared/ui/PageHeader.jsx";
+import { themes } from "../../../components/shared/ui/Theme.js";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -64,27 +68,20 @@ const Users = () => {
 
   const [form, setForm] = useState({
     name: "",
-
     phone: "",
-
     password: "",
-
     role: "Kitchen Incharge",
-
+    district:"",
     kitchenId: "",
-
     language: "en",
-
     status: "Active",
   });
 
   const roles = [
     "Kitchen Incharge",
-
     "Store Incharge",
-
     "Store Supervisor",
-
+    "district coordinator",
     "Admin",
   ];
 
@@ -101,17 +98,12 @@ const Users = () => {
 
     setForm({
       name: "",
-
       phone: "",
-
       password: "",
-
+      district:"",
       role: "Kitchen Incharge",
-
       kitchenId: "",
-
       language: "en",
-
       status: "Active",
     });
 
@@ -123,46 +115,49 @@ const Users = () => {
 
     setForm({
       name: user.name,
-
       phone: user.phone,
-
       password: "",
-
+      district:user?.district,
       role: user.role,
-
       kitchenId: user.kitchenId?._id || "",
-
       language: user.language,
-
       status: user.isActive ? "Active" : "Inactive",
     });
 
     setShowModal(true);
   };
+console.log(DISTRICTS.map((district) => district.name));
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
+    console.log(name , value);
+    
     if (
       name === "role" &&
-      (value === "Store Supervisor" || value === "Admin")
+      (value === "Store Supervisor" || value === "Admin" || value === "district coordinator")
     ) {
+      
       setForm((prev) => ({
         ...prev,
-
         role: value,
-
         kitchenId: "",
       }));
-
       return;
     }
+    // if(name === "district" && form.role === "district coordinator" ) {
+      
+    //   setForm((prev)=>({
+    //     ...prev,
+    //     district:value
+    //   }))
+    // }
 
     setForm((prev) => ({
       ...prev,
 
       [name]: value,
     }));
+    
   };
 
   const handleSave = async () => {
@@ -199,19 +194,24 @@ const Users = () => {
         language: form.language,
         isActive: form.status === "Active",
       };
-
+     
       if (["Kitchen Incharge", "Store Incharge"].includes(form.role)) {
         payload.kitchenId = form.kitchenId;
       }
 
-      if (!editingUser) {
+      if(form.role === "district coordinator"){
+        payload.district = form.district
+      }
+     
+      if (form.password) {
         payload.password = form.password;
       }
-
-      if (editingUser) {
+      console.log(payload);
+      setIsSaving(false);
+      
+      if (editingUser ) {
         await updateUser(
           editingUser._id,
-
           payload,
         );
       } else {
@@ -238,13 +238,16 @@ const Users = () => {
   }
   return (
     <div className="space-y-5 pb-10">
+      <ThemeProvider
+      theme={themes.USERS}
+      className="min-h-full pb-24"
+    >
+      <PageHeader
+            title="Users"
+            subtitle="Manage application users"
+            imageUrl={'/ui/USERS.png'}
+          />
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Users</h1>
-
-          <p className="text-gray-500">Manage application users</p>
-        </div>
-
         <Button onClick={openAddModal}>
           <MdAdd size={20} />
         </Button>
@@ -387,6 +390,22 @@ const Users = () => {
                 ))}
               </select>
             )}
+            {form.role === "district coordinator"  && (
+              <select
+                name="district"
+                value={form.district}
+                onChange={handleChange}
+                className="w-full border rounded-xl p-3 outline-none"
+              >
+                <option value="">Select District</option>
+
+                {DISTRICTS.map((district , index) => (
+                  <option key={district.value} value={district.value}>
+                    {district.name}
+                  </option>
+                ))}
+              </select>
+            )}
 
             <select
               name="language"
@@ -425,6 +444,7 @@ const Users = () => {
           </div>
         </div>
       )}
+      </ThemeProvider>
     </div>
   );
 };

@@ -13,6 +13,9 @@ import {
     createDriver,
     updateDriver,
 } from "../../../services/driver.service";
+import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
+import { themes } from "../../../components/shared/ui/Theme";
+import PageHeader from "../../../components/shared/ui/PageHeader";
 
 const Drivers = () => {
   const [drivers, setDrivers] = useState([]);
@@ -182,7 +185,15 @@ const handleSave = async () => {
   return (
     <div className="space-y-6 pb-10">
       {/* Header */}
-
+      <ThemeProvider
+      theme={themes.DRIVERS}
+      className="min-h-full pb-24"
+    >
+      <PageHeader
+            title="Drivers"
+            subtitle="Manage delivery drivers"
+            imageUrl={'/ui/DRIVERS.png'}
+          />
       <motion.div
         initial={{
           opacity: 0,
@@ -194,11 +205,6 @@ const handleSave = async () => {
         }}
         className="flex justify-between items-center"
       >
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Drivers</h1>
-
-          <p className="text-gray-500">Manage delivery drivers</p>
-        </div>
 
         <Button onClick={openAddModal} className="flex items-center gap-2">
           <MdAdd size={20} />
@@ -447,6 +453,7 @@ const handleSave = async () => {
           </motion.div>
         )}
       </AnimatePresence>
+      </ThemeProvider>
     </div>
   );
 };

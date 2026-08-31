@@ -24,7 +24,13 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get("/", getKitchens);
+router.get("/",
+  authorize(
+    ROLE.ADMIN, 
+    ROLE.STORE_SUPERVISOR,  
+    ROLE.KITCHEN_INCHARGE, 
+    ROLE.STORE_SUPERVISOR),
+    getKitchens);
 
 router.get("/:id", getKitchenById);
 

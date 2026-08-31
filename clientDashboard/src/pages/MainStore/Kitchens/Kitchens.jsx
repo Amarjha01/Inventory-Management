@@ -19,6 +19,9 @@ import {
   createKitchen,
   updateKitchen,
 } from "../../../services/kitchen.service";
+import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
+import { themes } from "../../../components/shared/ui/Theme";
+import PageHeader from "../../../components/shared/ui/PageHeader";
 
 const Kitchens = () => {
   const [kitchens, setKitchens] = useState([]);
@@ -121,7 +124,15 @@ const Kitchens = () => {
   return (
     <div className="space-y-6 pb-10">
       {/* Header */}
-
+    <ThemeProvider
+      theme={themes.KITCHENS}
+      className="min-h-full pb-24"
+    >
+      <PageHeader
+            title="Kitchens"
+            subtitle="Manage kitchen locations"
+            imageUrl={'/ui/KITCHENS.png'}
+          />
       <motion.div
         initial={{
           opacity: 0,
@@ -133,11 +144,6 @@ const Kitchens = () => {
         }}
         className="flex justify-between items-center"
       >
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Kitchens</h1>
-
-          <p className="text-gray-500">Manage kitchen locations</p>
-        </div>
 
         <Button onClick={openAddModal} className="flex items-center gap-2">
           <MdAdd size={20} />
@@ -393,6 +399,7 @@ const Kitchens = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      </ThemeProvider>
     </div>
   );
 };

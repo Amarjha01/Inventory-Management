@@ -17,6 +17,9 @@ import {
   createVehicle,
   updateVehicle,
 } from "../../../services/vehicle.service";
+import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
+import { themes } from "../../../components/shared/ui/Theme";
+import PageHeader from "../../../components/shared/ui/PageHeader";
 
 const Vehicles = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -126,17 +129,20 @@ const Vehicles = () => {
   return (
     <div className="space-y-6 pb-10">
       {/* Header */}
-
+    <ThemeProvider
+      theme={themes.VEHICLES}
+      className="min-h-full pb-24"
+    >
+      <PageHeader
+            title="Vehicles"
+            subtitle="Manage delivery vehicles"
+            imageUrl={'/ui/VEHICLES.png'}
+          />
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex justify-between items-center"
       >
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Vehicles</h1>
-
-          <p className="text-gray-500">Manage delivery vehicles</p>
-        </div>
 
         <Button onClick={openAddModal} className="flex items-center gap-2">
           <MdAdd size={20} />
@@ -365,6 +371,7 @@ const Vehicles = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      </ThemeProvider>
     </div>
   );
 };

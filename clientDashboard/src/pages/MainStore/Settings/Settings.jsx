@@ -4,13 +4,17 @@ import Card from "../../../components/shared/ui/Card";
 import NotificationSettings from "../../../components/shared/notifications/NotificationSettings";
 import api from "../../../api/axios";
 import { storage } from "../../../utils/storage";
-
+import PageHeader from "../../../components/shared/ui/PageHeader";
+import { themes } from "../../../components/shared/ui/Theme";
+import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
+import InstallPrompt from "../../../components/shared/InstallPrompt";
 const Settings = () => {
   // ----------------------------------------
   // Admin's own notification setting
   // ----------------------------------------
 
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] =
+    useState(false);
 
   const [message, setMessage] = useState(null);
 
@@ -46,7 +50,9 @@ const Settings = () => {
   useEffect(() => {
     const settings = storage.getNotificationSettings();
 
-    setNotificationsEnabled(settings?.notificationsEnabled ?? false);
+    setNotificationsEnabled(
+      settings?.notificationsEnabled ?? false,
+    );
   }, []);
 
   // ----------------------------------------
@@ -94,6 +100,54 @@ const Settings = () => {
   }, []);
 
   // ----------------------------------------
+  // Logout
+  // ----------------------------------------
+
+  const handleLogout = () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to logout?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      /*
+       * Clear authentication data.
+       *
+       * If your storage utility has a dedicated logout/clearAuth
+       * method, you can use that instead.
+       */
+      if (typeof storage.clearAuth === "function") {
+        storage.clearAuth();
+      } else {
+        /*
+         * Fallback: remove common auth keys.
+         *
+         * Keep/add the exact keys used by your application here.
+         */
+        localStorage.removeItem("token");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+      }
+
+      /*
+       * Redirect to login page.
+       */
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Logout failed:", error);
+
+      /*
+       * Even if storage cleanup fails, redirect the user.
+       */
+      window.location.href = "/login";
+    }
+  };
+
+  // ----------------------------------------
   // Admin's notification setting
   // ----------------------------------------
 
@@ -106,7 +160,9 @@ const Settings = () => {
 
     setMessage({
       type: "success",
-      text: enabled ? "Notifications enabled." : "Notifications disabled.",
+      text: enabled
+        ? "Notifications enabled."
+        : "Notifications disabled.",
     });
 
     setTimeout(() => {
@@ -161,9 +217,16 @@ const Settings = () => {
 
       await api.post("/notifications/admin/send", {
         audience,
-        kitchenId: audience === "kitchen" ? kitchenId : undefined,
 
-        districtId: audience === "district" ? districtId : undefined,
+        kitchenId:
+          audience === "kitchen"
+            ? kitchenId
+            : undefined,
+
+        districtId:
+          audience === "district"
+            ? districtId
+            : undefined,
 
         title: title.trim(),
 
@@ -186,11 +249,16 @@ const Settings = () => {
       setKitchenId("");
       setDistrictId("");
     } catch (error) {
-      console.error("Failed to send notification:", error);
+      console.error(
+        "Failed to send notification:",
+        error,
+      );
 
       setMessage({
         type: "error",
-        text: error.response?.data?.message || "Failed to send notification.",
+        text:
+          error.response?.data?.message ||
+          "Failed to send notification.",
       });
     } finally {
       setSending(false);
@@ -199,16 +267,32 @@ const Settings = () => {
 
   return (
     <div className="space-y-6">
+       <ThemeProvider
+      theme={themes.SETTINGS}
+      className="min-h-full pb-24"
+    >
       {/* ----------------------------------------
           PAGE HEADER
       ----------------------------------------- */}
+      <PageHeader 
+      title={"Settings"} 
+      subtitle={"Manage notifications and administrator preferences."} 
+      imageUrl={'/ui/type/SETTING.png'}
+      />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+        {/* ----------------------------------------
+            LOGOUT BUTTON
+        ----------------------------------------- */}
 
-        <p className="mt-1 text-sm text-gray-500">
-          Manage notifications and administrator preferences.
-        </p>
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-5 text-sm font-semibold text-red-600 transition hover:bg-red-50 hover:border-red-300"
+        >
+          <span>↪</span>
+          Logout
+        </button>
       </div>
 
       {/* ----------------------------------------
@@ -241,11 +325,15 @@ const Settings = () => {
             >
               <span
                 className={`h-2 w-2 rounded-full ${
-                  notificationsEnabled ? "bg-green-500" : "bg-gray-400"
+                  notificationsEnabled
+                    ? "bg-green-500"
+                    : "bg-gray-400"
                 }`}
               />
 
-              {notificationsEnabled ? "Enabled" : "Disabled"}
+              {notificationsEnabled
+                ? "Enabled"
+                : "Disabled"}
             </div>
           </div>
 
@@ -296,13 +384,13 @@ const Settings = () => {
               }}
               className="h-11 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-500"
             >
-              <option value="kitchen">Specific Kitchen</option>
+              <option value="kitchen">
+                Specific Kitchen
+              </option>
 
-              {/* <option value="district">All Kitchens in District</option> */}
-
-              {/* <option value="all_kitchens">All Kitchens</option> */}
-
-              <option value="all_users">All Users</option>
+              <option value="all_users">
+                All Users
+              </option>
             </select>
           </div>
 
@@ -316,16 +404,23 @@ const Settings = () => {
 
               <select
                 value={kitchenId}
-                onChange={(e) => setKitchenId(e.target.value)}
+                onChange={(e) =>
+                  setKitchenId(e.target.value)
+                }
                 disabled={loadingKitchens}
                 className="h-11 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-500"
               >
                 <option value="">
-                  {loadingKitchens ? "Loading kitchens..." : "Select kitchen"}
+                  {loadingKitchens
+                    ? "Loading kitchens..."
+                    : "Select kitchen"}
                 </option>
 
                 {kitchens.map((kitchen) => (
-                  <option key={kitchen._id} value={kitchen._id}>
+                  <option
+                    key={kitchen._id}
+                    value={kitchen._id}
+                  >
                     {kitchen.name}
                   </option>
                 ))}
@@ -343,7 +438,9 @@ const Settings = () => {
 
               <select
                 value={districtId}
-                onChange={(e) => setDistrictId(e.target.value)}
+                onChange={(e) =>
+                  setDistrictId(e.target.value)
+                }
                 disabled={loadingDistricts}
                 className="h-11 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm outline-none focus:border-blue-500"
               >
@@ -354,7 +451,10 @@ const Settings = () => {
                 </option>
 
                 {districts.map((district) => (
-                  <option key={district._id} value={district._id}>
+                  <option
+                    key={district._id}
+                    value={district._id}
+                  >
                     {district.name}
                   </option>
                 ))}
@@ -372,7 +472,9 @@ const Settings = () => {
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) =>
+                setTitle(e.target.value)
+              }
               placeholder="e.g. New Requirement Update"
               maxLength={100}
               className="h-11 w-full rounded-xl border border-gray-200 px-3 text-sm outline-none focus:border-blue-500"
@@ -388,7 +490,9 @@ const Settings = () => {
 
             <textarea
               value={body}
-              onChange={(e) => setBody(e.target.value)}
+              onChange={(e) =>
+                setBody(e.target.value)
+              }
               placeholder="Enter notification message..."
               rows={4}
               maxLength={300}
@@ -410,7 +514,9 @@ const Settings = () => {
             <input
               type="text"
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e) =>
+                setUrl(e.target.value)
+              }
               placeholder="/requirements"
               className="h-11 w-full rounded-xl border border-gray-200 px-3 text-sm outline-none focus:border-blue-500"
             />
@@ -435,7 +541,8 @@ const Settings = () => {
                   </h3>
 
                   <p className="mt-1 text-sm text-gray-600">
-                    {body || "Notification message will appear here."}
+                    {body ||
+                      "Notification message will appear here."}
                   </p>
                 </div>
               </div>
@@ -452,7 +559,9 @@ const Settings = () => {
                   : "border-red-200 bg-red-50 text-red-700"
               }`}
             >
-              {message.type === "success" ? "✓ " : "⚠ "}
+              {message.type === "success"
+                ? "✓ "
+                : "⚠ "}
 
               {message.text}
             </div>
@@ -467,11 +576,15 @@ const Settings = () => {
               disabled={sending}
               className="h-11 rounded-xl bg-blue-600 px-6 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
             >
-              {sending ? "Sending..." : "📢 Send Notification"}
+              {sending
+                ? "Sending..."
+                : "📢 Send Notification"}
             </button>
           </div>
         </div>
       </Card>
+      <InstallPrompt />
+      </ThemeProvider>
     </div>
   );
 };

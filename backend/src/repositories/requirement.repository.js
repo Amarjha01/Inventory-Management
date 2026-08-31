@@ -1,3 +1,4 @@
+import Kitchen from "../models/kitchen.js";
 import Requirement from "../models/requirement.js";
 
 class RequirementRepository {
@@ -9,26 +10,31 @@ async create(payload) {
   return requirement;
 }
 
-  async findMany(filter = {}) {
-    
-    return await Requirement.find(filter)
+ async findMany(filter = {}) {
+  let requirementFilter = filter;
 
-      .populate("kitchen")
+  if (filter.district) {
+    const kitchens = await Kitchen.find({
+      district: filter.district,
+    }).select("_id").lean();
 
-      .populate("createdBy", "-password")
-
-      .populate("items.inventoryId")
-
-      .populate("dispatch.vehicle")
-
-      .populate("dispatch.driver")
-
-      .sort({
-        createdAt: -1,
-      })
-
-      .lean();
+    requirementFilter.kitchen = {
+      $in: kitchens.map((kitchen) => kitchen._id),
+    };
   }
+
+  return await Requirement.find(requirementFilter)
+    .populate("kitchen")
+    .populate("createdBy", "-password")
+    .populate("items.inventoryId")
+    .populate("dispatch.vehicle")
+    .populate("dispatch.driver")
+    .sort({
+      createdAt: -1,
+    })
+    .lean();
+}
+
 
   async findById(id) {
     return await Requirement.findById(id)

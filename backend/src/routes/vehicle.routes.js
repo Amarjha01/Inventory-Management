@@ -26,13 +26,12 @@ router.use(authenticate);
 
 router.get(
   "/",
-
+  
   getVehicles,
 );
 
 router.get(
   "/:id",
-
   getVehicleById,
 );
 

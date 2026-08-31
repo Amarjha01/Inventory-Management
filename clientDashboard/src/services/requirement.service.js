@@ -52,7 +52,7 @@ export const updateRequirement = async (
     payload,
   );
 
-  return data.data;
+  return data;
 };
 
 export const dispatchRequirement = async (id, payload) => {

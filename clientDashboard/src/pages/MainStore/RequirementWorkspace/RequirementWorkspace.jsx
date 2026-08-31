@@ -19,6 +19,7 @@ import { getVehicles } from "../../../services/vehicle.service";
 
 import { getDrivers } from "../../../services/driver.service";
 
+import { storage } from "../../../utils/storage";
 import InfoRow from "../../../components/shared/ui/InfoRow";
 import DispatchDetails from "../../../components/shared/dispatch/DispatchDetails";
 import EditGatePassImage from "../../../components/shared/dispatch/EditGatePassImage";
@@ -29,12 +30,17 @@ import ItemSelectorModal from "../../../components/kitchen/requirement/ItemSelec
 import { AnimatePresence , motion } from "framer-motion";
 import ItemCard from "../../../components/kitchen/requirement/ItemCard";
 import { RiDeleteBin3Fill } from "react-icons/ri";
+import { FaSave } from "react-icons/fa";
+import { FiLoader } from "react-icons/fi";
+import toast from "react-hot-toast";
 const RequirementWorkspace = () => {
   const { id } = useParams();
 
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
+
+  const [user , setUser] = useState(storage.getUser())
 
   const [requirement, setRequirement] = useState(null);
 
@@ -58,7 +64,9 @@ const RequirementWorkspace = () => {
 
   const [manualDriverPhone, setManualDriverPhone] = useState("");
 
+  // for loader
   const [isDispatching, setIsDispatching] = useState(false);
+  const [isAddingItems , setIsAddingItems] = useState(false)
   
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
@@ -203,64 +211,104 @@ useEffect(() => {
       }),
     }));
   };
-    const handleDelete = async(id)=>{
-    
-    try {
-      const response =  await deletedRequirement(id)
-      alert("deleted successful")
-      window.location.href = "/store/requirements"
-    } catch (error) {
-      alert(response)
-    }
+
+  const handleDelete = async (id) => {
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this requirement?"
+  );
+
+  if (!confirmed) {
+    return;
   }
-  const handleSave = async () => {
-    if (!vehicleId && !manualVehicleNumber ) {
-      alert('please select vehicle or type manual')
-    }
-    if (!driverId && !manualDriverName ) {
-      alert('please select driver or type manual')
-    }
-    if(manualDriverName ?? !manualDriverPhone){
-      alert("please type phone number also.")
-    }
-  setIsDispatching(true);
-   const itemPayload = selectedItems.map((item) => ({
+
+  try {
+    await deletedRequirement(id);
+    toast.success("Deleted successfully")
+    window.location.href = "/store/requirements";
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      error.response?.data?.message ||
+      "Failed to delete requirement"
+    );
+  }
+};
+
+  const handleSaveItem = async()=>{
+     const itemPayload = selectedItems.map((item) => ({
     inventoryId: item._id,
     quantity: item.quantity,
-    unit:item.unit
-
+    unit: item.unit,
   }));
-  const response = await updateRequirement(requirement._id , itemPayload )
-    
-    try {
-      const payload = {
-        vehicleId,
-        manualVehicleNumber,
-        driverId,
-        manualDriverName,
-        manualDriverPhone,
-        remarks,
+  setIsAddingItems(true)
+   try {
+    const updatedRequirement = await updateRequirement(requirement._id, itemPayload);
+    setRequirement(updatedRequirement.data);
+    setSelectedItems([])
+    setIsAddingItems(false)
+    toast.success(updatedRequirement.message)
+   } catch (error) {
+    toast.error(error.message)
+    setIsAddingItems(false)
+   }
 
-        items: requirement.items.map((item) => ({
-          inventoryId: item.inventoryId._id,
-          quantity: item.quantity,
-          dispatchedQuantity: item.dispatchedQuantity,
-          unit: item.unit,
-        })),
-      };
-      await dispatchRequirement(requirement._id, payload);
-      setIsDispatching(false);
+  }
+ const handleSave = async () => {
+  // Vehicle validation
+  if (!vehicleId && !manualVehicleNumber) {
+    alert("Please select a vehicle or type a manual vehicle number.");
+    return;
+  }
 
-      alert("Requirement dispatched successfully.");
+  // Driver validation
+  if (!driverId && !manualDriverName) {
+    alert("Please select a driver or type a manual driver name.");
+    return;
+  }
 
-      navigate("/store/requirements");
-    } catch (error) {
-      setIsDispatching(false);
-      console.error(error);
+  // Manual driver phone validation
+  if (manualDriverName && !manualDriverPhone) {
+    alert("Please type the driver's phone number also.");
+    return;
+  }
 
-      alert(error.response?.data?.message || "Failed to dispatch.");
-    }
-  };
+  setIsDispatching(true);
+
+  try {
+    const payload = {
+      vehicleId,
+      manualVehicleNumber,
+      driverId,
+      manualDriverName,
+      manualDriverPhone,
+      remarks,
+
+      items: requirement.items.map((item) => ({
+        inventoryId: item.inventoryId._id,
+        quantity: item.quantity,
+        dispatchedQuantity: item.dispatchedQuantity,
+        unit: item.unit,
+      })),
+    };
+
+    await dispatchRequirement(requirement._id, payload);
+
+    alert("Requirement dispatched successfully.");
+
+    navigate("/store/requirements");
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      error.response?.data?.message ||
+        "Failed to dispatch."
+    );
+  } finally {
+    setIsDispatching(false);
+  }
+};
+
 
   if (loading) {
     return <Loader />;
@@ -293,9 +341,27 @@ useEffect(() => {
             <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
               {requirement.status}
             </span>
-            <button onClick={()=>{handleDelete(requirement._id)}} className=" cursor-pointer">
-                      <RiDeleteBin3Fill className=" text-2xl text-red-700"/>
-                     </button>
+            <button
+  type="button"
+  onClick={() => handleDelete(requirement._id)}
+  title="Delete requirement"
+  className="
+    group
+    flex h-9 w-9
+    items-center justify-center
+    rounded-lg
+    text-red-600
+    transition-all duration-200
+    hover:bg-red-50
+    hover:text-red-700
+    active:scale-95
+  "
+>
+  <RiDeleteBin3Fill
+    className="text-2xl cursor-pointer transition-transform duration-200 group-hover:scale-110"
+  />
+</button>
+
           </div>
 
           <div className="mt-6 space-y-4">
@@ -350,7 +416,13 @@ useEffect(() => {
                     </motion.div>
                   ))}
                 </AnimatePresence>
+                 {selectedItems.length >0 && (
+            <button  className=" text-blue-600 cursor-pointer text-3xl">
+            {isAddingItems ?<FiLoader className="animate-spin" /> : <FaSave onClick={handleSaveItem}/>}
+            </button>
+          )}
         <Card>
+         
           <span className=" flex justify-between">
             <h3 className="text-lg font-semibold mb-5">Requested Items</h3>
              <TiDocumentAdd onClick={()=>setShowModal(!showModal)} className="text-3xl cursor-pointer" />
@@ -358,26 +430,26 @@ useEffect(() => {
            
           <div className="space-y-5">
             {requirement.items.map((item) => {
-              const stock = inventoryMap[item.inventoryId._id];
+              const stock = inventoryMap[item?.inventoryId?._id];
 
               return (
                 <div
-                  key={item.inventoryId._id}
+                  key={item?.inventoryId?._id}
                   className="border rounded-xl p-4"
                 >
                   
                   <div className="flex gap-4">
                     <img
-                      src={`/items/${item.inventoryId.image}`}
-                      alt={item.inventoryId.name}
+                      src={`/items/${item?.inventoryId?.image}`}
+                      alt={item?.inventoryId?.name}
                       className="w-16 h-16 rounded-xl object-cover"
                     />
 
                     <div className="flex-1">
-                      <h4 className="font-semibold">{item.inventoryId.name}</h4>
+                      <h4 className="font-semibold">{item?.inventoryId?.name}</h4>
 
                       <p className="text-sm text-gray-500">
-                        {item.inventoryId.hindiName}
+                        {item?.inventoryId?.hindiName}
                       </p>
                     </div>
                    <div className="relative">
@@ -386,22 +458,22 @@ useEffect(() => {
     className="text-2xl cursor-pointer"
     onClick={() =>
       setOpenDropdownId((prev) =>
-        prev === item.inventoryId._id ? null : item.inventoryId._id
+        prev === item?.inventoryId?._id ? null : item?.inventoryId?._id
       )
     }
   />
 
-  {openDropdownId === item.inventoryId._id && (
-    <div className="absolute right-0 top-8 z-50 w-40 rounded-lg border bg-white p-2 shadow-lg">
+  {openDropdownId === item?.inventoryId?._id && (
+    <div className="absolute right-0 top-8 z-50 w-50 rounded-lg border bg-white p-2 shadow-lg">
       <button
         type="button"
         onMouseDown={(e) => {
     e.stopPropagation();
-    handleHaveItemForLatter(item.inventoryId._id);
+    handleHaveItemForLatter(item?.inventoryId?._id);
     setOpenDropdownId(null);
   }}
         onClick={() => {
-          handleHaveItemForLatter(item.inventoryId._id);
+          handleHaveItemForLatter(item?.inventoryId?._id);
         }}
         className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
       >
@@ -413,11 +485,11 @@ useEffect(() => {
         type="button"
         onMouseDown={(e) => {
     e.stopPropagation();
-    handleArchiveItem(item.inventoryId._id);
+    handleArchiveItem(item?.inventoryId?._id);
     setOpenDropdownId(null);
   }}
         onClick={() => {
-          handleArchiveItem(item.inventoryId._id);
+          handleArchiveItem(item?.inventoryId?._id);
         }}
         className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
       >
@@ -438,7 +510,7 @@ useEffect(() => {
                       <p className="text-xs text-gray-500">Requested</p>
 
                       <p className="font-semibold">
-                        {item.quantity} {item.inventoryId.unit}
+                        {item?.quantity} {item?.inventoryId?.unit}
                       </p>
                       
                     </div>
@@ -447,7 +519,7 @@ useEffect(() => {
                       <p className="text-xs text-gray-500">Available Stock</p>
 
                       <p className="font-semibold text-green-600">
-                        {stock?.quantity || 0} {item.inventoryId.unit}
+                        {/* {stock?.quantity || 0} {item?.inventoryId?.unit} */}
                       </p>
                     </div>
                   </div>
@@ -461,10 +533,10 @@ useEffect(() => {
                       type="number"
                       disabled={isDispatched || isReceived}
                       min={0}
-                      value={item.dispatchedQuantity}
+                      value={item?.dispatchedQuantity}
                       onChange={(e) =>
                         updateDispatchQuantity(
-                          item.inventoryId._id,
+                          item?.inventoryId?._id,
                           e.target.value,
                         )
                       }
@@ -480,11 +552,11 @@ useEffect(() => {
           </div>
         </Card>
 
-        {isDispatched || isReceived ? (
+        {isDispatched || isReceived  ?(
           <>
-            <DispatchDetails requirement={requirement} />
+            <DispatchDetails requirement={requirement} user={user}/>
 
-            {isReceived && requirement.gatePass?.length > 0 && (
+            {isReceived && requirement.gatePass?.length > 0 && user.role !== "district coordinator" && (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
    {isReceived && (
     <EditGatePassImage
@@ -499,7 +571,8 @@ useEffect(() => {
 )}
           </>
         ) : (
-          <>
+        user.role !== "district coordinator" && (
+            <>
             <Card>
               <h3 className="text-lg font-semibold mb-4">Vehicle Details</h3>
 
@@ -580,9 +653,11 @@ useEffect(() => {
               />
             </Card>
           </>
+        )
         )}
 
-        <Card>
+        {user.role !== "district coordinator" && (
+          <Card>
           <h3 className="text-lg font-semibold mb-4">Dispatch Remarks</h3>
 
           <textarea
@@ -594,6 +669,8 @@ useEffect(() => {
             className="w-full border rounded-xl p-3 resize-none disabled:bg-gray-100 disabled:text-gray-500"
           />
         </Card>
+        )}
+
         <Card>
           <h3 className="text-lg font-semibold mb-4">Activity History</h3>
 
@@ -625,11 +702,22 @@ useEffect(() => {
           )}
         </Card>
 
-        {!isDispatched && !isReceived && (
-          <Button className="w-full" onClick={handleSave}>
-            {isDispatching ? "Dispatching...." : " Dispatch Requirement "}
-          </Button>
-        )}
+        {!isDispatched && !isReceived && user.role !== "district coordinator" && (
+  <Button
+    className="w-full"
+    onClick={handleSave}
+    disabled={isDispatching}
+  >
+    {isDispatching ? (
+      <span className=" flex justify-center items-center gap-1 ">
+        Dispatching... <FiLoader className="animate-spin text-2xl" />
+      </span>
+    ) : (
+      "Dispatch Requirement"
+    )}
+  </Button>
+)}
+
       </div>
     );
   }

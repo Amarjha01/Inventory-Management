@@ -29,15 +29,6 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/resetpass" element={<PasswordResetForm />} />
 
-      {/* <Route
-    path="/dashboard"
-    element={
-        <ProtectedRoute roles={["Kitchen Incharge"]}>
-            <Dashboard />
-        </ProtectedRoute>
-    }
-/> */}
-
 <Route
     path="/new-requirement"
     element={
@@ -96,6 +87,7 @@ const AppRoutes = () => {
             roles={[
                 "Admin",
                 "Store Supervisor",
+                "district coordinator",
             ]}
         >
             <MainStoreLayout />
@@ -155,6 +147,8 @@ const AppRoutes = () => {
 
 </Route>
     </Routes>
+
+    
   );
 };
 

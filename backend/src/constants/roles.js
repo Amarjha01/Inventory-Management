@@ -4,6 +4,8 @@ export const ROLE = Object.freeze({
 
     STORE_SUPERVISOR: "Store Supervisor",
 
+    DISTRICT_COORDINATOR: "district coordinator",
+
     STORE_INCHARGE: "Store Incharge",
 
     KITCHEN_INCHARGE: "Kitchen Incharge"

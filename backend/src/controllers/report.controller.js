@@ -2,8 +2,17 @@ import asyncHandler from "../utils/asyncHandler.js";
 
 import reportService from "../services/report.service.js";
 
+// --------------------------------------------------
+// Report Options
+// --------------------------------------------------
+
 export const getRequirementReportOptions =
   asyncHandler(async (req, res) => {
+    console.log(
+      "Requirement report options query:",
+      req.query,
+    );
+
     const data =
       await reportService.getRequirementReportOptions(
         req.query,
@@ -12,22 +21,47 @@ export const getRequirementReportOptions =
     res.status(200).json(data);
   });
 
+// --------------------------------------------------
+// Download Report
+// --------------------------------------------------
 
+export const downloadRequirementReport =
+  asyncHandler(async (req, res) => {
+    console.log(
+      "Requirement report query:",
+      req.query,
+    );
 
+    const workbook =
+      await reportService.downloadRequirementReport(
+        req.query,
+      );
 
-export const downloadRequirementReport = asyncHandler(async (req, res) => {
-  const workbook = await reportService.downloadRequirementReport(req.query);
+    let statusName = "all-status";
 
-  const filename = `requirements-${Date.now()}.xlsx`;
+    if (req.query.status === "requested") {
+      statusName = "requested";
+    }
 
-  res.setHeader(
-    "Content-Type",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  );
+    if (req.query.status === "dispatched") {
+      statusName = "dispatched";
+    }
 
-  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    const filename =
+      `${statusName}-requirements-${Date.now()}.xlsx`;
 
-  await workbook.xlsx.write(res);
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
 
-  res.end();
-});
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${filename}"`,
+    );
+
+    await workbook.xlsx.write(res);
+
+    res.end();
+  });
+

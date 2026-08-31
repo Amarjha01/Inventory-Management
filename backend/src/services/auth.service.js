@@ -68,10 +68,10 @@ class AuthService {
 
 };
   }
-  async changePassword(userId, newPassword) {
+  async changePassword(id , userId, newPassword) {
     console.log("userId & newPassword" , userId , newPassword );
-    
-    const user = await userRepository.findByIdWithPassword(userId);
+    const _id = id || userId;
+    const user = await userRepository.findByIdWithPassword(_id);
 
     if (!user) {
         throw new ApiError(
@@ -80,17 +80,17 @@ class AuthService {
         );
     }
 
-    const passwordMatched = await comparePassword(
-      newPassword,
-        user.password
-    );
+    // const passwordMatched = await comparePassword(
+    //   newPassword,
+    //     user.password
+    // );
 
-    if (passwordMatched) {
-        throw new ApiError(
-            422,
-            "The new password cannot be the same as any previously used password."
-        );
-    }
+    // if (passwordMatched) {
+    //     throw new ApiError(
+    //         422,
+    //         "The new password cannot be the same as any previously used password."
+    //     );
+    // }
 
     const hashedPassword = await hashPassword(
         newPassword

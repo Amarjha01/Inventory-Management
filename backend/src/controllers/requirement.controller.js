@@ -31,17 +31,24 @@ export const getRequirements = asyncHandler(async (req, res) => {
     requirements,
   );
 });
+
 export const getAllKitchenRequirements = asyncHandler(async (req, res) => {
-  const requirements = await requirementService.allKitchenRequirements();
+  console.log(req.user);
   
+  const filter =
+    req.user.role === 'district coordinator'
+      ? { district: req.user.district }
+      : {};
+
+  const requirements = await requirementService.allKitchenRequirements(filter);
+
   return ApiResponse.success(
     res,
-
     MESSAGE.SUCCESS,
-
     requirements,
   );
 });
+
 
 export const getRequirementById = asyncHandler(async (req, res) => {
   const requirement = await requirementService.getRequirementById(
