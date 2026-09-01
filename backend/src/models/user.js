@@ -51,6 +51,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    notificationEnabled: {
+      type: Boolean,
+      default: false,
+    },
     isFirstLogin: {
       type: Boolean,
       default: true,

@@ -40,6 +40,7 @@ class NotificationService {
 
 
   async unsubscribe(userId, endpoint) {
+console.log(userId , endpoint);
 
     return await notificationRepository
       .deleteByUserIdAndEndpoint(
