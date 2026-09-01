@@ -5,7 +5,9 @@ import {
   FiSearch,
   FiFileText,
   FiPackage,
+  FiFilter
 } from "react-icons/fi";
+
 
 import Card from "../../../components/shared/ui/Card";
 import Loader from "../../../components/shared/ui/Loader";
@@ -22,6 +24,7 @@ const Requirements = () => {
 
   const [loading, setLoading] = useState(true);
   const [requirements, setRequirements] = useState([]);
+  const [showFilters, setShowFilters] = useState(false);
   const [search, setSearch] = useState(() => {
   try {
     const saved = sessionStorage.getItem(
@@ -43,7 +46,6 @@ const Requirements = () => {
   return "";
 });
 
-
   const [activeStatus, setActiveStatus] = useState(() => {
     try {
       const saved = sessionStorage.getItem(
@@ -62,40 +64,29 @@ const Requirements = () => {
     return "Submitted";
   });
 
-// useEffect(() => {
-//   const handleScroll = () => {
-//     try {
-//       const existing = sessionStorage.getItem(
-//         REQUIREMENTS_STATE_KEY
-//       );
+ 
 
-//       const saved = existing
-//         ? JSON.parse(existing)
-//         : {};
+const [dateFilter, setDateFilter] = useState(() => {
+  try {
+    const saved = localStorage.getItem(
+      REQUIREMENTS_STATE_KEY
+    );
 
-//       sessionStorage.setItem(
-//         REQUIREMENTS_STATE_KEY,
-//         JSON.stringify({
-//           ...saved,
-//           scrollY: window.scrollY,
-//         })
-//       );
-//     } catch (error) {
-//       console.error(
-//         "Failed to save scroll position:",
-//         error
-//       );
-//     }
-//   };
+    if (saved) {
+      const parsed = JSON.parse(saved);
 
-//   window.addEventListener("scroll", handleScroll, {
-//     passive: true,
-//   });
+      return parsed.dateFilter || "All";
+    }
+  } catch (error) {
+    console.error(
+      "Failed to restore date filter:",
+      error
+    );
+  }
 
-//   return () => {
-//     window.removeEventListener("scroll", handleScroll);
-//   };
-// }, []);
+  return "All";
+});
+
 
 useEffect(() => {
   if (loading) return;
@@ -195,29 +186,85 @@ useEffect(() => {
   // FILTER REQUIREMENTS
   // =========================================================
 
-  const filteredRequirements = useMemo(() => {
-    let result = requirements.filter(
-      (item) =>
-        item.status === activeStatus,
+ const filteredRequirements = useMemo(() => {
+  let result = requirements.filter(
+    (item) =>
+      item.status === activeStatus
+  );
+
+  // =========================================
+  // DATE FILTER
+  // =========================================
+
+  if (dateFilter !== "All") {
+    const now = new Date();
+
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
     );
 
-    if (search.trim()) {
-      const searchValue =
-        search.trim().toLowerCase();
+    const startOfYesterday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() - 1
+    );
 
-      result = result.filter((item) =>
-        JSON.stringify(item)
-          .toLowerCase()
-          .includes(searchValue),
-      );
+    if (dateFilter === "Today") {
+      result = result.filter((item) => {
+        const createdAt =
+          new Date(item.createdAt);
+
+        return createdAt >= startOfToday;
+      });
     }
 
-    return result;
-  }, [
-    requirements,
-    activeStatus,
-    search,
-  ]);
+    if (dateFilter === "Yesterday") {
+      result = result.filter((item) => {
+        const createdAt =
+          new Date(item.createdAt);
+
+        return (
+          createdAt >= startOfYesterday &&
+          createdAt < startOfToday
+        );
+      });
+    }
+
+    if (dateFilter === "Older") {
+      result = result.filter((item) => {
+        const createdAt =
+          new Date(item.createdAt);
+
+        return createdAt < startOfYesterday;
+      });
+    }
+  }
+
+  // =========================================
+  // SEARCH
+  // =========================================
+
+  if (search.trim()) {
+    const searchValue =
+      search.trim().toLowerCase();
+
+    result = result.filter((item) =>
+      JSON.stringify(item)
+        .toLowerCase()
+        .includes(searchValue)
+    );
+  }
+
+  return result;
+}, [
+  requirements,
+  activeStatus,
+  dateFilter,
+  search,
+]);
+
 
   // =========================================================
   // STATUS STYLE
@@ -361,65 +408,101 @@ useEffect(() => {
           SEARCH
       ====================================================== */}
 
-      <div className="relative">
-        <FiSearch
-          className="
-            absolute
-            left-3
-            top-1/2
-            -translate-y-1/2
-            text-gray-400
-          "
-        />
+      <div className="flex gap-2">
+  {/* SEARCH */}
+  <div className="relative flex-1">
+    <FiSearch
+      className="
+        absolute
+        left-3
+        top-1/2
+        -translate-y-1/2
+        text-gray-400
+      "
+    />
 
-        <input
-          value={search}
-          onChange={(e) => {
-  const value = e.target.value;
+    <input
+      value={search}
+      onChange={(e) => {
+        const value = e.target.value;
 
-  setSearch(value);
+        setSearch(value);
 
-  try {
-    const existing = sessionStorage.getItem(
-      REQUIREMENTS_STATE_KEY
-    );
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem(
+              REQUIREMENTS_STATE_KEY
+            ) || "{}"
+          );
 
-    const saved = existing
-      ? JSON.parse(existing)
-      : {};
+          localStorage.setItem(
+            REQUIREMENTS_STATE_KEY,
+            JSON.stringify({
+              ...saved,
+              search: value,
+            })
+          );
+        } catch (error) {
+          console.error(error);
+        }
+      }}
+      placeholder={`Search ${activeStatus.toLowerCase()} requirement...`}
+      className="
+        w-full
+        rounded-xl
+        border
+        border-gray-200
+        bg-white
+        py-3
+        pl-10
+        pr-4
+        outline-none
+        focus:border-teal-500
+        focus:ring-4
+        focus:ring-teal-500/10
+      "
+    />
+  </div>
 
-    sessionStorage.setItem(
-      REQUIREMENTS_STATE_KEY,
-      JSON.stringify({
-        ...saved,
-        search: value,
-      })
-    );
-  } catch (error) {
-    console.error(
-      "Failed to save search state:",
-      error
-    );
-  }
-}}
+  {/* FILTER BUTTON */}
+  <button
+    type="button"
+    onClick={() =>
+      setShowFilters((prev) => !prev)
+    }
+    className={`
+      flex
+      shrink-0
+      items-center
+      gap-2
+      rounded-xl
+      border
+      px-4
+      py-3
+      text-sm
+      font-semibold
+      transition-all
+      ${
+        dateFilter !== "All"
+          ? "border-(--theme-text) bg-(--theme-text)/10 text-(--theme-text)"
+          : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+      }
+    `}
+  >
+    <FiFilter />
 
-          placeholder={`Search ${activeStatus.toLowerCase()} requirement...`}
-          className="
-            w-full
-            rounded-xl
-            border
-            border-gray-200
-            bg-white
-            py-3
-            pl-10
-            pr-4
-            outline-none
-            focus:border-teal-500
-            focus:ring-4
-            focus:ring-teal-500/10
-          "
-        />
-      </div>
+    <span className="hidden sm:inline">
+      Filter
+    </span>
+
+    {dateFilter !== "All" && (
+      <span className="rounded-full bg-(--theme-text) px-2 py-0.5 text-xs text-white">
+        1
+      </span>
+    )}
+  </button>
+</div>
+
 
       {/* =====================================================
           EMPTY
@@ -440,6 +523,143 @@ useEffect(() => {
           </p>
         </div>
       )}
+
+      {showFilters && (
+  <motion.div
+    initial={{
+      opacity: 0,
+      height: 0,
+    }}
+    animate={{
+      opacity: 1,
+      height: "auto",
+    }}
+    exit={{
+      opacity: 0,
+      height: 0,
+    }}
+    className="overflow-hidden"
+  >
+    <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-semibold text-gray-800">
+            Filter Requirements
+          </h3>
+
+          <p className="mt-1 text-xs text-gray-500">
+            Showing: {activeStatus}
+          </p>
+        </div>
+
+        {dateFilter !== "All" && (
+          <button
+            type="button"
+            onClick={() => {
+              setDateFilter("All");
+
+              try {
+                const saved = JSON.parse(
+                  localStorage.getItem(
+                    REQUIREMENTS_STATE_KEY
+                  ) || "{}"
+                );
+
+                localStorage.setItem(
+                  REQUIREMENTS_STATE_KEY,
+                  JSON.stringify({
+                    ...saved,
+                    dateFilter: "All",
+                    scrollY: 0,
+                  })
+                );
+              } catch (error) {
+                console.error(error);
+              }
+
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              });
+            }}
+            className="text-xs font-medium text-red-500 hover:text-red-600"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* DATE FILTER */}
+      <div className="mt-4">
+        <p className="mb-2 text-sm font-medium text-gray-600">
+          Created Date
+        </p>
+
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {[
+            "All",
+            "Today",
+            "Yesterday",
+            "Older",
+          ].map((filter) => {
+            const active =
+              dateFilter === filter;
+
+            return (
+              <button
+                key={filter}
+                type="button"
+                onClick={() => {
+                  setDateFilter(filter);
+
+                  try {
+                    const saved = JSON.parse(
+                      localStorage.getItem(
+                        REQUIREMENTS_STATE_KEY
+                      ) || "{}"
+                    );
+
+                    localStorage.setItem(
+                      REQUIREMENTS_STATE_KEY,
+                      JSON.stringify({
+                        ...saved,
+                        dateFilter: filter,
+                        scrollY: 0,
+                      })
+                    );
+                  } catch (error) {
+                    console.error(error);
+                  }
+
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
+                className={`
+                  rounded-xl
+                  px-3
+                  py-2
+                  text-sm
+                  font-medium
+                  transition-all
+                  ${
+                    active
+                      ? "bg-(--theme-text) text-white shadow-sm"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }
+                `}
+              >
+                {filter}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  </motion.div>
+)}
+
 
       {/* =====================================================
           REQUIREMENT CARDS
@@ -474,6 +694,7 @@ useEffect(() => {
     JSON.stringify({
       activeStatus,
       search,
+      dateFilter,
       scrollY: window.scrollY,
     })
   );
