@@ -26,7 +26,6 @@ router.use(authenticate);
 
 router.get(
   "/",
-  
   getVehicles,
 );
 

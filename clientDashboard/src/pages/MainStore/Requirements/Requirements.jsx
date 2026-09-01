@@ -15,15 +15,119 @@ import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
 import { themes } from "../../../components/shared/ui/Theme";
 import PageHeader from "../../../components/shared/ui/PageHeader";
 
+const REQUIREMENTS_STATE_KEY = "requirements-page-state";
+
 const Requirements = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [requirements, setRequirements] = useState([]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => {
+  try {
+    const saved = sessionStorage.getItem(
+      REQUIREMENTS_STATE_KEY
+    );
 
-  const [activeStatus, setActiveStatus] =
-    useState("Submitted");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+
+      return parsed.search || "";
+    }
+  } catch (error) {
+    console.error(
+      "Failed to restore search state:",
+      error
+    );
+  }
+
+  return "";
+});
+
+
+  const [activeStatus, setActiveStatus] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem(
+        REQUIREMENTS_STATE_KEY
+      );
+
+      if (saved) {
+        const parsed = JSON.parse(saved);
+
+        return parsed.activeStatus || "Submitted";
+      }
+    } catch (error) {
+      console.error("Failed to restore requirements state:", error);
+    }
+
+    return "Submitted";
+  });
+
+// useEffect(() => {
+//   const handleScroll = () => {
+//     try {
+//       const existing = sessionStorage.getItem(
+//         REQUIREMENTS_STATE_KEY
+//       );
+
+//       const saved = existing
+//         ? JSON.parse(existing)
+//         : {};
+
+//       sessionStorage.setItem(
+//         REQUIREMENTS_STATE_KEY,
+//         JSON.stringify({
+//           ...saved,
+//           scrollY: window.scrollY,
+//         })
+//       );
+//     } catch (error) {
+//       console.error(
+//         "Failed to save scroll position:",
+//         error
+//       );
+//     }
+//   };
+
+//   window.addEventListener("scroll", handleScroll, {
+//     passive: true,
+//   });
+
+//   return () => {
+//     window.removeEventListener("scroll", handleScroll);
+//   };
+// }, []);
+
+useEffect(() => {
+  if (loading) return;
+
+  const saved = sessionStorage.getItem(
+    REQUIREMENTS_STATE_KEY
+  );
+
+  if (!saved) return;
+
+  try {
+    const parsed = JSON.parse(saved);
+
+    if (typeof parsed.scrollY !== "number") return;
+
+    // Wait for the DOM to render the requirement cards
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: parsed.scrollY,
+          behavior: "instant",
+        });
+      });
+    });
+  } catch (error) {
+    console.error(
+      "Failed to restore scroll position:",
+      error
+    );
+  }
+}, [loading]);
+
 
   useEffect(() => {
     const load = async () => {
@@ -187,13 +291,33 @@ const Requirements = () => {
               key={tab.value}
               type="button"
               onClick={() => {
-                setActiveStatus(
-                  tab.value,
-                );
+  setActiveStatus(tab.value);
+  setSearch("");
 
-                // Optional: clear search
-                setSearch("");
-              }}
+  const existing = sessionStorage.getItem(
+    REQUIREMENTS_STATE_KEY
+  );
+
+  const saved = existing
+    ? JSON.parse(existing)
+    : {};
+
+  sessionStorage.setItem(
+    REQUIREMENTS_STATE_KEY,
+    JSON.stringify({
+      ...saved,
+      activeStatus: tab.value,
+      search: "",
+      scrollY: 0,
+    })
+  );
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+}}
+
               className={`
                 rounded-xl
                 px-2
@@ -250,9 +374,35 @@ const Requirements = () => {
 
         <input
           value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
+          onChange={(e) => {
+  const value = e.target.value;
+
+  setSearch(value);
+
+  try {
+    const existing = sessionStorage.getItem(
+      REQUIREMENTS_STATE_KEY
+    );
+
+    const saved = existing
+      ? JSON.parse(existing)
+      : {};
+
+    sessionStorage.setItem(
+      REQUIREMENTS_STATE_KEY,
+      JSON.stringify({
+        ...saved,
+        search: value,
+      })
+    );
+  } catch (error) {
+    console.error(
+      "Failed to save search state:",
+      error
+    );
+  }
+}}
+
           placeholder={`Search ${activeStatus.toLowerCase()} requirement...`}
           className="
             w-full
@@ -318,11 +468,21 @@ const Requirements = () => {
                 layout
               >
                 <Card
-                  onClick={() =>
-                    navigate(
-                      `/store/requirements/${requirement._id}`,
-                    )
-                  }
+                 onClick={() => {
+  sessionStorage.setItem(
+    REQUIREMENTS_STATE_KEY,
+    JSON.stringify({
+      activeStatus,
+      search,
+      scrollY: window.scrollY,
+    })
+  );
+
+  navigate(
+    `/store/requirements/${requirement._id}`
+  );
+}}
+
                   className="
                     cursor-pointer
                     transition-all
