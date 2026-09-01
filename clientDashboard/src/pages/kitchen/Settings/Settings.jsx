@@ -66,7 +66,8 @@ const Settings = () => {
       setSending(true);
       setMessage(null);
 
-      await api.post("/notifications/test");
+      const res = await api.post("/notifications/test");
+        console.log(res);
 
       setMessage({
         type: "success",
