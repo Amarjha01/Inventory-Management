@@ -114,7 +114,7 @@ const Login = () => {
       <div className="relative z-10 w-full max-w-md">
         {/* Logo / Brand */}
         <div className="text-center mb-6">
-          <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-xl shadow-blue-500/30 flex items-center justify-center">
+          <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-blue-800 shadow-xl shadow-blue-500/30 flex items-center justify-center">
             <TbLockPassword className="text-white text-3xl" />
           </div>
 
@@ -177,7 +177,7 @@ const Login = () => {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   placeholder="Enter your password"
-                  className="!pl-11 !pr-12"
+                  className="pl-11! pr-12!"
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !loading) {
@@ -210,7 +210,7 @@ const Login = () => {
 
             {/* Login Button */}
             <Button
-              className="w-full !mt-7 !h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full  h-12! rounded-xl bg-blue-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
               onClick={handleLogin}
               disabled={loading}
             >
@@ -226,7 +226,7 @@ const Login = () => {
           </div>
 
           {/* Footer */}
-          <div className="mt-7 pt-5 border-t border-gray-100 text-center">
+          <div className="mt-1 pt-5 border-t border-gray-100 text-center">
             <p className="text-xs text-gray-400">
               Secure access to your management dashboard
             </p>

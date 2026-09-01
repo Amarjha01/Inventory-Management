@@ -37,10 +37,9 @@ const userSchema = new mongoose.Schema(
       ref: "Kitchen",
       default: null,
     },
-    district:{
-    type: String,
-    
-    },
+    district:[
+      {type: String}
+    ],
 
     language: {
       type: String,
