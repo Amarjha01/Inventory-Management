@@ -119,7 +119,7 @@ const Settings = () => {
             imageUrl={'/ui/type/SETTING.png'}
           />
         {/* Notifications */}
-        <Card className="mt-4 overflow-hidden !p-0">
+        <Card className="mt-4 overflow-hidden p-0!">
           {/* Notification Header */}
           <button
             type="button"
