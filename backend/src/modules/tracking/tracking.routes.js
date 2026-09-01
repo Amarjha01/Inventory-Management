@@ -20,7 +20,13 @@ router.get(
 );
 router.get(
   "/live-by-vehicle",
-  authorize(ROLE.ADMIN , ROLE.KITCHEN_INCHARGE , ROLE.STORE_INCHARGE , ROLE.STORE_SUPERVISOR),
+  authorize(
+    ROLE.ADMIN, 
+    ROLE.KITCHEN_INCHARGE, 
+    ROLE.STORE_INCHARGE, 
+    ROLE.STORE_SUPERVISOR, 
+    ROLE.DISTRICT_COORDINATOR
+  ),
   validateTrackerRequirement,
   validate,
   getLiveLocationsByVehicle

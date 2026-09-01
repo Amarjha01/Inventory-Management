@@ -36,6 +36,11 @@ class NotificationRepository {
       endpoint,
     });
   }
+  async deleteById(id) {
+    return await PushSubscription.deleteOne({
+     id
+    });
+  }
 }
 
 export default new NotificationRepository();

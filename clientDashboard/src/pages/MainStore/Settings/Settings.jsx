@@ -8,6 +8,7 @@ import PageHeader from "../../../components/shared/ui/PageHeader";
 import { themes } from "../../../components/shared/ui/Theme";
 import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
 import InstallPrompt from "../../../components/shared/InstallPrompt";
+import { FiSend } from "react-icons/fi";
 const Settings = () => {
   // ----------------------------------------
   // Admin's own notification setting
@@ -169,6 +170,31 @@ const Settings = () => {
       setMessage(null);
     }, 3000);
   };
+
+   const handleSendTestNotification = async () => {
+      try {
+        setSending(true);
+        setMessage(null);
+  
+        await api.post("/notifications/test");
+  
+        setMessage({
+          type: "success",
+          text: "Test notification sent successfully.",
+        });
+      } catch (error) {
+        console.error("Notification test failed:", error);
+  
+        setMessage({
+          type: "error",
+          text:
+            error.response?.data?.message ||
+            "Failed to send test notification.",
+        });
+      } finally {
+        setSending(false);
+      }
+    };
 
   // ----------------------------------------
   // Send admin notification
@@ -345,7 +371,81 @@ const Settings = () => {
           />
         </div>
       </Card>
+              {/* Test notification */}
+             <div
+  className="
+    mx-4
+    mb-4
+    rounded-2xl
+    border
+    border-(--theme-border)
+    bg-(--theme-surface-alt)
+    p-4
+  "
+>
+  <div className="flex items-center justify-between gap-4">
 
+    <div>
+      <h3
+        className="
+          text-sm
+          font-semibold
+          text-(--theme-text)
+        "
+      >
+        Test Notification
+      </h3>
+
+      <p
+        className="
+          mt-1
+          text-xs
+          leading-5
+          text-(--theme-text-secondary)
+        "
+      >
+        Send a test notification to this device.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      onClick={handleSendTestNotification}
+      disabled={
+        sending || !notificationsEnabled
+      }
+      className="
+        flex
+        shrink-0
+        items-center
+        gap-2
+        rounded-xl
+        border
+        border-(--theme-primary)
+        bg-(--theme-surface)
+        px-4
+        py-2.5
+        text-xs
+        font-semibold
+        text-(--theme-primary)
+        transition
+
+        hover:bg-(--theme-primary-light)
+
+        disabled:cursor-not-allowed
+        disabled:border-gray-300
+        disabled:text-gray-400
+      "
+    >
+      <FiSend size={15} />
+
+      {sending
+        ? "Sending..."
+        : "Send Test"}
+    </button>
+
+  </div>
+</div>
       {/* ----------------------------------------
           SEND NOTIFICATION
       ----------------------------------------- */}

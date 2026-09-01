@@ -71,7 +71,7 @@ const Users = () => {
     phone: "",
     password: "",
     role: "Kitchen Incharge",
-    district:"",
+    district:[],
     kitchenId: "",
     language: "en",
     status: "Active",
@@ -100,7 +100,7 @@ const Users = () => {
       name: "",
       phone: "",
       password: "",
-      district:"",
+      district:[],
       role: "Kitchen Incharge",
       kitchenId: "",
       language: "en",
@@ -129,36 +129,50 @@ const Users = () => {
 console.log(DISTRICTS.map((district) => district.name));
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    console.log(name , value);
-    
-    if (
-      name === "role" &&
-      (value === "Store Supervisor" || value === "Admin" || value === "district coordinator")
-    ) {
-      
-      setForm((prev) => ({
-        ...prev,
-        role: value,
-        kitchenId: "",
-      }));
-      return;
-    }
-    // if(name === "district" && form.role === "district coordinator" ) {
-      
-    //   setForm((prev)=>({
-    //     ...prev,
-    //     district:value
-    //   }))
-    // }
+  const { name, value, options, multiple } = e.target;
+
+  console.log(name, value);
+
+  // Handle role change
+  if (
+    name === "role" &&
+    (
+      value === "Store Supervisor" ||
+      value === "Admin" ||
+      value === "district coordinator"
+    )
+  ) {
+    setForm((prev) => ({
+      ...prev,
+      role: value,
+      kitchenId: "",
+      district: value === "district coordinator" ? prev.district : [],
+    }));
+
+    return;
+  }
+
+  // Handle multiple district select
+  if (name === "district" && multiple) {
+    const selectedDistricts = Array.from(options)
+      .filter((option) => option.selected)
+      .map((option) => option.value);
 
     setForm((prev) => ({
       ...prev,
-
-      [name]: value,
+      district: selectedDistricts,
     }));
-    
-  };
+
+    return;
+  }
+
+  // Handle normal inputs
+  setForm((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -247,13 +261,13 @@ console.log(DISTRICTS.map((district) => district.name));
             subtitle="Manage application users"
             imageUrl={'/ui/USERS.png'}
           />
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center pb-1">
         <Button onClick={openAddModal}>
           <MdAdd size={20} />
         </Button>
       </div>
 
-      <div className="relative">
+      <div className="relative py-1">
         <MdSearch className="absolute left-3 top-3.5 text-gray-400" size={20} />
 
         <input
@@ -390,9 +404,11 @@ console.log(DISTRICTS.map((district) => district.name));
                 ))}
               </select>
             )}
+            
             {form.role === "district coordinator"  && (
               <select
                 name="district"
+                multiple
                 value={form.district}
                 onChange={handleChange}
                 className="w-full border rounded-xl p-3 outline-none"
@@ -435,7 +451,7 @@ console.log(DISTRICTS.map((district) => district.name));
               </Button>
 
               <Button
-                className="flex-1 bg-gray-300 text-black hover:bg-gray-400"
+                className="flex-1 bg-gray-600 text-black hover:bg-gray-700"
                 onClick={() => setShowModal(false)}
               >
                 Cancel

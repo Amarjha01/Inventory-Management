@@ -14,7 +14,7 @@ const Input = ({
             )}
 
             <input
-                className={`w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 ${className}`}
+                className={`w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
                 {...props}
             />
 
