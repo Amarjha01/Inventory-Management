@@ -3,7 +3,7 @@ import trackingService from "./tracking.service.js";
 const getLiveLocations = async (req, res) => {
   try {
     const result =
-      await trackingService.getLiveLocations("BR31GC5932");
+      await trackingService.getLiveLocations();
     console.log("tracking URL" , result);
     
     return res.status(200).json({

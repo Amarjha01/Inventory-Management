@@ -17,7 +17,12 @@ const RequirementCard = ({ requirement }) => {
             </h2>
 
             <p className="text-sm text-gray-500 mt-1">
-              {requirement.createdAt}
+              {
+              new Date(requirement.createdAt).toLocaleString("en-IN", {
+              dateStyle: "medium",
+              timeStyle: "medium",
+              timeZone: "Asia/Kolkata",
+            })}
             </p>
 
           </div>
