@@ -105,7 +105,7 @@ const ReceiveRequirement = ({ loading = false, onReceive , user}) => {
             ))}
           </div>
 
-          {gatePass.length < 2 && user.role !== "district coordinator" && (
+          {gatePass.length < 2 && user?.role !== "district coordinator" && (
             <Button
               type="button"
               onClick={() => fileInputRef.current?.click()}

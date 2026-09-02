@@ -177,7 +177,7 @@ const Requirements = () => {
 
       if (dateFilter === "Today") {
         result = result.filter((item) => {
-          const createdAt = new Date(item.dispatch.dispatchedAt || item.createdAt);
+          const createdAt = new Date(item.receivedAt || item.dispatch.dispatchedAt || item.createdAt);
 
           return createdAt >= startOfToday;
         });
@@ -185,7 +185,7 @@ const Requirements = () => {
 
       if (dateFilter === "Yesterday") {
         result = result.filter((item) => {
-          const createdAt = new Date(item.dispatch.dispatchedAt || item.createdAt);
+          const createdAt = new Date(item.receivedAt || item.dispatch.dispatchedAt || item.createdAt);
 
           return createdAt >= startOfYesterday && createdAt < startOfToday;
         });
@@ -193,7 +193,7 @@ const Requirements = () => {
 
       if (dateFilter === "Older") {
         result = result.filter((item) => {
-          const createdAt = new Date(item.dispatch.dispatchedAt || item.createdAt);
+          const createdAt = new Date(item.receivedAt || item.dispatch.dispatchedAt || item.createdAt);
 
           return createdAt < startOfYesterday;
         });
@@ -643,7 +643,7 @@ const Requirements = () => {
 
                       <p className="mt-1 text-xs text-gray-400">
                         {new Date(
-                          requirement?.dispatch?.dispatchedAt ||
+                        requirement.receivedAt ||  requirement?.dispatch?.dispatchedAt ||
                             requirement?.createdAt,
                         ).toLocaleString("en-IN", {
                           dateStyle: "medium",
