@@ -38,7 +38,6 @@ class NotificationService {
     });
   }
 
-
   async unsubscribe(userId, endpoint) {
 console.log(userId , endpoint);
 
@@ -48,7 +47,6 @@ console.log(userId , endpoint);
         endpoint,
       );
   }
-
 
   async sendToUser(userId, payload) {
 
@@ -388,6 +386,10 @@ async sendAdminNotification(data) {
     sent,
     failed,
   };
+}
+
+async autoSendNotification(){
+  
 }
 }
 

@@ -13,7 +13,7 @@ const InfoRow = ({
 
             </p>
 
-            <p className="text-sm font-semibold text-right break-words">
+            <p className="text-sm font-semibold text-right wrap-break-word">
 
                 {value || "-"}
 

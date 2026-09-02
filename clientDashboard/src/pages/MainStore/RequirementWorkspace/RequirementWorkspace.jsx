@@ -515,13 +515,13 @@ useEffect(() => {
                       
                     </div>
 
-                    <div>
+                    {/* <div>
                       <p className="text-xs text-gray-500">Available Stock</p>
 
                       <p className="font-semibold text-green-600">
-                        {/* {stock?.quantity || 0} {item?.inventoryId?.unit} */}
+                        {stock?.quantity || 0} {item?.inventoryId?.unit}
                       </p>
-                    </div>
+                    </div> */}
                   </div>
 
                   <div className="mt-5">

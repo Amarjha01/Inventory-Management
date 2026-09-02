@@ -46,9 +46,12 @@ const DispatchInfo = ({
 
             <InfoRow
                 label="Dispatched At"
-                value={new Date(
-                    dispatch.dispatchedAt
-                ).toLocaleString()}
+                value={dispatch.dispatchedAt !=null && 
+                    new Date(dispatch?.dispatchedAt).toLocaleString("en-IN", {
+                    dateStyle: "medium",
+                    timeStyle: "medium",
+                    timeZone: "Asia/Kolkata",
+                })}
             />
 
         </Card>
