@@ -15,6 +15,8 @@ import {
 import { FaTruckMoving, FaUsers } from "react-icons/fa";
 import { HiOutlineBuildingStorefront } from "react-icons/hi2";
 import { storage } from "../../../utils/storage";
+import { VscVmPending } from "react-icons/vsc";
+import { RiImageDownloadFill } from "react-icons/ri";
 const user = storage.getUser();
 const MainStoreNavbar = () => {
   const [moreOpen, setMoreOpen] = useState(false);
@@ -27,11 +29,25 @@ const MainStoreNavbar = () => {
       path: "/store/requirements",
     },
     {
+      title: "Pending",
+      icon: VscVmPending,
+      path: "/store/pending",
+    },
+    {
       title: "Inventory",
       icon: MdInventory,
       path: "/store/inventory",
     },
-    {
+   {
+      title: "Users",
+      icon: FaUsers,
+      path: "/store/users",
+    },
+   
+  ];
+
+  const moreMenus = [
+     {
       title: "Vehicles",
       icon: FaTruckMoving,
       path: "/store/vehicles",
@@ -41,23 +57,20 @@ const MainStoreNavbar = () => {
       icon: HiOutlineBuildingStorefront,
       path: "/store/kitchens",
     },
-  ];
-
-  const moreMenus = [
     {
       title: "Drivers",
       icon: MdPeople,
       path: "/store/drivers",
     },
     {
-      title: "Users",
-      icon: FaUsers,
-      path: "/store/users",
-    },
-    {
       title: "Reports",
       icon: MdAssessment,
       path: "/store/reports",
+    },
+    {
+      title: "Downloads",
+      icon: RiImageDownloadFill,
+      path: "/store/downloads",
     },
     {
       title: "Settings",

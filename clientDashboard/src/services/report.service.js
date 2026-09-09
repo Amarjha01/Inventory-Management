@@ -24,6 +24,8 @@ export const getRequirementReportOptions = async ({
 export const downloadRequirementReport = async (
   filters,
 ) => {
+  console.log(filters);
+  
   const response = await api.get(
     "/reports/requirements/report",
     {
@@ -36,6 +38,21 @@ export const downloadRequirementReport = async (
       responseType: "blob",
     },
   );
+
+  return response.data;
+};
+
+export const getRequirementReport = async (filter) => {
+  console.log(filter);
+  
+  const response = await api.get("/reports/requirements/view", {
+    params: filter,
+
+     paramsSerializer: {
+        indexes: null,
+      },
+
+  });
 
   return response.data;
 };

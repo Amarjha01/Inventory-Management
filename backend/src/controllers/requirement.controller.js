@@ -49,7 +49,6 @@ export const getAllKitchenRequirements = asyncHandler(async (req, res) => {
   );
 });
 
-
 export const getRequirementById = asyncHandler(async (req, res) => {
   const requirement = await requirementService.getRequirementById(
     req.params.id,
@@ -80,18 +79,6 @@ export const getLatestKitchenRequirement = asyncHandler(async (req, res) => {
 
 export const updateRequirement = asyncHandler(async (req, res) => {
    console.log("payload for update quantity" , req.body);
-//   {
-//   kitchen: '6a8eb5fde02cf423de8eddd8',
-//   createdBy: '6a8eb38ae02cf423de8eddd5',
-//   remarks: '',
-//   items: [
-//     {
-//       inventoryId: '6a882ab534c31b8345e93a9b',
-//       quantity: 1,
-//       unit: 'Kg'
-//     }
-//   ]
-// }
  const payload = {
     $push: {
       items: {
@@ -171,6 +158,7 @@ export const editGatePass = asyncHandler(async (req, res) => {
     requirement,
   );
 });
+
 export const deletteRequirement = asyncHandler(async (req, res) => {
   console.log("id to delete" , req.body);
   
@@ -184,4 +172,3 @@ export const deletteRequirement = asyncHandler(async (req, res) => {
     deletedRequirement,
   );
 });
-

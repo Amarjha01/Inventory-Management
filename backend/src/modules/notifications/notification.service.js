@@ -391,6 +391,16 @@ async sendAdminNotification(data) {
 async autoSendNotification(){
   
 }
+
+async getAllUsersWithNotificationDisabled(){
+  try {
+    const data = await notificationRepository.findAllUnsubscribedUsers()
+    return data;
+  } catch (error) {
+    console.log(error);
+    
+  }
+}
 }
 
 export default new NotificationService();

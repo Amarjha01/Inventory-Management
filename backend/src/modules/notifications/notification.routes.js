@@ -4,6 +4,7 @@ import authenticate from "../../middleware/auth.middleware.js";
 import validate from "../../middleware/validate.middleware.js";
 
 import {
+  allUnsubscribedUsr,
   sendAdminNotification,
   subscribe,
   unsubscribe,
@@ -16,6 +17,7 @@ import {
 import { testNotification } from "../../controllers/testNotification.js";
 import authorize from "../../middleware/role.middleware.js";
 import { ROLE } from "../../constants/roles.js";
+import notificationRepository from "./notification.repository.js";
 
 const router = Router();
 
@@ -48,4 +50,12 @@ router.post(
   ),
   sendAdminNotification
 )
+
+router.get(
+  "/allUnsubscribedUsr",
+  authorize(
+     ROLE.ADMIN,
+     ROLE.STORE_SUPERVISOR
+  ),
+allUnsubscribedUsr)
 export default router;

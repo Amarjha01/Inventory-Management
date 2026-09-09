@@ -21,6 +21,10 @@ import PasswordResetForm from "../pages/auth/PasswordResetForm.jsx";
 import Settings from "../pages/MainStore/Settings/Settings.jsx";
 import KitchenSettings from "../pages/kitchen/Settings/Settings.jsx"
 import VehicleTracking from "../pages/VehicleTracking/VehicleTracking.jsx"
+import Pending from "../pages/MainStore/Pending/Pending.jsx";
+import Downloads from "../pages/MainStore/Downloads/Downloads.jsx";
+import Uploads from "../pages/kitchen/Uploads/Uploads.jsx";
+import Maintenance from "../pages/kitchen/Maintenance/Maintenance.jsx";
 const AppRoutes = () => {
   return (
     <Routes>
@@ -65,6 +69,22 @@ const AppRoutes = () => {
     element={
         <ProtectedRoute roles={["Kitchen Incharge" ,"Store Incharge"]}>
             <RequirementDetails />
+        </ProtectedRoute>
+    }
+/>
+<Route
+    path="/uploads"
+    element={
+        <ProtectedRoute roles={["Kitchen Incharge" ,"Store Incharge"]}>
+            <Uploads />
+        </ProtectedRoute>
+    }
+/>
+<Route
+    path="/maintenance"
+    element={
+        <ProtectedRoute roles={["Kitchen Incharge" ,"Store Incharge"]}>
+            <Maintenance />
         </ProtectedRoute>
     }
 />
@@ -143,6 +163,14 @@ const AppRoutes = () => {
    <Route
     path="settings"
     element={<Settings />}
+    />
+   <Route
+    path="pending"
+    element={<Pending />}
+    />
+   <Route
+    path="downloads"
+    element={<Downloads />}
     />
 
 </Route>

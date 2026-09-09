@@ -250,7 +250,6 @@ USERS: {
   secondary: "#F59E0B",
 },
 
-
   // ==================================================
   // KITCHENS
   // ==================================================
@@ -281,7 +280,6 @@ USERS: {
     // Supporting color
     secondary: "#F2B84B",
   },
-
 
   // ==================================================
   // VEHICLES
@@ -375,5 +373,61 @@ USERS: {
     // Supporting color
     secondary: "#65B741",
   },
+
+  PENDING: {
+    image: "/ui/type/PENDING.png",
+
+    // Warm pending / attention theme
+    background: "#FFF9F0",
+    header: "#4A2A0A",
+    surface: "#FFFFFF",
+    surfaceAlt: "#FFF3DD",
+
+    // Amber / orange accent
+    primary: "#F59E0B",
+    primaryLight: "#FFF0C7",
+    primaryDark: "#D97706",
+
+    // Text
+    text: "#292015",
+    textSecondary: "#78716C",
+    textOnPrimary: "#FFFFFF",
+
+    // Borders / states
+    border: "#F3E3C3",
+    selectedBorder: "#FBBF24",
+
+    // Supporting color
+    secondary: "#EA580C",
+  },
+
+
+  DOWNLOADS: {
+    image: "/ui/type/DOWNLOADS.png",
+
+    // Excel / document management theme
+    background: "#F3FAF7",
+    header: "#123B32",
+    surface: "#FFFFFF",
+    surfaceAlt: "#E8F6F0",
+
+    // Excel green
+    primary: "#168A5B",
+    primaryLight: "#DDF5E9",
+    primaryDark: "#0F6B47",
+
+    // Text
+    text: "#172B24",
+    textSecondary: "#66756F",
+    textOnPrimary: "#FFFFFF",
+
+    // Borders / states
+    border: "#D5E9DF",
+    selectedBorder: "#35A96F",
+
+    // Supporting color
+    secondary: "#22A06B",
+  },
+
 };
 

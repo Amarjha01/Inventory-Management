@@ -332,209 +332,192 @@ class ReportService {
    *
    *   Quantity = item.dispatchedQuantity
    */
-  async downloadRequirementReport(query) {
-    const {
-      date,
+ /**
+ * ==========================================================
+ * GET REQUIREMENT REPORT DATA
+ * ==========================================================
+ *
+ * This method contains all report filtering logic.
+ *
+ * It is shared by:
+ *
+ * - View Now
+ * - Download Excel
+ */
+async getRequirementReport(query) {
+  const {
+    date,
+    fromDate,
+    toDate,
+    dateType,
+
+    kitchen,
+    items,
+    district,
+
+    status,
+  } = query;
+
+  console.log(
+    "Requirement report query:",
+    query,
+  );
+
+  /**
+   * ========================================================
+   * DATE FILTER
+   * ========================================================
+   */
+  let filter;
+
+  if (dateType === "range") {
+    filter = this.buildDateFilter(
       fromDate,
       toDate,
-      dateType,
+    );
+  } else {
+    const selectedDate =
+      date || fromDate;
 
-      kitchen,
-      items,
+    if (!selectedDate) {
+      throw new Error(
+        "Date is required.",
+      );
+    }
+
+    filter = this.buildDateFilter(
+      selectedDate,
+      selectedDate,
+    );
+  }
+
+  /**
+   * ========================================================
+   * KITCHEN FILTER
+   * ========================================================
+   */
+  if (kitchen) {
+    filter.kitchen = kitchen;
+  }
+
+  /**
+   * ========================================================
+   * STATUS FILTER
+   * ========================================================
+   */
+
+  if (status === "requested") {
+    filter.status = {
+  $in: [
+    "Submitted",
+    "Out For Delivery",
+    "Received",
+  ],
+};
+  }
+
+  if (status === "dispatched") {
+    filter.status = {
+      $in: [
+        "Out For Delivery",
+        "Received",
+      ],
+    };
+  }
+
+  /**
+   * ========================================================
+   * GET REQUIREMENTS
+   * ========================================================
+   */
+  const requirements =
+    await reportRepository.getRequirements(
+      filter,
+    );
+
+  console.log(
+    "Requirements found:",
+    requirements.length,
+  );
+
+  /**
+   * ========================================================
+   * DISTRICT FILTER
+   * ========================================================
+   */
+  let filteredRequirements =
+    this.filterByDistrict(
+      requirements,
       district,
-
-      status,
-    } = query;
-
-    console.log(
-      "Download requirement report query:",
-      query,
     );
 
-    /**
-     * ========================================================
-     * DATE FILTER
-     * ========================================================
-     */
-    let filter;
+  /**
+   * ========================================================
+   * ITEM FILTER
+   * ========================================================
+   */
+  const selectedItems =
+    this.normalizeItems(items);
 
-    if (dateType === "range") {
-      filter = this.buildDateFilter(
-        fromDate,
-        toDate,
-      );
-    } else {
-      const selectedDate =
-        date || fromDate;
-
-      if (!selectedDate) {
-        throw new Error(
-          "Date is required.",
-        );
-      }
-
-      filter = this.buildDateFilter(
-        selectedDate,
-        selectedDate,
-      );
-    }
-
-    /**
-     * ========================================================
-     * KITCHEN FILTER
-     * ========================================================
-     */
-    if (kitchen) {
-      filter.kitchen = kitchen;
-    }
-
-    /**
-     * ========================================================
-     * STATUS FILTER
-     * ========================================================
-     *
-     * IMPORTANT
-     *
-     * Frontend status:
-     *
-     * ""
-     * requested
-     * dispatched
-     *
-     * Database status:
-     *
-     * Submitted
-     * Out For Delivery
-     * Received
-     *
-     * Therefore we translate frontend status
-     * into database status here.
-     */
-
-    if (status === "requested") {
-      /**
-       * Requested report:
-       *
-       * Submitted ONLY
-       */
-      filter.status = {
-        $in: [
-          "Submitted",
-          "Out For Delivery",
-          "Received",
-        ],
-      };
-    }
-
-    if (status === "dispatched") {
-      /**
-       * Dispatched report:
-       *
-       * Out For Delivery OR Received
-       */
-      filter.status = {
-        $in: [
-          "Out For Delivery",
-          "Received",
-        ],
-      };
-    }
-
-    /**
-     * ========================================================
-     * ALL STATUS
-     * ========================================================
-     *
-     * When status is empty:
-     *
-     * DO NOT add a status filter.
-     *
-     * MongoDB will therefore return:
-     *
-     * Submitted
-     * Out For Delivery
-     * Received
-     *
-     * and any other requirement status that exists.
-     *
-     * The Excel generator will use item.quantity.
-     */
-    if (!status) {
-      // No status filter.
-    }
-
-    /**
-     * ========================================================
-     * GET REQUIREMENTS
-     * ========================================================
-     */
-    const requirements =
-      await reportRepository.getRequirements(
-        filter,
-      );
-
-    console.log(
-      "Requirements found:",
-      requirements.length,
-    );
-
-    /**
-     * ========================================================
-     * DISTRICT FILTER
-     * ========================================================
-     */
-    let filteredRequirements =
-      this.filterByDistrict(
-        requirements,
-        district,
-      );
-
-    /**
-     * ========================================================
-     * ITEM FILTER
-     * ========================================================
-     */
-    const selectedItems =
-      this.normalizeItems(items);
-
-    filteredRequirements =
-      this.filterByItems(
-        filteredRequirements,
-        selectedItems,
-      );
-
-    console.log(
-      "Selected items:",
+  filteredRequirements =
+    this.filterByItems(
+      filteredRequirements,
       selectedItems,
     );
 
-    console.log(
-      "Filtered requirements:",
-      filteredRequirements.length,
+  console.log(
+    "Selected items:",
+    selectedItems,
+  );
+
+  console.log(
+    "Filtered requirements:",
+    filteredRequirements.length,
+  );
+
+  /**
+   * ========================================================
+   * RETURN RAW REPORT DATA
+   * ========================================================
+   */
+  return {
+    requirements: filteredRequirements,
+
+    filters: {
+      status: status || "",
+
+      district: district || "",
+      kitchen: kitchen || "",
+
+      items: selectedItems,
+
+      dateType,
+      fromDate,
+      toDate,
+      date,
+    },
+  };
+}
+
+/**
+ * ==========================================================
+ * DOWNLOAD REQUIREMENT REPORT
+ * ==========================================================
+ *
+ * Uses the exact same data returned by getRequirementReport().
+ */
+async downloadRequirementReport(query) {
+  const report =
+    await this.getRequirementReport(
+      query,
     );
 
-    /**
-     * ========================================================
-     * GENERATE EXCEL
-     * ========================================================
-     */
-    return createRequirementWorkbook(
-      filteredRequirements,
-      {
-        status,
+  return createRequirementWorkbook(
+    report.requirements,
+    report.filters,
+  );
+}
 
-        district,
-        kitchen,
-
-        items: selectedItems,
-
-        dateType,
-        fromDate,
-        toDate,
-        date,
-      },
-    );
-  }
 }
 
 export default new ReportService();

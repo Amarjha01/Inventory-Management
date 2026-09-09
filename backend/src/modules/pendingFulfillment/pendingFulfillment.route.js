@@ -3,21 +3,62 @@ import { Router } from "express";
 import {
   getPendingFulfillments,
   getPendingFulfillment,
-  fulfillPendingFulfillment,
-  cancelPendingFulfillment,
+  fulfillPendingItem,
+  cancelPendingItem,
+  createPendingFulfillment,
+  getUndispatchedRequirementId,
+  mergeItems,
 } from "./pendingFulfillment.controller.js";
 
-import authorize from "../middleware/authorize.middleware.js";
-
-import {
-  ROLE,
-} from "../constants/roles.js";
+import { ROLE } from "../../constants/roles.js";
+import authorize from "../../middleware/role.middleware.js";
+import authenticate from "../../middleware/auth.middleware.js";
 
 const router = Router();
 
+router.use(authenticate);
 
 // ======================================================
-// GET ACTIVE PENDING
+// CREATE PENDING ITEM
+// ======================================================
+
+router.post(
+  "/",
+  authorize(
+    ROLE.ADMIN,
+    ROLE.STORE_SUPERVISOR,
+  ),
+  createPendingFulfillment,
+);
+
+// ======================================================
+// getUndispatchedRequirementId PENDING ITEM
+// ======================================================
+
+router.get(
+  "/requirementsByKitchen",
+  authorize(
+    ROLE.ADMIN,
+    ROLE.STORE_SUPERVISOR,
+  ),
+  getUndispatchedRequirementId,
+);
+
+// ======================================================
+// getUndispatchedRequirementId PENDING ITEM
+// ======================================================
+
+router.post(
+  "/mergeItems",
+  authorize(
+    ROLE.ADMIN,
+    ROLE.STORE_SUPERVISOR,
+  ),
+  mergeItems,
+);
+
+// ======================================================
+// GET ACTIVE PENDING ITEMS
 // ======================================================
 
 router.get(
@@ -30,9 +71,8 @@ router.get(
   getPendingFulfillments,
 );
 
-
 // ======================================================
-// GET ONE
+// GET ONE KITCHEN'S PENDING FULFILLMENT
 // ======================================================
 
 router.get(
@@ -45,33 +85,30 @@ router.get(
   getPendingFulfillment,
 );
 
-
 // ======================================================
-// FULFILL
+// FULFILL ONE PENDING ITEM
 // ======================================================
 
 router.patch(
-  "/:id/fulfill",
+  "/:id/item/fulfill",
   authorize(
     ROLE.ADMIN,
     ROLE.STORE_INCHARGE,
   ),
-  fulfillPendingFulfillment,
+  fulfillPendingItem,
 );
 
-
 // ======================================================
-// CANCEL
+// CANCEL ONE PENDING ITEM
 // ======================================================
 
 router.patch(
-  "/:id/cancel",
+  "/:id/item/cancel",
   authorize(
     ROLE.ADMIN,
     ROLE.STORE_INCHARGE,
   ),
-  cancelPendingFulfillment,
+  cancelPendingItem,
 );
-
 
 export default router;

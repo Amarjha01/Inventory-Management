@@ -22,6 +22,28 @@ export const getRequirementReportOptions =
   });
 
 // --------------------------------------------------
+// View Report
+// --------------------------------------------------
+
+export const viewRequirementReport =
+  asyncHandler(async (req, res) => {
+    console.log(
+      "View requirement report query:",
+      req.query,
+    );
+
+    const data =
+      await reportService.getRequirementReport(
+        req.query,
+      );
+
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  });
+
+// --------------------------------------------------
 // Download Report
 // --------------------------------------------------
 
@@ -65,3 +87,4 @@ export const downloadRequirementReport =
     res.end();
   });
 
+  

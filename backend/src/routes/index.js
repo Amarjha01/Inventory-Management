@@ -9,7 +9,7 @@ import vehicleRoutes from "./vehicle.routes.js";
 import driverRoutes from "./driver.routes.js";
 import reports from "./report.routes.js"
 import trackingRoutes from '../modules/tracking/tracking.routes.js'
-
+import pendingFullfillment from "../modules/pendingFulfillment/pendingFulfillment.route.js"
 const router = Router();
 
 router.get("/health", (req, res) => {
@@ -41,5 +41,7 @@ router.use("/drivers", driverRoutes);
 router.use("/reports", reports);
 
 router.use("/tracking", trackingRoutes);
+
+router.use("/pending", pendingFullfillment);
 
 export default router;
