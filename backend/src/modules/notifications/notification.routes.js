@@ -46,7 +46,9 @@ router.post(
   "/admin/send",
   authorize(
      ROLE.ADMIN,
-     ROLE.STORE_SUPERVISOR
+     ROLE.STORE_SUPERVISOR,
+     ROLE.CHIEF_COORDINATOR,
+     ROLE.DISTRICT_COORDINATOR
   ),
   sendAdminNotification
 )
@@ -55,7 +57,9 @@ router.get(
   "/allUnsubscribedUsr",
   authorize(
      ROLE.ADMIN,
-     ROLE.STORE_SUPERVISOR
+     ROLE.STORE_SUPERVISOR,
+     ROLE.CHIEF_COORDINATOR,
+     ROLE.DISTRICT_COORDINATOR
   ),
 allUnsubscribedUsr)
 export default router;

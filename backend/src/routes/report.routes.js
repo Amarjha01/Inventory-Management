@@ -20,7 +20,8 @@ router.get(
   authorize(
     ROLE.ADMIN,
     ROLE.STORE_SUPERVISOR,
-    ROLE.DISTRICT_COORDINATOR
+    ROLE.DISTRICT_COORDINATOR,
+    ROLE.CHIEF_COORDINATOR
   ),
   getRequirementReportOptions,
 );
@@ -30,7 +31,8 @@ router.get(
   authorize(
     ROLE.ADMIN,
     ROLE.STORE_SUPERVISOR,
-    ROLE.DISTRICT_COORDINATOR
+    ROLE.DISTRICT_COORDINATOR,
+    ROLE.CHIEF_COORDINATOR
   ),
   downloadRequirementReport,
 );

@@ -40,6 +40,8 @@ router.get(
   authorize(
     ROLE.ADMIN,
     ROLE.STORE_SUPERVISOR,
+    ROLE.CHIEF_COORDINATOR,
+    ROLE.DISTRICT_COORDINATOR
   ),
   getUndispatchedRequirementId,
 );
@@ -67,6 +69,8 @@ router.get(
     ROLE.ADMIN,
     ROLE.STORE_INCHARGE,
     ROLE.KITCHEN_INCHARGE,
+    ROLE.CHIEF_COORDINATOR,
+    ROLE.DISTRICT_COORDINATOR
   ),
   getPendingFulfillments,
 );
@@ -81,6 +85,8 @@ router.get(
     ROLE.ADMIN,
     ROLE.STORE_INCHARGE,
     ROLE.KITCHEN_INCHARGE,
+    ROLE.CHIEF_COORDINATOR,
+    ROLE.DISTRICT_COORDINATOR
   ),
   getPendingFulfillment,
 );

@@ -89,13 +89,25 @@ const createService = async (
   next
 ) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.user._id;
 
-    const data =
-      await maintenanceService.createService(
-        userId,
-        req.body
-      );
+console.log("userId" ,userId);
+console.log("req.body" ,  req.body);
+    const { type, ...body } = req.body;
+
+      let data;
+
+      if (type === "service") {
+        data = {
+          userId,
+          service: [body],
+        };
+      }
+
+      await maintenanceService.create(data);
+
+      
+      
 
     return res.status(201).json({
       success: true,
@@ -344,7 +356,7 @@ const deletePurchaseRecord = async (
 };
 
 
-module.exports = {
+export {
   getMaintenance,
   createMaintenance,
 

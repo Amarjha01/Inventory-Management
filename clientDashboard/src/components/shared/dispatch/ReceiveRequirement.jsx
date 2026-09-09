@@ -57,7 +57,7 @@ const ReceiveRequirement = ({ loading = false, onReceive , user}) => {
         onChange={handleSelect}
       />
 
-      {gatePass?.length === 0 && user?.role !== "district coordinator"  ? (
+      {gatePass?.length === 0 && user?.role !== "district coordinator" && user?.role !== "Chief Coordinator"  ? (
         <div
           onClick={() => fileInputRef.current?.click()}
           className="cursor-pointer border-2 border-dashed border-blue-300 rounded-xl p-10 text-center hover:border-blue-500 hover:bg-blue-50 transition"

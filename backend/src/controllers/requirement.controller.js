@@ -36,7 +36,7 @@ export const getAllKitchenRequirements = asyncHandler(async (req, res) => {
   console.log(req.user);
   
   const filter =
-    req.user.role === 'district coordinator'
+    req.user.role === 'district coordinator' || req.user.role === 'Chief Coordinator'
       ? { district: req.user.district }
       : {};
 

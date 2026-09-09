@@ -108,6 +108,7 @@ const AppRoutes = () => {
                 "Admin",
                 "Store Supervisor",
                 "district coordinator",
+                "Chief Coordinator",
             ]}
         >
             <MainStoreLayout />

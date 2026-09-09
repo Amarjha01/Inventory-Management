@@ -1,8 +1,6 @@
 import express from "express";
 
-import {
-  uploadMaintenance,
-} from "../../middleware/upload.js";
+
 
 import {
   createService,
@@ -13,15 +11,18 @@ import {
   updateVisitor,
   deleteVisitor,
 
-  createPurchaseRecord,
+  // createPurchaseRecord,
   updatePurchaseRecord,
   deletePurchaseRecord,
 
   getMaintenance,
 } from "./maintenance.controller.js";
+import { uploadMaintenance } from "../../middleware/upload.middleware.js";
+import authenticate from "../../middleware/auth.middleware.js";
 
 const router = express.Router();
 
+router.use(authenticate)
 
 router.get(
   "/",
@@ -95,20 +96,20 @@ router.delete(
 |--------------------------------------------------------------------------
 */
 
-router.post(
-  "/purchase-record",
-  uploadMaintenance.fields([
-    {
-      name: "guaranteePhoto",
-      maxCount: 1,
-    },
-    {
-      name: "otherImages",
-      maxCount: 1,
-    },
-  ]),
-  createPurchaseRecord
-);
+// router.post(
+//   "/purchase-record",
+//   uploadMaintenance.fields([
+//     {
+//       name: "guaranteePhoto",
+//       maxCount: 1,
+//     },
+//     {
+//       name: "otherImages",
+//       maxCount: 1,
+//     },
+//   ]),
+//   createPurchaseRecord
+// );
 
 
 router.put(

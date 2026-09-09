@@ -82,6 +82,7 @@ const Users = () => {
     "Store Incharge",
     "Store Supervisor",
     "district coordinator",
+    "Chief Coordinator",
     "Admin",
   ];
 
@@ -405,7 +406,7 @@ console.log(DISTRICTS.map((district) => district.name));
               </select>
             )}
             
-            {form.role === "district coordinator"  && (
+            {(form.role === "district coordinator" || form.role === "Chief Coordinator")  && (
               <select
                 name="district"
                 multiple
