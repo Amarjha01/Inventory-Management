@@ -17,6 +17,8 @@ export const ENDPOINTS = {
 
     VEHICLES: "/vehicles",
 
-    DRIVERS: "/drivers"
+    DRIVERS: "/drivers",
+
+    PENDINGITEMS: "/pending"
 
 };

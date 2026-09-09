@@ -2,6 +2,7 @@ import Kitchen from "../models/kitchen.js";
 import Requirement from "../models/requirement.js";
 
 class RequirementRepository {
+
 async create(payload) {
   const requirement = await Requirement.create(payload);
 
@@ -35,7 +36,6 @@ async create(payload) {
     .lean();
 }
 
-
   async findById(id) {
     return await Requirement.findById(id)
 
@@ -56,33 +56,29 @@ async create(payload) {
       .lean();
   }
 
-  async update(id, payload) {
-    console.log("id and payload at repositories" , id , payload);
-    
-    return await Requirement.findByIdAndUpdate(
-      id,
+async update(id, payload, options = {}) {
+  console.log(
+    "id and payload at repositories",
+    id,
+    payload
+  );
 
-      payload,
-
-      {
-        new: true,
-
-        runValidators: true,
-      },
-    )
-
-      .populate("kitchen")
-
-      .populate("createdBy", "-password")
-
-      .populate("items.inventoryId")
-
-      .populate("dispatch.vehicle")
-
-      .populate("dispatch.driver")
-
-      .lean();
-  }
+  return await Requirement.findByIdAndUpdate(
+    id,
+    payload,
+    {
+      new: true,
+      runValidators: true,
+      ...options,
+    },
+  )
+    .populate("kitchen")
+    .populate("createdBy", "-password")
+    .populate("items.inventoryId")
+    .populate("dispatch.vehicle")
+    .populate("dispatch.driver")
+    .lean();
+}
 
   async findLatestKitchenRequirement(kitchenId) {
     return await Requirement.findOne({
@@ -110,6 +106,57 @@ async create(payload) {
   async findByIdAndDelete(id){
     return await Requirement.findByIdAndDelete(id)
   }
+
+    async mergeItems(id, items) {   
+  return await Requirement.findByIdAndUpdate(
+    id,
+    {
+      $push: {
+        items: {
+          $each: items,
+        },
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  )
+    .lean();
+}
+
+async markItemFulfilled(
+  requirementId,
+  inventoryId,
+) {
+  return await Requirement.findOneAndUpdate(
+    {
+      _id: requirementId,
+      "items.inventoryId": inventoryId,
+    },
+    {
+      $set: {
+        "items.$.fulfillmentStatus": true,
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  )
+    .populate("kitchen")
+    .populate("createdBy", "-password")
+    .populate("items.inventoryId")
+    .populate("dispatch.vehicle")
+    .populate("dispatch.driver")
+    .populate(
+      "dispatch.dispatchedBy",
+      "-password",
+    )
+    .lean();
+}
+
+
 }
 
 export default new RequirementRepository();

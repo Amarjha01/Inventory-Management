@@ -64,3 +64,13 @@ export const sendAdminNotification = async (req, res) => {
     });
   }
 };
+
+export const allUnsubscribedUsr = async(req , res)=>{
+  const data = await notificationService.getAllUsersWithNotificationDisabled()
+  console.log(data);
+  return ApiResponse.success(
+      res,
+      data,
+      "fetched unsubscribed notification user successfully",
+    );
+}

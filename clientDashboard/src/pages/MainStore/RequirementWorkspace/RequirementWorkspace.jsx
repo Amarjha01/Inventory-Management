@@ -27,12 +27,13 @@ import { VscKebabVertical } from "react-icons/vsc";
 import { MdArchive, MdSendAndArchive } from "react-icons/md";
 import { TiDocumentAdd } from "react-icons/ti";
 import ItemSelectorModal from "../../../components/kitchen/requirement/ItemSelectorModal";
-import { AnimatePresence , motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import ItemCard from "../../../components/kitchen/requirement/ItemCard";
 import { RiDeleteBin3Fill } from "react-icons/ri";
 import { FaSave } from "react-icons/fa";
 import { FiLoader } from "react-icons/fi";
 import toast from "react-hot-toast";
+import { createPendingItems } from "../../../services/pendingFulfillment.service";
 const RequirementWorkspace = () => {
   const { id } = useParams();
 
@@ -40,7 +41,7 @@ const RequirementWorkspace = () => {
 
   const [loading, setLoading] = useState(true);
 
-  const [user , setUser] = useState(storage.getUser())
+  const [user, setUser] = useState(storage.getUser());
 
   const [requirement, setRequirement] = useState(null);
 
@@ -66,8 +67,8 @@ const RequirementWorkspace = () => {
 
   // for loader
   const [isDispatching, setIsDispatching] = useState(false);
-  const [isAddingItems , setIsAddingItems] = useState(false)
-  
+  const [isAddingItems, setIsAddingItems] = useState(false);
+
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
   const [showModal, setShowModal] = useState(false);
@@ -109,24 +110,21 @@ const RequirementWorkspace = () => {
     loadData();
   }, [id]);
 
-const dropdownRef = useRef(null);
+  const dropdownRef = useRef(null);
 
-useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (
-      dropdownRef.current &&
-      !dropdownRef.current.contains(event.target)
-    ) {
-      setOpenDropdownId(null);
-    }
-  };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpenDropdownId(null);
+      }
+    };
 
-  document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const loadData = async () => {
     try {
@@ -201,8 +199,6 @@ useEffect(() => {
           quantity = 0;
         }
 
-       
-
         return {
           ...item,
 
@@ -213,115 +209,131 @@ useEffect(() => {
   };
 
   const handleDelete = async (id) => {
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this requirement?"
-  );
-
-  if (!confirmed) {
-    return;
-  }
-
-  try {
-    await deletedRequirement(id);
-    toast.success("Deleted successfully")
-    window.location.href = "/store/requirements";
-  } catch (error) {
-    console.error(error);
-
-    alert(
-      error.response?.data?.message ||
-      "Failed to delete requirement"
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this requirement?",
     );
-  }
-};
 
-  const handleSaveItem = async()=>{
-     const itemPayload = selectedItems.map((item) => ({
-    inventoryId: item._id,
-    quantity: item.quantity,
-    unit: item.unit,
-  }));
-  setIsAddingItems(true)
-   try {
-    const updatedRequirement = await updateRequirement(requirement._id, itemPayload);
-    setRequirement(updatedRequirement.data);
-    setSelectedItems([])
-    setIsAddingItems(false)
-    toast.success(updatedRequirement.message)
-   } catch (error) {
-    toast.error(error.message)
-    setIsAddingItems(false)
-   }
+    if (!confirmed) {
+      return;
+    }
 
-  }
- const handleSave = async () => {
-  // Vehicle validation
-  if (!vehicleId && !manualVehicleNumber) {
-    alert("Please select a vehicle or type a manual vehicle number.");
-    return;
-  }
+    try {
+      await deletedRequirement(id);
+      toast.success("Deleted successfully");
+      window.location.href = "/store/requirements";
+    } catch (error) {
+      console.error(error);
 
-  // Driver validation
-  if (!driverId && !manualDriverName) {
-    alert("Please select a driver or type a manual driver name.");
-    return;
-  }
+      alert(error.response?.data?.message || "Failed to delete requirement");
+    }
+  };
+console.log(requirement);
 
-  // Manual driver phone validation
-  if (manualDriverName && !manualDriverPhone) {
-    alert("Please type the driver's phone number also.");
-    return;
-  }
+  const handleSaveItem = async () => {
+    const itemPayload = selectedItems.map((item) => ({
+      inventoryId: item._id,
+      quantity: item.quantity,
+      unit: item.unit,
+    }));
+    setIsAddingItems(true);
+    try {
+      const updatedRequirement = await updateRequirement(
+        requirement._id,
+        itemPayload,
+      );
+      setRequirement(updatedRequirement.data);
+      setSelectedItems([]);
+      setIsAddingItems(false);
+      toast.success(updatedRequirement.message);
+    } catch (error) {
+      toast.error(error.message);
+      setIsAddingItems(false);
+    }
+  };
+  const handleSave = async () => {
+    // Vehicle validation
+    if (!vehicleId && !manualVehicleNumber) {
+      alert("Please select a vehicle or type a manual vehicle number.");
+      return;
+    }
 
-  setIsDispatching(true);
+    // Driver validation
+    if (!driverId && !manualDriverName) {
+      alert("Please select a driver or type a manual driver name.");
+      return;
+    }
 
-  try {
-    const payload = {
-      vehicleId,
-      manualVehicleNumber,
-      driverId,
-      manualDriverName,
-      manualDriverPhone,
-      remarks,
+    // Manual driver phone validation
+    if (manualDriverName && !manualDriverPhone) {
+      alert("Please type the driver's phone number also.");
+      return;
+    }
 
-      items: requirement.items.map((item) => ({
-        inventoryId: item.inventoryId._id,
-        quantity: item.quantity,
-        dispatchedQuantity: item.dispatchedQuantity,
-        unit: item.unit,
-      })),
-    };
+    setIsDispatching(true);
 
-    await dispatchRequirement(requirement._id, payload);
+    try {
+      const payload = {
+        vehicleId,
+        manualVehicleNumber,
+        driverId,
+        manualDriverName,
+        manualDriverPhone,
+        remarks,
 
-    alert("Requirement dispatched successfully.");
+        items: requirement.items.map((item) => ({
+          inventoryId: item.inventoryId._id,
+          quantity: item.quantity,
+          dispatchedQuantity: item.dispatchedQuantity,
+          unit: item.unit,
+        })),
+      };
 
-    navigate("/store/requirements");
-  } catch (error) {
-    console.error(error);
+      await dispatchRequirement(requirement._id, payload);
 
-    alert(
-      error.response?.data?.message ||
-        "Failed to dispatch."
-    );
-  } finally {
-    setIsDispatching(false);
-  }
-};
+      alert("Requirement dispatched successfully.");
 
+      navigate("/store/requirements");
+    } catch (error) {
+      console.error(error);
+
+      alert(error.response?.data?.message || "Failed to dispatch.");
+    } finally {
+      setIsDispatching(false);
+    }
+  };
 
   if (loading) {
     return <Loader />;
   }
-  const handleHaveItemForLatter = async (id)=>{
-    console.log(id);
-    
-  }
+  const handleHaveItemForLatter = async (item ) => {
 
-  const handleArchiveItem = async (id)=>{
-    console.log(id);
+    try {
+      const payload ={
+        ...item,
+       _id: id,
+      }
 
-  }
+      const updatedData = await createPendingItems(payload)
+     setRequirement((prev) => ({
+      ...prev,
+      items: prev.items.map((existingItem) =>
+        existingItem.inventoryId?._id === item.inventoryId
+          ? {
+              ...existingItem,
+              fulfillmentStatus: false,
+            }
+          : existingItem
+      ),
+    }));
+      toast.success("saved for latter")
+    } catch (error) {
+      toast.error(error.response.data.message)
+    }
+  };
+
+  const handleArchiveItem = async (id) => {
+    console.log(id);
+  };
 
   if (requirement) {
     return (
@@ -342,26 +354,23 @@ useEffect(() => {
               {requirement.status}
             </span>
             <button
-  type="button"
-  onClick={() => handleDelete(requirement._id)}
-  title="Delete requirement"
-  className="
-    group
-    flex h-9 w-9
-    items-center justify-center
-    rounded-lg
-    text-red-600
-    transition-all duration-200
-    hover:bg-red-50
-    hover:text-red-700
-    active:scale-95
-  "
->
-  <RiDeleteBin3Fill
-    className="text-2xl cursor-pointer transition-transform duration-200 group-hover:scale-110"
-  />
-</button>
-
+              type="button"
+              onClick={() => handleDelete(requirement._id)}
+              title="Delete requirement"
+              className="
+              group
+              flex h-9 w-9
+              items-center justify-center
+              rounded-lg
+              text-red-600
+              transition-all duration-200
+              hover:bg-red-50
+              hover:text-red-700
+              active:scale-95
+            "
+            >
+              <RiDeleteBin3Fill className="text-2xl cursor-pointer transition-transform duration-200 group-hover:scale-110" />
+            </button>
           </div>
 
           <div className="mt-6 space-y-4">
@@ -392,44 +401,50 @@ useEffect(() => {
           onSelect={addItem}
         />
         <AnimatePresence>
-                  {selectedItems.map((item, index) => (
-                    <motion.div
-                      key={item._id}
-                      layout
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -30 }}
-                      transition={{ duration: 0.25 }}
-                      className={
-                        index !== selectedItems.length - 1
-                          ? "border-b border-[#eeeeee]"
-                          : ""
-                      }
-                    >
-                      <ItemCard
-                        item={item}
-                        onQuantityChange={(qty) =>
-                          updateQuantity(item._id, qty)
-                        }
-                        onRemove={() => removeItem(item._id)}
-                      />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-                 {selectedItems.length >0 && (
-            <button  className=" text-blue-600 cursor-pointer text-3xl">
-            {isAddingItems ?<FiLoader className="animate-spin" /> : <FaSave onClick={handleSaveItem}/>}
-            </button>
-          )}
+          {selectedItems.map((item, index) => (
+            <motion.div
+              key={item._id}
+              layout
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.25 }}
+              className={
+                index !== selectedItems.length - 1
+                  ? "border-b border-[#eeeeee]"
+                  : ""
+              }
+            >
+              <ItemCard
+                item={item}
+                onQuantityChange={(qty) => updateQuantity(item._id, qty)}
+                onRemove={() => removeItem(item._id)}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        {selectedItems.length > 0 && (
+          <button className=" text-blue-600 cursor-pointer text-3xl">
+            {isAddingItems ? (
+              <FiLoader className="animate-spin" />
+            ) : (
+              <FaSave onClick={handleSaveItem} />
+            )}
+          </button>
+        )}
         <Card>
-         
           <span className=" flex justify-between">
             <h3 className="text-lg font-semibold mb-5">Requested Items</h3>
-             <TiDocumentAdd onClick={()=>setShowModal(!showModal)} className="text-3xl cursor-pointer" />
+            <TiDocumentAdd
+              onClick={() => setShowModal(!showModal)}
+              className="text-3xl cursor-pointer"
+            />
           </span>
-           
+
           <div className="space-y-5">
-            {requirement.items.map((item) => {
+            {requirement.items
+  ?.filter((item) => item?.fulfillmentStatus === true || item?.fulfillmentStatus === undefined )
+  .map((item) => {
               const stock = inventoryMap[item?.inventoryId?._id];
 
               return (
@@ -437,7 +452,6 @@ useEffect(() => {
                   key={item?.inventoryId?._id}
                   className="border rounded-xl p-4"
                 >
-                  
                   <div className="flex gap-4">
                     <img
                       src={`/items/${item?.inventoryId?.image}`}
@@ -446,63 +460,67 @@ useEffect(() => {
                     />
 
                     <div className="flex-1">
-                      <h4 className="font-semibold">{item?.inventoryId?.name}</h4>
+                      <h4 className="font-semibold">
+                        {item?.inventoryId?.name}
+                      </h4>
 
                       <p className="text-sm text-gray-500">
                         {item?.inventoryId?.hindiName}
                       </p>
                     </div>
-                   <div className="relative">
- <div ref={dropdownRef} className="relative">
-  <VscKebabVertical
-    className="text-2xl cursor-pointer"
-    onClick={() =>
-      setOpenDropdownId((prev) =>
-        prev === item?.inventoryId?._id ? null : item?.inventoryId?._id
-      )
-    }
-  />
+                    <div className="relative">
+                      <div ref={dropdownRef} className="relative">
+                        <VscKebabVertical
+                          className="text-2xl cursor-pointer"
+                          onClick={() =>
+                            setOpenDropdownId((prev) =>
+                              prev === item?.inventoryId?._id
+                                ? null
+                                : item?.inventoryId?._id,
+                            )
+                          }
+                        />
 
-  {openDropdownId === item?.inventoryId?._id && (
-    <div className="absolute right-0 top-8 z-50 w-50 rounded-lg border bg-white p-2 shadow-lg">
-      <button
-        type="button"
-        onMouseDown={(e) => {
-    e.stopPropagation();
-    handleHaveItemForLatter(item?.inventoryId?._id);
-    setOpenDropdownId(null);
-  }}
-        onClick={() => {
-          handleHaveItemForLatter(item?.inventoryId?._id);
-        }}
-        className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
-      >
-        <MdSendAndArchive />
-        Save For latter
-      </button>
+                        {openDropdownId === item?.inventoryId?._id && (
+                          <div className="absolute right-0 top-8 z-50 w-50 rounded-lg border bg-white p-2 shadow-lg">
+                            <button
+                              type="button"
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                handleHaveItemForLatter({
+                                  kitchenId: requirement.kitchen._id,
+                                  requirementNumber:requirement.requirementNumber,
+                                  quantity: item?.quantity,
+                                  inventoryId: item?.inventoryId?._id,
+                                  unit: item?.inventoryId?.unit,
+                                });
+                                setOpenDropdownId(null);
+                              }}
+                              className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
+                            >
+                              <MdSendAndArchive />
+                              Save For latter
+                            </button>
 
-      <button
-        type="button"
-        onMouseDown={(e) => {
-    e.stopPropagation();
-    handleArchiveItem(item?.inventoryId?._id);
-    setOpenDropdownId(null);
-  }}
-        onClick={() => {
-          handleArchiveItem(item?.inventoryId?._id);
-        }}
-        className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
-      >
-        <MdArchive />
-        Archive
-      </button>
-    </div>
-  )}
-</div>
-
-
-</div>
-
+                            <button
+                              type="button"
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                handleArchiveItem(item?.inventoryId?._id);
+                                setOpenDropdownId(null);
+                              }}
+                              onClick={() => {
+                                handleArchiveItem(item?.inventoryId?._id);
+                              }}
+                              className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
+                            >
+                              <MdArchive />
+                              Archive
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-5 mt-5">
@@ -512,7 +530,6 @@ useEffect(() => {
                       <p className="font-semibold">
                         {item?.quantity} {item?.inventoryId?.unit}
                       </p>
-                      
                     </div>
 
                     {/* <div>
@@ -552,123 +569,124 @@ useEffect(() => {
           </div>
         </Card>
 
-        {isDispatched || isReceived  ?(
+        {isDispatched || isReceived ? (
           <>
-            <DispatchDetails requirement={requirement} user={user}/>
+            <DispatchDetails requirement={requirement} user={user} />
 
-            {isReceived && requirement.gatePass?.length > 0 && user.role !== "district coordinator" && (
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-   {isReceived && (
-    <EditGatePassImage
-      requirement={requirement}
-      onSuccess={(updatedRequirement) => {
-        setRequirement(updatedRequirement);
-      }}
-    />
-)}
-
-  </div>
-)}
+            {isReceived &&
+              requirement.gatePass?.length > 0 &&
+              user.role !== "district coordinator" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {isReceived && (
+                    <EditGatePassImage
+                      requirement={requirement}
+                      onSuccess={(updatedRequirement) => {
+                        setRequirement(updatedRequirement);
+                      }}
+                    />
+                  )}
+                </div>
+              )}
           </>
         ) : (
-        user.role !== "district coordinator" && (
+          user.role !== "district coordinator" && (
             <>
-            <Card>
-              <h3 className="text-lg font-semibold mb-4">Vehicle Details</h3>
+              <Card>
+                <h3 className="text-lg font-semibold mb-4">Vehicle Details</h3>
 
-              <label className="block text-sm mb-2">Registered Vehicle</label>
+                <label className="block text-sm mb-2">Registered Vehicle</label>
 
-              <select
-                value={vehicleId}
-                onChange={(e) => setVehicleId(e.target.value)}
-                className="w-full border rounded-xl px-3 py-3"
-              >
-                <option value="">Select Vehicle</option>
+                <select
+                  value={vehicleId}
+                  onChange={(e) => setVehicleId(e.target.value)}
+                  className="w-full border rounded-xl px-3 py-3"
+                >
+                  <option value="">Select Vehicle</option>
 
-                {vehicles
+                  {vehicles
 
-                  .filter((vehicle) => vehicle.isActive)
+                    .filter((vehicle) => vehicle.isActive)
 
-                  .map((vehicle) => (
-                    <option key={vehicle._id} value={vehicle._id}>
-                      {vehicle.vehicleNumber}
+                    .map((vehicle) => (
+                      <option key={vehicle._id} value={vehicle._id}>
+                        {vehicle.vehicleNumber}
 
-                      {" - "}
+                        {" - "}
 
-                      {vehicle.vehicleName}
-                    </option>
-                  ))}
-              </select>
+                        {vehicle.vehicleName}
+                      </option>
+                    ))}
+                </select>
 
-              <div className="my-5 text-center text-gray-500">OR</div>
+                <div className="my-5 text-center text-gray-500">OR</div>
 
-              <input
-                type="text"
-                placeholder="Vehicle Number"
-                value={manualVehicleNumber}
-                onChange={(e) => setManualVehicleNumber(e.target.value)}
-                className="w-full border rounded-xl px-3 py-3 mb-3"
-              />
-            </Card>
+                <input
+                  type="text"
+                  placeholder="Vehicle Number"
+                  value={manualVehicleNumber}
+                  onChange={(e) => setManualVehicleNumber(e.target.value)}
+                  className="w-full border rounded-xl px-3 py-3 mb-3"
+                />
+              </Card>
 
-            <Card>
-              <h3 className="text-lg font-semibold mb-4">Driver Details</h3>
-              <select
-                value={driverId}
-                onChange={(e) => setDriverId(e.target.value)}
-                className="w-full border rounded-xl px-3 py-3"
-              >
-                <option value="">Select Driver</option>
+              <Card>
+                <h3 className="text-lg font-semibold mb-4">Driver Details</h3>
+                <select
+                  value={driverId}
+                  onChange={(e) => setDriverId(e.target.value)}
+                  className="w-full border rounded-xl px-3 py-3"
+                >
+                  <option value="">Select Driver</option>
 
-                {drivers
+                  {drivers
 
-                  .filter((driver) => driver.isActive)
+                    .filter((driver) => driver.isActive)
 
-                  .map((driver) => (
-                    <option key={driver._id} value={driver._id}>
-                      {driver.name}
+                    .map((driver) => (
+                      <option key={driver._id} value={driver._id}>
+                        {driver.name}
 
-                      {" - "}
+                        {" - "}
 
-                      {driver.phone}
-                    </option>
-                  ))}
-              </select>
+                        {driver.phone}
+                      </option>
+                    ))}
+                </select>
 
-              <div className="my-5 text-center text-gray-500">OR</div>
-              <input
-                type="text"
-                placeholder="Driver Name"
-                value={manualDriverName}
-                onChange={(e) => setManualDriverName(e.target.value)}
-                className="w-full border rounded-xl px-3 py-3 mb-3"
-              />
+                <div className="my-5 text-center text-gray-500">OR</div>
+                <input
+                  type="text"
+                  placeholder="Driver Name"
+                  value={manualDriverName}
+                  onChange={(e) => setManualDriverName(e.target.value)}
+                  className="w-full border rounded-xl px-3 py-3 mb-3"
+                />
 
-              <input
-                type="text"
-                placeholder="Driver Phone Number"
-                value={manualDriverPhone}
-                onChange={(e) => setManualDriverPhone(e.target.value)}
-                className="w-full border rounded-xl px-3 py-3"
-              />
-            </Card>
-          </>
-        )
+                <input
+                  type="text"
+                  placeholder="Driver Phone Number"
+                  value={manualDriverPhone}
+                  onChange={(e) => setManualDriverPhone(e.target.value)}
+                  className="w-full border rounded-xl px-3 py-3"
+                />
+              </Card>
+            </>
+          )
         )}
 
         {user.role !== "district coordinator" && (
           <Card>
-          <h3 className="text-lg font-semibold mb-4">Dispatch Remarks</h3>
+            <h3 className="text-lg font-semibold mb-4">Dispatch Remarks</h3>
 
-          <textarea
-            rows={4}
-            disabled={isDispatched || isReceived}
-            value={remarks}
-            onChange={(e) => setRemarks(e.target.value)}
-            placeholder="Write dispatch remarks..."
-            className="w-full border rounded-xl p-3 resize-none disabled:bg-gray-100 disabled:text-gray-500"
-          />
-        </Card>
+            <textarea
+              rows={4}
+              disabled={isDispatched || isReceived}
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+              placeholder="Write dispatch remarks..."
+              className="w-full border rounded-xl p-3 resize-none disabled:bg-gray-100 disabled:text-gray-500"
+            />
+          </Card>
         )}
 
         <Card>
@@ -702,22 +720,23 @@ useEffect(() => {
           )}
         </Card>
 
-        {!isDispatched && !isReceived && user.role !== "district coordinator" && (
-  <Button
-    className="w-full"
-    onClick={handleSave}
-    disabled={isDispatching}
-  >
-    {isDispatching ? (
-      <span className=" flex justify-center items-center gap-1 ">
-        Dispatching... <FiLoader className="animate-spin text-2xl" />
-      </span>
-    ) : (
-      "Dispatch Requirement"
-    )}
-  </Button>
-)}
-
+        {!isDispatched &&
+          !isReceived &&
+          user.role !== "district coordinator" && (
+            <Button
+              className="w-full"
+              onClick={handleSave}
+              disabled={isDispatching}
+            >
+              {isDispatching ? (
+                <span className=" flex justify-center items-center gap-1 ">
+                  Dispatching... <FiLoader className="animate-spin text-2xl" />
+                </span>
+              ) : (
+                "Dispatch Requirement"
+              )}
+            </Button>
+          )}
       </div>
     );
   }

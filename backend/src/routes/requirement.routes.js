@@ -25,7 +25,7 @@ import {
 } from "../validators/requirement.validator.js";
 
 import { ROLE } from "../constants/roles.js";
-import upload from "../middleware/upload.middleware.js";
+import {upload} from "../middleware/upload.middleware.js";
 
 const router = Router();
 

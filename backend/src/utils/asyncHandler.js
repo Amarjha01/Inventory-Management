@@ -8,7 +8,7 @@ const asyncHandler = (handler) => {
 
         } catch (error) {
             console.log("error" , error);
-            
+
             next(error);
 
         }

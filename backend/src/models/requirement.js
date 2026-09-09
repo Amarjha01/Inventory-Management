@@ -26,6 +26,12 @@ const requirementItemSchema = new mongoose.Schema(
         type: String,
         required: true,
     },
+
+    fulfillmentStatus:{
+      type:Boolean,
+      default:true
+    },
+
 },
 {
     _id: false,
@@ -104,25 +110,26 @@ const requirementSchema = new mongoose.Schema(
 
       default: null,
     },
-gatePass: [
-  {
-    image: {
-      type: String,
-      required: true,
-    },
+    
+    gatePass: [
+      {
+        image: {
+          type: String,
+          required: true,
+        },
 
-    uploadedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
+        uploadedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
 
-    uploadedAt: {
-      type: Date,
-      default: Date.now,
-    },
-  },
-],
+        uploadedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

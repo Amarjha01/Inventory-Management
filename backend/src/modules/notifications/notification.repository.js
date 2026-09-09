@@ -1,3 +1,4 @@
+import User from "../../models/user.js";
 import PushSubscription from "./notification.model.js";
 
 class NotificationRepository {
@@ -36,11 +37,26 @@ class NotificationRepository {
       endpoint,
     });
   }
+
   async deleteById(id) {
     return await PushSubscription.deleteOne({
      id
     });
   }
+
+async findAllUnsubscribedUsers() {
+  const subscriptions = await PushSubscription.find().select("userId");
+
+  const subscribedUserIds = subscriptions.map(sub => sub.userId);
+
+  const unsubscribed = await User.find({
+    _id: { $nin: subscribedUserIds },
+    role: "Store Incharge"
+  }).select("name");
+
+  return unsubscribed;
+}
+
 }
 
 export default new NotificationRepository();

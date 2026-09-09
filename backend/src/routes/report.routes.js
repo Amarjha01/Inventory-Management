@@ -8,6 +8,7 @@ import { ROLE } from "../constants/roles.js";
 import {
   downloadRequirementReport,
   getRequirementReportOptions,
+  viewRequirementReport,
 } from "../controllers/report.controller.js";
 
 const router = Router();
@@ -32,6 +33,11 @@ router.get(
     ROLE.DISTRICT_COORDINATOR
   ),
   downloadRequirementReport,
+);
+
+router.get(
+  "/requirements/view",
+  viewRequirementReport,
 );
 
 export default router;
