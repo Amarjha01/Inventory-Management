@@ -29,7 +29,9 @@ router.get("/",
     ROLE.ADMIN, 
     ROLE.STORE_SUPERVISOR,  
     ROLE.KITCHEN_INCHARGE, 
-    ROLE.STORE_SUPERVISOR),
+    ROLE.DISTRICT_COORDINATOR,
+    ROLE.CHIEF_COORDINATOR
+  ),
     getKitchens);
 
 router.get("/:id", getKitchenById);

@@ -278,113 +278,168 @@ const compressImage = (
   // CAPTURE IMAGE
   // ==========================================================
 
-  const captureImage = async () => {
-    try {
-      const video =
-        videoRef.current;
+const captureImage = async () => {
+  try {
+    const video = videoRef.current;
 
-      const canvas =
-        canvasRef.current;
+    if (!video) {
+      return;
+    }
 
-      if (!video || !canvas) {
-        return;
-      }
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
 
-      const width =
-        video.videoWidth;
+    if (!videoWidth || !videoHeight) {
+      setCameraError("Camera is not ready yet.");
+      return;
+    }
 
-      const height =
-        video.videoHeight;
+    // ==========================================================
+    // FRAME POSITION
+    // Must match the CSS scanner frame
+    // ==========================================================
 
-      if (!width || !height) {
-        setCameraError(
-          "Camera is not ready yet.",
-        );
+    const isDesktop = window.innerWidth >= 640;
 
-        return;
-      }
+    const leftPercent = isDesktop ? 0.10 : 0.06;
+    const rightPercent = isDesktop ? 0.10 : 0.06;
+    const topPercent = isDesktop ? 0.15 : 0.18;
+    const bottomPercent = isDesktop ? 0.15 : 0.18;
 
-      /*
-       * Keep the original camera resolution.
-       *
-       * This is important for documents because
-       * reducing the resolution too aggressively
-       * makes small text blurry.
-       */
+    // ==========================================================
+    // CROP AREA
+    // ==========================================================
 
-      canvas.width = width;
-      canvas.height = height;
+    const cropX = Math.round(
+      videoWidth * leftPercent
+    );
 
-      const context =
-        canvas.getContext("2d", {
-          alpha: false,
-        });
+    const cropY = Math.round(
+      videoHeight * topPercent
+    );
 
-      context.imageSmoothingEnabled =
-        true;
+    const cropWidth = Math.round(
+      videoWidth *
+        (1 - leftPercent - rightPercent)
+    );
 
-      context.imageSmoothingQuality =
-        "high";
+    const cropHeight = Math.round(
+      videoHeight *
+        (1 - topPercent - bottomPercent)
+    );
 
-      /*
-       * Mirror only the front camera.
-       */
+    // ==========================================================
+    // CREATE CROPPED CANVAS
+    // ==========================================================
 
-      if (facingMode === "user") {
-        context.save();
+    const canvas = canvasRef.current;
 
-        context.translate(
-          width,
-          0,
-        );
+    if (!canvas) {
+      return;
+    }
 
-        context.scale(-1, 1);
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
 
-        context.drawImage(
-          video,
-          0,
-          0,
-          width,
-          height,
-        );
+    const context = canvas.getContext("2d", {
+      alpha: false,
+    });
 
-        context.restore();
-      } else {
-        context.drawImage(
-          video,
-          0,
-          0,
-          width,
-          height,
-        );
-      }
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
 
-      const file =
-        await compressImage(
-          canvas,
-          `${documentType?.id || "document"}-${Date.now()}.jpg`,
-        );
+    // White background
+    context.fillStyle = "#ffffff";
+    context.fillRect(
+      0,
+      0,
+      cropWidth,
+      cropHeight
+    );
 
-      const previewUrl =
-        URL.createObjectURL(file);
+    // ==========================================================
+    // FRONT CAMERA
+    // ==========================================================
 
-      setPreview({
-        file,
-        url: previewUrl,
-      });
+    if (facingMode === "user") {
+      context.save();
 
-      stopCamera();
-    } catch (error) {
-      console.error(
-        "Capture error:",
-        error,
+      context.translate(
+        cropWidth,
+        0
       );
 
-      setCameraError(
-        "Unable to capture the document.",
+      context.scale(-1, 1);
+
+      context.drawImage(
+        video,
+
+        // Source crop
+        cropX,
+        cropY,
+        cropWidth,
+        cropHeight,
+
+        // Destination
+        0,
+        0,
+        cropWidth,
+        cropHeight
+      );
+
+      context.restore();
+    } else {
+      // ========================================================
+      // REAR CAMERA
+      // ========================================================
+
+      context.drawImage(
+        video,
+
+        // Source crop
+        cropX,
+        cropY,
+        cropWidth,
+        cropHeight,
+
+        // Destination
+        0,
+        0,
+        cropWidth,
+        cropHeight
       );
     }
-  };
+
+    // ==========================================================
+    // COMPRESS CROPPED IMAGE
+    // ==========================================================
+
+    const file = await compressImage(
+      canvas,
+      `${documentType?.id || "document"}-${Date.now()}.jpg`
+    );
+
+    const previewUrl = URL.createObjectURL(file);
+
+    setPreview({
+      file,
+      url: previewUrl,
+    });
+
+    stopCamera();
+
+  } catch (error) {
+    console.error(
+      "Capture error:",
+      error
+    );
+
+    setCameraError(
+      "Unable to capture the document."
+    );
+  }
+};
+
 
   // ==========================================================
   // RETAKE
@@ -651,9 +706,7 @@ const compressImage = (
               {/* =================================================
                   DOCUMENT SCANNER OVERLAY
               ================================================= */}
-        <div>
-            <img src={preview?.url} alt="" />
-        </div>
+       
               {!loading &&
                 !cameraError && (
                   <div className="

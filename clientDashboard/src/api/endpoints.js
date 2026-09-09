@@ -19,6 +19,8 @@ export const ENDPOINTS = {
 
     DRIVERS: "/drivers",
 
-    PENDINGITEMS: "/pending"
+    PENDINGITEMS: "/pending",
+
+    MAINTENANCE: "/maintenance"
 
 };

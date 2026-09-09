@@ -30,12 +30,13 @@ import { themes } from "../../../components/shared/ui/Theme";
 import ServiceSection from "./ServiceSection.jsx";
 import VisitorSection from "./VisitorSection.jsx";
 import PurchaseSection from "./PurchaseSection.jsx";
-
+import api from "../../../api/axios.js";
+import { createServiceRecord } from "../../../services/maintainence.service.js";
 /* ============================================================
    CONSTANTS
 ============================================================ */
 
-const API_BASE = "/api/maintenance";
+const API_BASE =  "/api/v1/maintenance";
 
 const TABS = {
   SERVICE: "service",
@@ -529,9 +530,9 @@ const Maintenance = () => {
 
     formData.append("narration", serviceForm.narration);
 
-    serviceForm.images.forEach((image) => {
+    serviceForm?.images?.forEach((image) => {
       if (image instanceof File) {
-        formData.append("images", image);
+        formData?.append("images", image);
       }
     });
 
@@ -614,10 +615,36 @@ const Maintenance = () => {
 
       let method = editingId ? "PUT" : "POST";
 
+      let formData;
+
       if (activeTab === TABS.SERVICE) {
-        endpoint = editingId
-          ? `${API_BASE}/service/${editingId}`
-          : `${API_BASE}/service`;
+        formData = buildServiceFormData();
+        formData.append("type","service")
+      }
+      if (activeTab === TABS.PURCHASE) {
+        formData = buildServiceFormData();
+        formData.append("type","service")
+      }
+      if (activeTab === TABS.VISITOR) {
+        formData = buildServiceFormData();
+        formData.append("type","service")
+      }
+
+      if (activeTab === TABS.VISITOR) {
+        formData = buildVisitorFormData();
+      }
+
+      if (activeTab === TABS.PURCHASE) {
+        formData = buildPurchaseFormData();
+      }
+
+
+      if (activeTab === TABS.SERVICE) {
+        try {
+          const response = createServiceRecord(formData)
+        } catch (error) {
+          console.log(error);
+        }
       }
 
       if (activeTab === TABS.VISITOR) {
@@ -632,33 +659,11 @@ const Maintenance = () => {
           : `${API_BASE}/purchase-record`;
       }
 
-      let formData;
 
-      if (activeTab === TABS.SERVICE) {
-        formData = buildServiceFormData();
-      }
-
-      if (activeTab === TABS.VISITOR) {
-        formData = buildVisitorFormData();
-      }
-
-      if (activeTab === TABS.PURCHASE) {
-        formData = buildPurchaseFormData();
-      }
-
-      const response = await fetch(endpoint, {
-        method,
-        body: formData,
-        credentials: "include",
-      });
-
-      const result = await response.json();
 
       if (!response.ok) {
         throw new Error(result?.message || "Unable to save record.");
       }
-
-      setMaintenance(result.data);
 
       showSuccess(
         editingId

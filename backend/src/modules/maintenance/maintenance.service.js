@@ -1,278 +1,165 @@
-import Maintenance from "./maintenance.repository.js"
+import maintenanceRepository from "./maintenance.repository.js";
 
+class MaintenanceService {
+  /*
+  |--------------------------------------------------------------------------
+  | Find maintenance document
+  |--------------------------------------------------------------------------
+  */
 
-/*
-|--------------------------------------------------------------------------
-| Find maintenance document
-|--------------------------------------------------------------------------
-*/
+  async findByUserId(userId) {
+    return await maintenanceRepository.findByUserId(userId);
+  }
 
-const findByUserId = async (userId) => {
-  return await Maintenance.findOne({ userId });
-};
+  /*
+  |--------------------------------------------------------------------------
+  | Create maintenance document
+  |--------------------------------------------------------------------------
+  */
 
+  async create(data) {
+    console.log("data at maintenance service" , data);
+    
+    return await maintenanceRepository.create(data);
+  }
 
-/*
-|--------------------------------------------------------------------------
-| Create maintenance document
-|--------------------------------------------------------------------------
-*/
+  /*
+  |--------------------------------------------------------------------------
+  | Add Service
+  |--------------------------------------------------------------------------
+  */
 
-const create = async (data) => {
-  return await Maintenance.create(data);
-};
-
-
-/*
-|--------------------------------------------------------------------------
-| Add Service
-|--------------------------------------------------------------------------
-*/
-
-const addService = async (userId, serviceData) => {
-  return await Maintenance.findOneAndUpdate(
-    { userId },
-    {
-      $push: {
-        service: serviceData,
-      },
-    },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-};
-
-
-/*
-|--------------------------------------------------------------------------
-| Update Service
-|--------------------------------------------------------------------------
-*/
-
-const updateService = async (
-  userId,
-  serviceId,
-  serviceData
-) => {
-  return await Maintenance.findOneAndUpdate(
-    {
+  async addService(userId, serviceData) {
+    return await maintenanceRepository.addService(
       userId,
-      "service._id": serviceId,
-    },
-    {
-      $set: {
-        "service.$": serviceData,
-      },
-    },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-};
+      serviceData
+    );
+  }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Update Service
+  |--------------------------------------------------------------------------
+  */
 
-/*
-|--------------------------------------------------------------------------
-| Delete Service
-|--------------------------------------------------------------------------
-*/
-
-const deleteService = async (
-  userId,
-  serviceId
-) => {
-  return await Maintenance.findOneAndUpdate(
-    { userId },
-    {
-      $pull: {
-        service: {
-          _id: serviceId,
-        },
-      },
-    },
-    {
-      new: true,
-    }
-  );
-};
-
-
-/*
-|--------------------------------------------------------------------------
-| Add Visitor
-|--------------------------------------------------------------------------
-*/
-
-const addVisitor = async (
-  userId,
-  visitorData
-) => {
-  return await Maintenance.findOneAndUpdate(
-    { userId },
-    {
-      $push: {
-        visitor: visitorData,
-      },
-    },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-};
-
-
-/*
-|--------------------------------------------------------------------------
-| Update Visitor
-|--------------------------------------------------------------------------
-*/
-
-const updateVisitor = async (
-  userId,
-  visitorId,
-  visitorData
-) => {
-  return await Maintenance.findOneAndUpdate(
-    {
+  async updateService(
+    userId,
+    serviceId,
+    serviceData
+  ) {
+    return await maintenanceRepository.updateService(
       userId,
-      "visitor._id": visitorId,
-    },
-    {
-      $set: {
-        "visitor.$": visitorData,
-      },
-    },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-};
+      serviceId,
+      serviceData
+    );
+  }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Delete Service
+  |--------------------------------------------------------------------------
+  */
 
-/*
-|--------------------------------------------------------------------------
-| Delete Visitor
-|--------------------------------------------------------------------------
-*/
-
-const deleteVisitor = async (
-  userId,
-  visitorId
-) => {
-  return await Maintenance.findOneAndUpdate(
-    { userId },
-    {
-      $pull: {
-        visitor: {
-          _id: visitorId,
-        },
-      },
-    },
-    {
-      new: true,
-    }
-  );
-};
-
-
-/*
-|--------------------------------------------------------------------------
-| Add Purchase Record
-|--------------------------------------------------------------------------
-*/
-
-const addPurchaseRecord = async (
-  userId,
-  purchaseData
-) => {
-  return await Maintenance.findOneAndUpdate(
-    { userId },
-    {
-      $push: {
-        purchaseRecord: purchaseData,
-      },
-    },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-};
-
-
-/*
-|--------------------------------------------------------------------------
-| Update Purchase Record
-|--------------------------------------------------------------------------
-*/
-
-const updatePurchaseRecord = async (
-  userId,
-  purchaseId,
-  purchaseData
-) => {
-  return await Maintenance.findOneAndUpdate(
-    {
+  async deleteService(userId, serviceId) {
+    return await maintenanceRepository.deleteService(
       userId,
-      "purchaseRecord._id": purchaseId,
-    },
-    {
-      $set: {
-        "purchaseRecord.$": purchaseData,
-      },
-    },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-};
+      serviceId
+    );
+  }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Add Visitor
+  |--------------------------------------------------------------------------
+  */
 
-/*
-|--------------------------------------------------------------------------
-| Delete Purchase Record
-|--------------------------------------------------------------------------
-*/
+  async addVisitor(userId, visitorData) {
+    return await maintenanceRepository.addVisitor(
+      userId,
+      visitorData
+    );
+  }
 
-const deletePurchaseRecord = async (
-  userId,
-  purchaseId
-) => {
-  return await Maintenance.findOneAndUpdate(
-    { userId },
-    {
-      $pull: {
-        purchaseRecord: {
-          _id: purchaseId,
-        },
-      },
-    },
-    {
-      new: true,
-    }
-  );
-};
+  /*
+  |--------------------------------------------------------------------------
+  | Update Visitor
+  |--------------------------------------------------------------------------
+  */
 
+  async updateVisitor(
+    userId,
+    visitorId,
+    visitorData
+  ) {
+    return await maintenanceRepository.updateVisitor(
+      userId,
+      visitorId,
+      visitorData
+    );
+  }
 
-module.exports = {
-  findByUserId,
-  create,
+  /*
+  |--------------------------------------------------------------------------
+  | Delete Visitor
+  |--------------------------------------------------------------------------
+  */
 
-  addService,
-  updateService,
-  deleteService,
+  async deleteVisitor(userId, visitorId) {
+    return await maintenanceRepository.deleteVisitor(
+      userId,
+      visitorId
+    );
+  }
 
-  addVisitor,
-  updateVisitor,
-  deleteVisitor,
+  /*
+  |--------------------------------------------------------------------------
+  | Add Purchase Record
+  |--------------------------------------------------------------------------
+  */
 
-  addPurchaseRecord,
-  updatePurchaseRecord,
-  deletePurchaseRecord,
-};
+  async addPurchaseRecord(
+    userId,
+    purchaseData
+  ) {
+    return await maintenanceRepository.addPurchaseRecord(
+      userId,
+      purchaseData
+    );
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Update Purchase Record
+  |--------------------------------------------------------------------------
+  */
+
+  async updatePurchaseRecord(
+    userId,
+    purchaseId,
+    purchaseData
+  ) {
+    return await maintenanceRepository.updatePurchaseRecord(
+      userId,
+      purchaseId,
+      purchaseData
+    );
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Delete Purchase Record
+  |--------------------------------------------------------------------------
+  */
+
+  async deletePurchaseRecord(
+    userId,
+    purchaseId
+  ) {
+    return await maintenanceRepository.deletePurchaseRecord(
+      userId,
+      purchaseId
+    );
+  }
+}
+
+export default new MaintenanceService();

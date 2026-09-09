@@ -44,7 +44,8 @@ router.get("/allKitchenRequirements",
   authorize(
     ROLE.ADMIN,
     ROLE.STORE_INCHARGE,
-    ROLE.DISTRICT_COORDINATOR
+    ROLE.DISTRICT_COORDINATOR,
+    ROLE.CHIEF_COORDINATOR
   ),
   validate,
   getAllKitchenRequirements);

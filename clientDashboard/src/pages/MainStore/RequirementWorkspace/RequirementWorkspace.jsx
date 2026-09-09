@@ -575,7 +575,7 @@ console.log(requirement);
 
             {isReceived &&
               requirement.gatePass?.length > 0 &&
-              user.role !== "district coordinator" && (
+              (user.role !== "district coordinator" && user?.role !== "Chief Coordinator") && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {isReceived && (
                     <EditGatePassImage
@@ -589,7 +589,7 @@ console.log(requirement);
               )}
           </>
         ) : (
-          user.role !== "district coordinator" && (
+          (user.role !== "district coordinator" && user?.role !== "Chief Coordinator") && (
             <>
               <Card>
                 <h3 className="text-lg font-semibold mb-4">Vehicle Details</h3>
@@ -674,7 +674,7 @@ console.log(requirement);
           )
         )}
 
-        {user.role !== "district coordinator" && (
+        {(user.role !== "district coordinator" && user?.role !== "Chief Coordinator") && (
           <Card>
             <h3 className="text-lg font-semibold mb-4">Dispatch Remarks</h3>
 
@@ -721,22 +721,24 @@ console.log(requirement);
         </Card>
 
         {!isDispatched &&
-          !isReceived &&
-          user.role !== "district coordinator" && (
-            <Button
-              className="w-full"
-              onClick={handleSave}
-              disabled={isDispatching}
-            >
-              {isDispatching ? (
-                <span className=" flex justify-center items-center gap-1 ">
-                  Dispatching... <FiLoader className="animate-spin text-2xl" />
-                </span>
-              ) : (
-                "Dispatch Requirement"
-              )}
-            </Button>
-          )}
+  !isReceived &&
+  user.role !== "district coordinator" &&
+  user.role !== "Chief Coordinator" && (
+    <Button
+      className="w-full"
+      onClick={handleSave}
+      disabled={isDispatching}
+    >
+      {isDispatching ? (
+        <span className="flex justify-center items-center gap-1">
+          Dispatching... <FiLoader className="animate-spin text-2xl" />
+        </span>
+      ) : (
+        "Dispatch Requirement"
+      )}
+    </Button>
+  )}
+
       </div>
     );
   }

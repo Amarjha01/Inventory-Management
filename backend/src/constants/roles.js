@@ -8,6 +8,8 @@ export const ROLE = Object.freeze({
 
     STORE_INCHARGE: "Store Incharge",
 
-    KITCHEN_INCHARGE: "Kitchen Incharge"
+    KITCHEN_INCHARGE: "Kitchen Incharge",
+
+    CHIEF_COORDINATOR:"Chief Coordinator"
 
 });

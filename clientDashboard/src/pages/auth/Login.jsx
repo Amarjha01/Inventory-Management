@@ -68,11 +68,12 @@ const Login = () => {
     case "Store Supervisor":
     case "Admin":
     case "district coordinator":
+    case "Chief Coordinator":
       navigate("/store", { replace: true });
       break;
 
     default:
-      navigate("/login", { replace: true });
+      // navigate("/login", { replace: true });
   }
 };
   useEffect(() => {
@@ -98,7 +99,7 @@ const Login = () => {
       break;
 
     default:
-      navigate("/login", { replace: true });
+      // navigate("/login", { replace: true });
   }
 }, [navigate]);
   return (

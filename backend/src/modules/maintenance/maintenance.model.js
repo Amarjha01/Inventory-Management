@@ -230,4 +230,4 @@ const Maintenance = mongoose.model(
   maintenanceSchema
 );
 
-module.exports = Maintenance;
+export default Maintenance;
