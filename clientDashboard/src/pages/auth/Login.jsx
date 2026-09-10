@@ -73,7 +73,7 @@ const Login = () => {
       break;
 
     default:
-      // navigate("/login", { replace: true });
+      navigate("/login", { replace: true });
   }
 };
   useEffect(() => {
@@ -99,7 +99,7 @@ const Login = () => {
       break;
 
     default:
-      // navigate("/login", { replace: true });
+      navigate("/login", { replace: true });
   }
 }, [navigate]);
   return (

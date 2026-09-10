@@ -5,6 +5,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import requirementService from "../services/requirement.service.js";
 
 import { MESSAGE } from "../constants/responseMessages.js";
+import ApiError from "../utils/ApiError.js";
 
 export const createRequirement = asyncHandler(async (req, res) => {
   console.log("req.body at controller creat requirememnt" , req.body);
@@ -78,30 +79,57 @@ export const getLatestKitchenRequirement = asyncHandler(async (req, res) => {
 });
 
 export const updateRequirement = asyncHandler(async (req, res) => {
-   console.log("payload for update quantity" , req.body);
- const payload = {
+  
+if (req.body.action === "updateQuantity") {
+  const { inventoryId, quantity } = req.body;
+
+  console.log("inventoryId:", inventoryId);
+  console.log("quantity:", quantity);
+
+  if (!inventoryId) {
+    throw new ApiError(400, "inventoryId is required");
+  }
+
+  if (quantity === undefined || quantity === null) {
+    throw new ApiError(400, "quantity is required");
+  }
+
+  const requirement =
+    await requirementService.updateItemQuantity(
+      req.params.id,
+      req.user._id,
+      inventoryId,
+      Number(quantity)
+    );
+
+  return ApiResponse.success(
+    res,
+    MESSAGE.UPDATED,
+    requirement
+  );
+}
+
+  // Add new item
+  const payload = {
     $push: {
       items: {
         $each: req.body,
       },
     },
   };
- 
 
   const requirement = await requirementService.updateRequirement(
     req.params.id,
-
     payload
   );
 
   return ApiResponse.success(
     res,
-
     MESSAGE.UPDATED,
-
-    requirement,
+    requirement
   );
 });
+
 
 export const dispatchRequirement = asyncHandler(async (req, res) => {
 
