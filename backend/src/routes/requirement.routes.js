@@ -76,6 +76,8 @@ router.patch(
   authorize(
     ROLE.STORE_SUPERVISOR,
     ROLE.ADMIN,
+    ROLE.CHIEF_COORDINATOR,
+    ROLE.DISTRICT_COORDINATOR
   ),
   updateRequirementValidator,
   validate,
