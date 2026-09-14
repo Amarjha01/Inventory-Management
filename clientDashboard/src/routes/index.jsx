@@ -32,9 +32,9 @@ import MaintenanceStore from "../pages/MainStore/maintenance/Maintenance.jsx";
 import TripLayout from "../layouts/TripLayout";
 
 import Trip from "../pages/trip/Trip.jsx";
-import CreateTrip from "../pages/Trip/CreateTrip";
-import ActiveTrip from "../pages/Trip/ActiveTrip";
-import TripHistory from "../pages/Trip/TripHistory";
+import CreateTrip from "../pages/Trip/CreateTrip.jsx";
+import ActiveTrip from "../pages/trip/ActiveTrip.jsx";
+import TripHistory from "../pages/trip/TripHistory.jsx";
 
 
 const AppRoutes = () => {
