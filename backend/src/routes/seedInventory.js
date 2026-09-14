@@ -1,10 +1,12 @@
 import axios from "axios";
 // import inventoryData from "./inventoryData.js";
-import bartanInventory from './bartanInventory.js'
+// import bartanInventory from './bartanInventory.js'
+// import furnitureInventory from './furnitureInventory.js'
+import electricInventory from './electric.js'
 const BASE_URL = "http://localhost:5000/api/v1/inventory";
 
 const seedInventory = async () => {
-  for (const item of bartanInventory) {
+  for (const item of electricInventory) {
     try {
       const response = await axios.post(BASE_URL, item);
 

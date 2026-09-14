@@ -6,7 +6,11 @@ const createUpload = (
   folder,
   maxFiles = 2
 ) => {
-  const uploadDir = `uploads/${folder}`;
+  const uploadDir = path.join(
+  process.cwd(),
+  "uploads",
+  folder
+);
 
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, {
@@ -20,10 +24,9 @@ const createUpload = (
     },
 
     filename(req, file, cb) {
-      const extension =
-        path.extname(
-          file.originalname
-        );
+      const extension = path.extname(
+        file.originalname
+      );
 
       cb(
         null,
@@ -89,4 +92,86 @@ export const uploadMaintenance =
   createUpload(
     "maintenance",
     2
+  );
+
+
+/*
+|--------------------------------------------------------------------------
+| Trip uploads
+|--------------------------------------------------------------------------
+|
+| Trip lifecycle has different image types:
+|
+| 1. Initial meter image
+| 2. Destination selfie
+| 3. Destination meter image
+| 4. Fuel slip
+| 5. Final meter image
+|
+|--------------------------------------------------------------------------
+*/
+
+
+/*
+|--------------------------------------------------------------------------
+| Trip start
+|--------------------------------------------------------------------------
+|
+| Initial meter image
+|
+*/
+
+export const uploadTripStart =
+  createUpload(
+    "trips/start",
+    1
+  );
+
+
+/*
+|--------------------------------------------------------------------------
+| Destination evidence
+|--------------------------------------------------------------------------
+|
+| selfie
+| meterImage
+|
+*/
+
+export const uploadTripEvidence =
+  createUpload(
+    "trips/evidence",
+    2
+  );
+
+
+/*
+|--------------------------------------------------------------------------
+| Fuel slip
+|--------------------------------------------------------------------------
+|
+| One fuel slip per upload request.
+|
+*/
+
+export const uploadTripFuel =
+  createUpload(
+    "trips/fuel",
+    1
+  );
+
+
+/*
+|--------------------------------------------------------------------------
+| Trip finalization
+|--------------------------------------------------------------------------
+|
+| Final meter image
+|
+*/
+
+export const uploadTripFinal =
+  createUpload(
+    "trips/final",
+    1
   );

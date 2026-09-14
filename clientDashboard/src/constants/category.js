@@ -3,6 +3,8 @@ const category = [
   "BARTAN",
   "STATIONERY",
   "MAINTENANCE",
+  "ELECTRICAL",
+  "FURNITURE"
 ];
 
 export default category;

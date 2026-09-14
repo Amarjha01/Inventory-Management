@@ -21,6 +21,8 @@ export const ENDPOINTS = {
 
     PENDINGITEMS: "/pending",
 
-    MAINTENANCE: "/maintenance"
+    MAINTENANCE: "/maintenance",
+
+    TRIPS: "/trips"
 
 };

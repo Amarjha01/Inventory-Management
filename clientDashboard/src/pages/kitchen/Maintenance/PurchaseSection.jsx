@@ -26,7 +26,7 @@ const PurchaseSection = ({
   return (
     <div className="space-y-4">
       <Input
-        label="Purchase Date"
+        label="Purchase Date / परचेज डेट"
         name="purchaseDate"
         type="date"
         value={form.purchaseDate}
@@ -35,35 +35,35 @@ const PurchaseSection = ({
       />
 
       <Input
-        label="Party Name"
+        label="Party Name / पार्टी नेम"
         name="partyName"
         value={form.partyName}
         onChange={onChange}
-        placeholder="Supplier / party name"
+        placeholder="Supplier / party name / सप्लायर / पार्टी नेम"
         icon={FiTruck}
       />
 
       <Input
-        label="Company Name"
+        label="Company Name / कंपनी नेम"
         name="companyName"
         value={form.companyName}
         onChange={onChange}
-        placeholder="Manufacturer / company"
+        placeholder="Manufacturer / company / मैन्युफैक्चरर / कंपनी"
         icon={FiPackage}
       />
 
       <Input
-        label="Expiry / Warranty Year"
+        label="Expiry / Warranty Year / एक्सपायरी / वारंटी ईयर"
         name="expiryWarrantyYear"
         value={form.expiryWarrantyYear}
         onChange={onChange}
-        placeholder="e.g. 2028 or 2 years"
+        placeholder="e.g. 2028 or 2 years / जैसे: 2028 या 2 साल"
         icon={FiClock}
       />
 
       <SingleImageField
-        title="Guarantee / Warranty Photo"
-        subtitle="Optional"
+        title="Guarantee / Warranty Photo / गारंटी / वारंटी फोटो"
+        subtitle="Optional / ऑप्शनल"
         image={form.guaranteePhoto}
         onCamera={onGuaranteeCamera}
         onFiles={onGuaranteeFile}
@@ -71,8 +71,8 @@ const PurchaseSection = ({
       />
 
       <SingleImageField
-        title="Other Image"
-        subtitle="Invoice, product image or other document"
+        title="Other Image / अदर इमेज"
+        subtitle="Invoice, product image or other document / इनवॉइस, प्रोडक्ट इमेज या कोई अन्य डॉक्यूमेंट"
         image={form.otherImages?.[0]}
         onCamera={onOtherCamera}
         onFiles={onOtherFiles}

@@ -25,6 +25,18 @@ import Pending from "../pages/MainStore/Pending/Pending.jsx";
 import Downloads from "../pages/MainStore/Downloads/Downloads.jsx";
 import Uploads from "../pages/kitchen/Uploads/Uploads.jsx";
 import Maintenance from "../pages/kitchen/Maintenance/Maintenance.jsx";
+import MaintenanceStore from "../pages/MainStore/maintenance/Maintenance.jsx";
+
+
+
+import TripLayout from "../layouts/TripLayout";
+
+import Trip from "../pages/trip/Trip.jsx";
+import CreateTrip from "../pages/Trip/CreateTrip";
+import ActiveTrip from "../pages/Trip/ActiveTrip";
+import TripHistory from "../pages/Trip/TripHistory";
+
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -170,10 +182,23 @@ const AppRoutes = () => {
     element={<Pending />}
     />
    <Route
+    path="maintenance"
+    element={<MaintenanceStore />}
+    />
+   <Route
     path="downloads"
     element={<Downloads />}
     />
 
+</Route>
+
+||||||||||||||||||||||TRIP|||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+<Route element={<TripLayout />}>
+    <Route path="/trip" element={<Trip />} />
+    <Route path="/trip/create" element={<CreateTrip />} />
+    <Route path="/trip/active" element={<ActiveTrip />} />
+    <Route path="/trip/history" element={<TripHistory />} />
 </Route>
     </Routes>
 

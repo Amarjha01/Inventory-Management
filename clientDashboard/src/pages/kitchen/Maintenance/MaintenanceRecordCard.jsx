@@ -204,7 +204,7 @@ const MaintenanceRecordCard = ({
                 <PurchaseDetails record={record} />
               )}
 
-              <div className="mt-4 grid grid-cols-2 gap-2">
+              {/* <div className="mt-4 grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={onEdit}
@@ -253,7 +253,7 @@ const MaintenanceRecordCard = ({
                   <FiTrash2 size={14} />
                   Delete
                 </button>
-              </div>
+              </div> */}
             </div>
           </motion.div>
         )}

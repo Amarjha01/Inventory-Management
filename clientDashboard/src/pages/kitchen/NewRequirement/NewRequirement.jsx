@@ -59,7 +59,7 @@ const NewRequirement = () => {
   setTheme(NewRequirementTheme[type]);
 
   // Fetch inventory only for inventory-based requirements
-  if (["RM", "BARTAN", "STATIONERY"].includes(type)) {
+  if (["RM", "BARTAN", "STATIONERY" , "FURNITURE" , "ELECTRICAL"].includes(type)) {
     fetchInventory(type);
   }
 };
@@ -203,9 +203,7 @@ const NewRequirement = () => {
         />
 
         {/* Items Section */}
-        {(requirementType === "RM" ||
-          requirementType === "BARTAN" ||
-          requirementType === "STATIONERY") && (
+        {(requirementType != "MAINTENANCE" ) && (
           <motion.div
             variants={fadeUp}
             initial="hidden"

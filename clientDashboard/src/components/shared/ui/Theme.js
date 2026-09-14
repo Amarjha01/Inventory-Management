@@ -1,5 +1,58 @@
 export const themes = {
   NewRequirementTheme:{
+FURNITURE: {
+  image: "/ui/FURNITURE.png",
+
+  // Main areas
+  background: "#FAF7F2",
+  header: "#3B2A20",
+  surface: "#FFFFFF",
+  surfaceAlt: "#F5EEE6",
+
+  // Furniture / wood accent
+  primary: "#9A5B2F",
+  primaryLight: "#F2E3D3",
+  primaryDark: "#70401F",
+
+  // Text
+  text: "#2B211B",
+  textSecondary: "#756A62",
+  textOnPrimary: "#FFFFFF",
+
+  // Borders / states
+  border: "#E8DCCF",
+  selectedBorder: "#C58A5B",
+
+  // Supporting color
+  secondary: "#C89B6D",
+},
+
+ELECTRICAL: {
+  image: "/ui/ELECTRICAL.png",
+
+  // Main areas
+  background: "#F3F8FF",
+  header: "#101F4D",
+  surface: "#FFFFFF",
+  surfaceAlt: "#E8F1FF",
+
+  // Electrical blue + energy yellow
+  primary: "#1769E0",
+  primaryLight: "#E1EEFF",
+  primaryDark: "#0D47A1",
+
+  // Text
+  text: "#17233D",
+  textSecondary: "#667085",
+  textOnPrimary: "#FFFFFF",
+
+  // Borders / states
+  border: "#D7E5FA",
+  selectedBorder: "#4F8DF7",
+
+  // Supporting color derived from electricity image
+  secondary: "#F5C518",
+},
  RM: {
     image: "/ui/Glossy Purple Vegetable Crate.png",
 
@@ -428,6 +481,8 @@ USERS: {
     // Supporting color
     secondary: "#22A06B",
   },
+
+
 
 };
 

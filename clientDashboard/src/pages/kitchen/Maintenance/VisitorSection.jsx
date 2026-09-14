@@ -19,7 +19,7 @@ const VisitorSection = ({
   return (
     <div className="space-y-4">
       <Input
-        label="Problem Date"
+        label="Problem Date / प्रॉब्लम डेट"
         name="problemDate"
         type="date"
         value={form.problemDate}
@@ -28,42 +28,39 @@ const VisitorSection = ({
       />
 
       <Input
-        label="Visitor Name"
+        label="Visitor Name / विजिटर नेम"
         name="visitorName"
         value={form.visitorName}
         onChange={onChange}
-        placeholder="Enter visitor name"
+        placeholder="Enter visitor name / विजिटर का नाम दर्ज करें"
         icon={FiUser}
       />
 
       <Input
-        label="Phone Number"
+        label="Phone Number / फोन नंबर"
         name="phoneNumber"
         type="tel"
         value={form.phoneNumber}
         onChange={onChange}
-        placeholder="Enter phone number"
+        placeholder="Enter phone number / फोन नंबर दर्ज करें"
         icon={FiPhone}
       />
 
       <Input
-        label="Reason"
+        label="Reason / रीजन"
         name="reason"
         value={form.reason}
         onChange={onChange}
-        placeholder="Reason for visit"
+        placeholder="Reason for visit / विजिट का रीजन"
         icon={FiFileText}
       />
 
       <Textarea
-        label="Any Part Changes / Narration"
+        label="Any Part Changes / Narration / कोई पार्ट चेंज / नरेशन"
         name="narration"
         value={form.narration}
         onChange={onChange}
-        placeholder="
-          Mention parts changed, work performed
-          or other details...
-        "
+        placeholder="Mention parts changed, work performed or other details... / बदले गए पार्ट्स, किए गए काम या अन्य डिटेल्स लिखें..."
       />
     </div>
   );

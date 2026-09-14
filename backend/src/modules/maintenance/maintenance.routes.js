@@ -10,15 +10,17 @@ import {
   createVisitor,
   updateVisitor,
   deleteVisitor,
-
-  // createPurchaseRecord,
+  createPurchaseRecord,
   updatePurchaseRecord,
   deletePurchaseRecord,
 
   getMaintenance,
+  getAllMaintenanceForAdmin,
 } from "./maintenance.controller.js";
 import { uploadMaintenance } from "../../middleware/upload.middleware.js";
 import authenticate from "../../middleware/auth.middleware.js";
+import { ROLE } from "../../constants/roles.js";
+import authorize from "../../middleware/role.middleware.js";
 
 const router = express.Router();
 
@@ -27,6 +29,17 @@ router.use(authenticate)
 router.get(
   "/",
   getMaintenance
+);
+
+router.get(
+  "/admin",
+  authorize(
+    ROLE.ADMIN,
+    ROLE.CHIEF_COORDINATOR,
+    ROLE.DISTRICT_COORDINATOR,
+    ROLE.STORE_SUPERVISOR
+  ),
+  getAllMaintenanceForAdmin
 );
 
 
@@ -96,20 +109,20 @@ router.delete(
 |--------------------------------------------------------------------------
 */
 
-// router.post(
-//   "/purchase-record",
-//   uploadMaintenance.fields([
-//     {
-//       name: "guaranteePhoto",
-//       maxCount: 1,
-//     },
-//     {
-//       name: "otherImages",
-//       maxCount: 1,
-//     },
-//   ]),
-//   createPurchaseRecord
-// );
+router.post(
+  "/purchase-record",
+  uploadMaintenance.fields([
+    {
+      name: "guaranteePhoto",
+      maxCount: 1,
+    },
+    {
+      name: "otherImages",
+      maxCount: 1,
+    },
+  ]),
+  createPurchaseRecord
+);
 
 
 router.put(

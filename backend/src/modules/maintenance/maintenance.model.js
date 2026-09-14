@@ -179,29 +179,35 @@ const maintenanceSchema = new Schema(
       required: true,
       index: true,
     },
-
+    
+    kitchenId:{
+      type: Schema.Types.ObjectId,
+      ref: "Kitchen",
+      required: true,
+      index: true,
+    },
     /*
      * Service records
      */
     service: {
-      type: [serviceSchema],
-      default: [],
+      type: serviceSchema,
+      default: null,
     },
 
     /*
      * Visitor/problem records
      */
     visitor: {
-      type: [visitorSchema],
-      default: [],
+      type: visitorSchema,
+      default: null,
     },
 
     /*
      * Purchase records
      */
     purchaseRecord: {
-      type: [purchaseRecordSchema],
-      default: [],
+      type: purchaseRecordSchema,
+      default: null,
     },
   },
   {

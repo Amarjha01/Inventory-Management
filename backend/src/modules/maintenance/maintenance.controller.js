@@ -1,3 +1,4 @@
+import ApiResponse from "../../utils/ApiResponse.js";
 import maintenanceService from "./maintenance.service.js";
 
 
@@ -19,6 +20,20 @@ const sendSuccess = (
   });
 };
 
+const getAllMaintenanceForAdmin = async (req, res, next) => {
+  try {
+    const data =
+      await maintenanceService.findAllForAdmin();
+
+    return ApiResponse.success(
+      res,
+      "All maintenance records fetched successfully.",
+      data
+    );
+  } catch (error) {
+    next(error);
+  }
+};
 
 /*
 |--------------------------------------------------------------------------
@@ -28,17 +43,19 @@ const sendSuccess = (
 
 const getMaintenance = async (req, res, next) => {
   try {
-    const userId = req.params.userId;
-
+    const userId = req.user._id;
+    console.log(userId);
+    
     const data =
-      await maintenanceService.getMaintenance(
+      await maintenanceService.findByUserId(
         userId
       );
-
-    return sendSuccess(
+      console.log("maintenance data:", data);
+      
+     return ApiResponse.success(
       res,
-      data,
-      "Maintenance records fetched successfully."
+      "Maintenance records fetched successfully.",
+       data
     );
   } catch (error) {
     next(error);
@@ -58,7 +75,7 @@ const createMaintenance = async (
   next
 ) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.user._id;
 
     const data =
       await maintenanceService.createMaintenance(
@@ -89,31 +106,23 @@ const createService = async (
   next
 ) => {
   try {
-    const userId = req.user._id;
-
-console.log("userId" ,userId);
-console.log("req.body" ,  req.body);
+    const userId = req?.user._id;
+    const kitchenId = req?.user.kitchenId
     const { type, ...body } = req.body;
-
-      let data;
-
-      if (type === "service") {
-        data = {
+      body.images = req.files.images.map((element)=>element.filename)
+        const data = {
           userId,
-          service: [body],
+          kitchenId,
+          service: body,
         };
-      }
 
-      await maintenanceService.create(data);
-
-      
-      
+     const savedData = await maintenanceService.create(data);
 
     return res.status(201).json({
       success: true,
       message:
         "Service record added successfully.",
-      data,
+      savedData,
     });
   } catch (error) {
     next(error);
@@ -190,19 +199,23 @@ const createVisitor = async (
   next
 ) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.user._id;
 
-    const data =
-      await maintenanceService.createVisitor(
-        userId,
-        req.body
-      );
+    const {...body} = req.body
+    const kitchenId = req?.user.kitchenId
+      const  data = {
+          userId,
+          kitchenId,
+          visitor: body,
+        };
+    const savedData =
+      await maintenanceService.addVisitor(data);
 
     return res.status(201).json({
       success: true,
       message:
         "Visitor record added successfully.",
-      data,
+      savedData,
     });
   } catch (error) {
     next(error);
@@ -273,30 +286,41 @@ const deleteVisitor = async (
 |--------------------------------------------------------------------------
 */
 
-const createPurchaseRecord = async (
-  req,
-  res,
-  next
-) => {
+const createPurchaseRecord = async (req, res, next) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.user._id;
+    const body = { ...req.body };
+    const kitchenId = req?.user.kitchenId
+    const files = req.files;
 
-    const data =
-      await maintenanceService.createPurchaseRecord(
-        userId,
-        req.body
-      );
+    console.log(files);
+
+    // Add guarantee photo
+    body.guaranteePhoto = files?.guaranteePhoto?.[0]?.filename;
+
+    // Add other images
+    body.otherImages =
+      files?.otherImages?.map((element) => element.filename) || [];
+
+    const data = {
+      userId,
+      kitchenId,
+      purchaseRecord: body,
+    };
+
+    const savedData =
+      await maintenanceService.addPurchaseRecord(data);
 
     return res.status(201).json({
       success: true,
-      message:
-        "Purchase record added successfully.",
-      data,
+      message: "Purchase record added successfully.",
+      savedData,
     });
   } catch (error) {
     next(error);
   }
 };
+
 
 
 const updatePurchaseRecord = async (
@@ -358,6 +382,7 @@ const deletePurchaseRecord = async (
 
 export {
   getMaintenance,
+  getAllMaintenanceForAdmin,
   createMaintenance,
 
   createService,

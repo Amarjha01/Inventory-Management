@@ -31,7 +31,8 @@ import ServiceSection from "./ServiceSection.jsx";
 import VisitorSection from "./VisitorSection.jsx";
 import PurchaseSection from "./PurchaseSection.jsx";
 import api from "../../../api/axios.js";
-import { createServiceRecord } from "../../../services/maintainence.service.js";
+import { createPurchaseRecord, createServiceRecord, createVisitorRecord, getServiceRecords } from "../../../services/maintainence.service.js";
+import MaintenanceRecordCard from "./MaintenanceRecordCard.jsx";
 /* ============================================================
    CONSTANTS
 ============================================================ */
@@ -116,22 +117,12 @@ const Maintenance = () => {
       setLoading(true);
       setError("");
 
-      const response = await fetch(API_BASE, {
-        method: "GET",
-        credentials: "include",
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          result?.message || "Unable to fetch maintenance records.",
-        );
-      }
-
-      setMaintenance(result.data);
+      const response = await getServiceRecords()
+      console.log(response);
+      
+      setMaintenance(response);
     } catch (error) {
-      // console?.error(error);
+      console?.error(error);
 
       setError(error.message || "Unable to fetch maintenance records.");
     } finally {
@@ -152,15 +143,24 @@ const Maintenance = () => {
       return [];
     }
 
-    if (activeTab === TABS.SERVICE) {
-      return maintenance.service || [];
-    }
+   if (activeTab === TABS.SERVICE) {
+  return (
+    maintenance
+      ?.filter((element) => element?.service != null)
+      .map((element) => element.service) || []
+  );
+}
+
 
     if (activeTab === TABS.VISITOR) {
-      return maintenance.visitor || [];
+      return maintenance
+      ?.filter((element) => element?.visitor != null)
+      .map((element) => element.visitor) || []
     }
 
-    return maintenance.purchaseRecord || [];
+    return maintenance
+    ?.filter((element)=>element.purchaseRecord != null)
+    .map((element)=>element.purchaseRecord) || [];
   }, [maintenance, activeTab]);
 
   /* ==========================================================
@@ -611,12 +611,8 @@ const Maintenance = () => {
     try {
       setSaving(true);
 
-      let endpoint = API_BASE;
-
-      let method = editingId ? "PUT" : "POST";
-
       let formData;
-
+      let response;
       if (activeTab === TABS.SERVICE) {
         formData = buildServiceFormData();
         formData.append("type","service")
@@ -641,29 +637,29 @@ const Maintenance = () => {
 
       if (activeTab === TABS.SERVICE) {
         try {
-          const response = createServiceRecord(formData)
+          response = await createServiceRecord(formData)
         } catch (error) {
           console.log(error);
         }
       }
 
       if (activeTab === TABS.VISITOR) {
-        endpoint = editingId
-          ? `${API_BASE}/visitor/${editingId}`
-          : `${API_BASE}/visitor`;
+
+        try {
+          response = await createVisitorRecord(formData)
+        } catch (error) {
+          console.log(error); 
+        }
       }
 
       if (activeTab === TABS.PURCHASE) {
-        endpoint = editingId
-          ? `${API_BASE}/purchase-record/${editingId}`
-          : `${API_BASE}/purchase-record`;
+        try {
+          response = await createPurchaseRecord(formData)
+        } catch (error) {
+          
+        }
       }
 
-
-
-      if (!response.ok) {
-        throw new Error(result?.message || "Unable to save record.");
-      }
 
       showSuccess(
         editingId
@@ -913,7 +909,7 @@ const Maintenance = () => {
           <div className="mt-6 grid grid-cols-3 gap-2">
             <SummaryCard
               icon={FiTool}
-              label="Services"
+              label="Services (सर्विसेज)"
               value={stats.service}
               active={activeTab === TABS.SERVICE}
               onClick={() => changeTab(TABS.SERVICE)}
@@ -921,7 +917,7 @@ const Maintenance = () => {
 
             <SummaryCard
               icon={FiUsers}
-              label="Visitors"
+              label="Visitors (विजिटर्स)"
               value={stats.visitor}
               active={activeTab === TABS.VISITOR}
               onClick={() => changeTab(TABS.VISITOR)}
@@ -929,7 +925,7 @@ const Maintenance = () => {
 
             <SummaryCard
               icon={FiPackage}
-              label="Purchases"
+              label="Purchases (परचेजेज)"
               value={stats.purchase}
               active={activeTab === TABS.PURCHASE}
               onClick={() => changeTab(TABS.PURCHASE)}
@@ -940,7 +936,7 @@ const Maintenance = () => {
               TABS
           ==================================================== */}
 
-          <div
+          {/* <div
             className="
               mt-6
               flex
@@ -972,7 +968,7 @@ const Maintenance = () => {
               label="Purchase"
               onClick={() => changeTab(TABS.PURCHASE)}
             />
-          </div>
+          </div> */}
 
           {/* ====================================================
               ADD
@@ -1054,7 +1050,7 @@ const Maintenance = () => {
 
                       <h2 className="mt-1 text-lg font-semibold text-(--theme-text)">
                         {activeTab === TABS.SERVICE
-                          ? "Service Details"
+                          ? "Service Details सर्विस रिकॉर्ड"
                           : activeTab === TABS.VISITOR
                             ? "Visitor Details"
                             : "Purchase Details"}
@@ -1213,45 +1209,21 @@ const Maintenance = () => {
             </div>
 
             {records.length === 0 ? (
-              // <EmptyState
-              //   icon={
-              //     activeTab === TABS.SERVICE
-              //       ? FiTool
-              //       : activeTab === TABS.VISITOR
-              //         ? FiUsers
-              //         : FiPackage
-              //   }
-              //   title={
-              //     activeTab === TABS.SERVICE
-              //       ? "No service records"
-              //       : activeTab === TABS.VISITOR
-              //         ? "No visitor records"
-              //         : "No purchase records"
-              //   }
-              //   text={
-              //     activeTab === TABS.SERVICE
-              //       ? "Service history will appear here."
-              //       : activeTab === TABS.VISITOR
-              //         ? "Visitor/problem records will appear here."
-              //         : "Purchase history will appear here."
-              //   }
-              //   onAdd={openCreate}
-              // />
               <>
               <p>empty</p>
               </>
             ) : (
               <div className="space-y-3">
                 <AnimatePresence>
-                  {records.map((record) => (
+                  {records?.map((record) => (
                     <MaintenanceRecordCard
-                      key={record._id}
+                      key={record?._id}
                       record={record}
                       type={activeTab}
-                      expanded={expandedId === record._id}
+                      expanded={expandedId === record?._id}
                       onToggle={() =>
                         setExpandedId(
-                          expandedId === record._id ? null : record._id,
+                          expandedId === record?._id ? null : record?._id,
                         )
                       }
                       onEdit={() => openEdit(record)}
