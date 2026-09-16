@@ -32,6 +32,20 @@ const requirementItemSchema = new mongoose.Schema(
       default:true
     },
 
+    updated: {
+      quantity: {
+        type: Number,
+      },
+      updatedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      updatedAt: {
+        type: Date,
+      },
+    },
+
+
 },
 {
     _id: false,
@@ -72,11 +86,18 @@ const requirementSchema = new mongoose.Schema(
 
     items: {
       type: [requirementItemSchema],
-
       validate: {
-        validator: (items) => items.length > 0,
+        validator: function (items) {
+          if (!items || items.length === 0) {
+            return false;
+          }
+          const inventoryIds = items.map((item) =>
+            item.inventoryId.toString()
+          );
 
-        message: "Requirement must contain at least one item.",
+          return new Set(inventoryIds).size === inventoryIds.length;
+        },
+        message: "Duplicate inventory items are not allowed in a requirement.",
       },
     },
 

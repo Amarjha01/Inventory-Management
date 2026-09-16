@@ -1,6 +1,12 @@
 import maintenanceRepository from "./maintenance.repository.js";
 
 class MaintenanceService {
+
+  async findAllForAdmin() {
+    return await maintenanceRepository.findAllForAdmin();
+  }
+
+  
   /*
   |--------------------------------------------------------------------------
   | Find maintenance document
@@ -73,10 +79,9 @@ class MaintenanceService {
   |--------------------------------------------------------------------------
   */
 
-  async addVisitor(userId, visitorData) {
+  async addVisitor(data) {
     return await maintenanceRepository.addVisitor(
-      userId,
-      visitorData
+      data
     );
   }
 
@@ -117,14 +122,8 @@ class MaintenanceService {
   |--------------------------------------------------------------------------
   */
 
-  async addPurchaseRecord(
-    userId,
-    purchaseData
-  ) {
-    return await maintenanceRepository.addPurchaseRecord(
-      userId,
-      purchaseData
-    );
+  async addPurchaseRecord(data) {
+    return await maintenanceRepository.addPurchaseRecord(data);
   }
 
   /*

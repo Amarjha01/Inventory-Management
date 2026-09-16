@@ -4,7 +4,6 @@ import useVehicleTracking from "../../hooks/useVehicleTracking";
 
 import TrackingHeader from "../../components/shared/vehicleTracking/TrackingHeader";
 import TrackingMap from "../../components/shared/vehicleTracking/TrackingMap";
-// import VehicleInfo from "../../components/shared/vehicleTracking/VehicleInfo";
 import { useSearchParams } from "react-router-dom";
 const VehicleTracking = ({id}) => {
   

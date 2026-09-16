@@ -31,7 +31,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import ItemCard from "../../../components/kitchen/requirement/ItemCard";
 import { RiDeleteBin3Fill } from "react-icons/ri";
 import { FaSave } from "react-icons/fa";
-import { FiLoader } from "react-icons/fi";
+import { FiEdit2, FiLoader } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { createPendingItems } from "../../../services/pendingFulfillment.service";
 const RequirementWorkspace = () => {
@@ -74,6 +74,12 @@ const RequirementWorkspace = () => {
   const [showModal, setShowModal] = useState(false);
 
   const [selectedItems, setSelectedItems] = useState([]);
+
+const [editingItemId, setEditingItemId] = useState(null);
+const [editQuantity, setEditQuantity] = useState("");
+const [isSavingQuantity, setIsSavingQuantity] = useState(false);
+
+
 
   const addItem = (item) => {
     if (selectedItems.some((i) => i._id === item._id)) return;
@@ -227,7 +233,6 @@ const RequirementWorkspace = () => {
       alert(error.response?.data?.message || "Failed to delete requirement");
     }
   };
-console.log(requirement);
 
   const handleSaveItem = async () => {
     const itemPayload = selectedItems.map((item) => ({
@@ -250,6 +255,7 @@ console.log(requirement);
       setIsAddingItems(false);
     }
   };
+
   const handleSave = async () => {
     // Vehicle validation
     if (!vehicleId && !manualVehicleNumber) {
@@ -305,6 +311,7 @@ console.log(requirement);
   if (loading) {
     return <Loader />;
   }
+  
   const handleHaveItemForLatter = async (item ) => {
 
     try {
@@ -330,6 +337,59 @@ console.log(requirement);
       toast.error(error.response.data.message)
     }
   };
+
+const handleEditQuantity = (item) => {
+  setEditingItemId(item.inventoryId?._id);
+  setEditQuantity(item.quantity);
+  setOpenDropdownId(null);
+};
+
+const handleQuantityChange = (value) => {
+  setEditQuantity(value);
+};
+
+const handleSaveQuantity = async (item) => {
+  const payload = {
+    ...item,
+    quantity:editQuantity,
+    _id: id,
+    action: "updateQuantity",
+  }
+  
+  if (editQuantity === "" || Number(editQuantity) < 1) {
+    toast.error("Quantity must be at least 1");
+    return;
+  }
+
+  setIsSavingQuantity(true);
+
+  try {
+    const response = await updateRequirement(
+      requirement._id,
+      payload
+    );
+
+    setRequirement((prev) => ({
+      ...prev,
+      ...response.data,
+    }));
+
+    setEditingItemId(null);
+    setEditQuantity("");
+
+    toast.success("Quantity updated successfully");
+  } catch (error) {
+    console.error(error);
+
+    toast.error(
+      error.response?.data?.message || "Failed to update quantity",
+    );
+  } finally {
+    setIsSavingQuantity(false);
+  }
+};
+
+
 
   const handleArchiveItem = async (id) => {
     console.log(id);
@@ -442,9 +502,9 @@ console.log(requirement);
           </span>
 
           <div className="space-y-5">
-            {requirement.items
-  ?.filter((item) => item?.fulfillmentStatus === true || item?.fulfillmentStatus === undefined )
-  .map((item) => {
+            {requirement?.items
+              ?.filter((item) => item?.fulfillmentStatus === true || item?.fulfillmentStatus === undefined )
+              .map((item) => {
               const stock = inventoryMap[item?.inventoryId?._id];
 
               return (
@@ -483,7 +543,11 @@ console.log(requirement);
 
                         {openDropdownId === item?.inventoryId?._id && (
                           <div className="absolute right-0 top-8 z-50 w-50 rounded-lg border bg-white p-2 shadow-lg">
-                            <button
+                            {
+                              user.role !== "district coordinator" && user?.role !== "Chief Coordinator"
+                              &&
+                              (
+                              <button
                               type="button"
                               onMouseDown={(e) => {
                                 e.stopPropagation();
@@ -501,8 +565,10 @@ console.log(requirement);
                               <MdSendAndArchive />
                               Save For latter
                             </button>
+                              )
+                            }
 
-                            <button
+                            {/* <button
                               type="button"
                               onMouseDown={(e) => {
                                 e.stopPropagation();
@@ -516,7 +582,20 @@ console.log(requirement);
                             >
                               <MdArchive />
                               Archive
-                            </button>
+                            </button> */}
+
+                           <button
+                            type="button"
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              handleEditQuantity(item);
+                            }}
+                            className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
+                          >
+                            <FiEdit2 />
+                            Edit
+                          </button>
+
                           </div>
                         )}
                       </div>
@@ -524,21 +603,75 @@ console.log(requirement);
                   </div>
 
                   <div className="grid grid-cols-2 gap-5 mt-5">
-                    <div>
-                      <p className="text-xs text-gray-500">Requested</p>
+                    <div className="">
+                      <div className="flex items-center justify-between">
+                          {editingItemId === item?.inventoryId?._id ? (
+                            <>
+                              <input
+                                type="number"
+                                min={1}
+                                value={editQuantity}
+                                onChange={(e) => handleQuantityChange(e.target.value)}
+                                className="w-24 rounded-lg border px-3 py-2 font-semibold outline-none focus:border-blue-500"
+                                autoFocus
+                              />
 
-                      <p className="font-semibold">
-                        {item?.quantity} {item?.inventoryId?.unit}
-                      </p>
+                              <button
+                                type="button"
+                                onClick={() => handleSaveQuantity({
+                                  kitchenId: requirement.kitchen._id,
+                                  requirementNumber: requirement.requirementNumber,
+                                  inventoryId: item?.inventoryId?._id,
+                                  unit: item?.inventoryId?.unit,
+                                })}
+                                disabled={isSavingQuantity}
+                                className="flex items-center gap-1 rounded-lg bg-green-600 px-3 py-2 text-white hover:bg-green-700 disabled:opacity-50"
+                              >
+                                {isSavingQuantity ? (
+                                  <>
+                                    Saving...
+                                    <FiLoader className="animate-spin" />
+                                  </>
+                                ) : (
+                                  <>
+                                    Save
+                                    <FaSave />
+                                  </>
+                                )}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingItemId(null);
+                                  setEditQuantity("");
+                                }}
+                                disabled={isSavingQuantity}
+                                className="rounded-lg border px-3 py-2 text-gray-600 hover:bg-gray-100"
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                             <span className="flex flex-col">
+                              <p className="text-xs text-gray-500">Requested</p>
+                             <p className="font-semibold">
+                              {item?.quantity} {item?.inventoryId?.unit}
+                            </p>
+                             </span>
+
+                             {item?.updated && (
+                              <span className=" flex flex-col">
+                              <p className="text-xs text-gray-500">Updated</p>
+                              <p className="font-semibol text-green-700 text-center">{`${item?.updated.quantity}`}</p>
+                              </span>
+                             )}
+                            </>
+                          )}
+                      </div>
+
                     </div>
-
-                    {/* <div>
-                      <p className="text-xs text-gray-500">Available Stock</p>
-
-                      <p className="font-semibold text-green-600">
-                        {stock?.quantity || 0} {item?.inventoryId?.unit}
-                      </p>
-                    </div> */}
                   </div>
 
                   <div className="mt-5">
@@ -550,7 +683,7 @@ console.log(requirement);
                       type="number"
                       disabled={isDispatched || isReceived}
                       min={0}
-                      value={item?.dispatchedQuantity}
+                      value={item?.updated?.quantity || item?.dispatchedQuantity}
                       onChange={(e) =>
                         updateDispatchQuantity(
                           item?.inventoryId?._id,
@@ -575,7 +708,7 @@ console.log(requirement);
 
             {isReceived &&
               requirement.gatePass?.length > 0 &&
-              (user.role !== "district coordinator" && user?.role !== "Chief Coordinator") && (
+              user.role !== "district coordinator" && user?.role !== "Chief Coordinator" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {isReceived && (
                     <EditGatePassImage
@@ -589,7 +722,7 @@ console.log(requirement);
               )}
           </>
         ) : (
-          (user.role !== "district coordinator" && user?.role !== "Chief Coordinator") && (
+          user.role !== "district coordinator" && user?.role !== "Chief Coordinator" && (
             <>
               <Card>
                 <h3 className="text-lg font-semibold mb-4">Vehicle Details</h3>

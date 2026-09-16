@@ -15,7 +15,7 @@ const inventorySchema = new mongoose.Schema(
     },
     requirementType: {
       type: String,
-      enum: ["RM", "BARTAN", "STATIONERY" , "MAINTENANCE"],
+      enum: ["RM", "BARTAN", "STATIONERY" , "MAINTENANCE" , "FURNITURE" , "ELECTRICAL"],
       default: "RM",
       required: true,
       trim: true,

@@ -85,7 +85,6 @@ export const Input = ({
             text-(--theme-text)
             outline-none
             transition
-            placeholder:text-(--theme-text-muted)
             focus:border-(--theme-primary)
             focus:ring-2
             focus:ring-(--theme-primary)/10
@@ -128,7 +127,6 @@ export const Textarea = ({
           text-(--theme-text)
           outline-none
           transition
-          placeholder:text-(--theme-text-muted)
           focus:border-(--theme-primary)
           focus:ring-2
           focus:ring-(--theme-primary)/10
@@ -481,7 +479,7 @@ export const RecordImages = ({
         {images.map((image, index) => (
           <a
             key={index}
-            href={image}
+            href={`http://localhost:5000/api/v1/uploads/maintenance/${image}`}
             target="_blank"
             rel="noreferrer"
             className="
@@ -493,7 +491,7 @@ export const RecordImages = ({
             "
           >
             <img
-              src={image}
+              src={`http://localhost:5000/api/v1/uploads/maintenance/${image}`}
               alt={`Maintenance ${index + 1}`}
               className="
                 h-36

@@ -12,7 +12,7 @@ import {
   MdClose,
 } from "react-icons/md";
 
-import { FaTruckMoving, FaUsers } from "react-icons/fa";
+import { FaTools, FaTruckMoving, FaUsers } from "react-icons/fa";
 import { HiOutlineBuildingStorefront } from "react-icons/hi2";
 import { VscVmPending } from "react-icons/vsc";
 import { RiImageDownloadFill } from "react-icons/ri";
@@ -75,10 +75,15 @@ const MainStoreNavbar = () => {
       icon: MdAssessment,
       path: "/store/reports",
     },
+    // {
+    //   title: "Downloads",
+    //   icon: RiImageDownloadFill,
+    //   path: "/store/downloads",
+    // },
     {
-      title: "Downloads",
-      icon: RiImageDownloadFill,
-      path: "/store/downloads",
+      title: "Maintenance",
+      icon: FaTools,
+      path: "/store/maintenance",
     },
     {
       title: "Settings",

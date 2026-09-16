@@ -74,10 +74,10 @@ const userIds = users.map(
   }
 
   async updateRequirement(id, payload) {
+console.log(payload);
 
     const requirement = await requirementRepository.update(
       id,
-
       payload,
     );
 
@@ -91,6 +91,25 @@ const userIds = users.map(
 
     return requirement;
   }
+
+  async updateItemQuantity(id,userId , inventoryId, quantity) {
+  const requirement = await requirementRepository.updateItemQuantity(
+    id,
+    userId,
+    inventoryId,
+    quantity
+  );
+
+  if (!requirement) {
+    throw new ApiError(
+      404,
+      "Requirement or inventory item not found"
+    );
+  }
+
+  return requirement;
+}
+
 
   async dispatchRequirement({ requirementId, payload, userId }) {
 

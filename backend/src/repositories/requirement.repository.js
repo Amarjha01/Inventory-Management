@@ -80,6 +80,34 @@ async update(id, payload, options = {}) {
     .lean();
 }
 
+async updateItemQuantity(id, userId , inventoryId, quantity) {
+  return await Requirement.findOneAndUpdate(
+    {
+      _id: id,
+      "items.inventoryId": inventoryId,
+    },
+    {
+      $set: {
+        "items.$.updated": {
+          quantity : Number(quantity),
+          updatedBy: userId
+      },
+    },
+  },
+    {
+      new: true,
+      runValidators: true,
+    }
+  )
+    .populate("kitchen")
+    .populate("createdBy", "-password")
+    .populate("items.inventoryId")
+    .populate("dispatch.vehicle")
+    .populate("dispatch.driver")
+    .lean();
+}
+
+
   async findLatestKitchenRequirement(kitchenId) {
     return await Requirement.findOne({
       kitchen: kitchenId,

@@ -18,7 +18,18 @@ import { ENDPOINTS } from "../api/endpoints";
  * - narration
  * - images [max 2]
  */
+
+export const getAllMaintenanceForAdmin = async () => {
+  const { data } = await api.get(
+    `${ENDPOINTS.MAINTENANCE}/admin`,
+  );
+  console.log(data);
+  
+  return data.data;
+};
+
 export const createServiceRecord = async (formData) => {
+  
   const { data } = await api.post(
     `${ENDPOINTS.MAINTENANCE}/service`,
     formData,
@@ -38,7 +49,7 @@ export const createServiceRecord = async (formData) => {
  */
 export const getServiceRecords = async () => {
   const { data } = await api.get(
-    `${ENDPOINTS.MAINTENANCE}/service`,
+    `${ENDPOINTS.MAINTENANCE}`,
   );
 
   return data.data;

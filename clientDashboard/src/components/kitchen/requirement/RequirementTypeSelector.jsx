@@ -25,6 +25,19 @@ const REQUIREMENT_TYPES = [
     hindiLabel: "लेखन सामग्री",
     image: "/ui/type/STATIONERY.png",
   },
+ {
+  value: "FURNITURE",
+  label: "Furniture",
+  hindiLabel: "फर्नीचर",
+  image: "/ui/type/FURNITURE.png",
+},
+{
+  value: "ELECTRICAL",
+  label: "Electrical",
+  hindiLabel: "विद्युत सामग्री",
+  image: "/ui/type/ELECTRICAL.png",
+},
+
 ];
 
 const RequirementTypeSelector = ({ value, onChange, disabled = false }) => {
@@ -52,7 +65,7 @@ const RequirementTypeSelector = ({ value, onChange, disabled = false }) => {
           snap-mandatory
           scrollbar-none
           sm:grid
-          sm:grid-cols-4
+          sm:grid-cols-5
           sm:overflow-visible
         "
       >

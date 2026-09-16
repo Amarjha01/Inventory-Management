@@ -1,6 +1,22 @@
 import Maintenance from "./maintenance.model.js";
 
 class MaintenanceRepository {
+
+
+    async findAllForAdmin() {
+    return await Maintenance.find({})
+      .populate({
+        path: "userId",
+        select: "_id name",
+      })
+      .populate({
+        path: "kitchenId",
+        select: "_id name",
+      })
+      .sort({ createdAt: -1 });
+  }
+
+  
   /*
   |--------------------------------------------------------------------------
   | Find maintenance document
@@ -8,7 +24,12 @@ class MaintenanceRepository {
   */
 
   async findByUserId(userId) {
-    return await Maintenance.findOne({ userId });
+    console.log(userId , "at repo");
+    
+    const data = await Maintenance.find( {userId} );
+    console.log(data , "at repo");
+    return data;
+    
   }
 
   /*
@@ -18,7 +39,9 @@ class MaintenanceRepository {
   */
 
   async create(data) {
-    return await Maintenance.create(data);
+    return await Maintenance.create(
+      data
+    );
   }
 
   /*
@@ -94,19 +117,8 @@ class MaintenanceRepository {
   |--------------------------------------------------------------------------
   */
 
-  async addVisitor(userId, visitorData) {
-    return await Maintenance.findOneAndUpdate(
-      { userId },
-      {
-        $push: {
-          visitor: visitorData,
-        },
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+  async addVisitor(data) {
+    return await Maintenance.create(data);
   }
 
   /*
@@ -161,19 +173,8 @@ class MaintenanceRepository {
   |--------------------------------------------------------------------------
   */
 
-  async addPurchaseRecord(userId, purchaseData) {
-    return await Maintenance.findOneAndUpdate(
-      { userId },
-      {
-        $push: {
-          purchaseRecord: purchaseData,
-        },
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+  async addPurchaseRecord(data) {
+    return await Maintenance.create(data);
   }
 
   /*

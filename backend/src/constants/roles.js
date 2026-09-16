@@ -10,6 +10,8 @@ export const ROLE = Object.freeze({
 
     KITCHEN_INCHARGE: "Kitchen Incharge",
 
-    CHIEF_COORDINATOR:"Chief Coordinator"
+    CHIEF_COORDINATOR:"Chief Coordinator",
+
+    DRIVER : "Driver"
 
 });

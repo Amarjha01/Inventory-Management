@@ -25,6 +25,19 @@ import Pending from "../pages/MainStore/Pending/Pending.jsx";
 import Downloads from "../pages/MainStore/Downloads/Downloads.jsx";
 import Uploads from "../pages/kitchen/Uploads/Uploads.jsx";
 import Maintenance from "../pages/kitchen/Maintenance/Maintenance.jsx";
+import MaintenanceStore from "../pages/MainStore/maintenance/Maintenance.jsx";
+
+
+
+import TripLayout from "../layouts/TripLayout";
+
+import Trip from "../pages/trip/Trip.jsx";
+import CreateTrip from "../pages/trip/CreateTrip.jsx";
+import ActiveTrip from "../pages/trip/ActiveTrip.jsx";
+import TripHistory from "../pages/trip/TripHistory.jsx";
+import TripDetails from "../pages/trip/TripDetails.jsx";
+
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -170,9 +183,35 @@ const AppRoutes = () => {
     element={<Pending />}
     />
    <Route
+    path="maintenance"
+    element={<MaintenanceStore />}
+    />
+   <Route
     path="downloads"
     element={<Downloads />}
     />
+
+</Route>
+
+||||||||||||||||||||||TRIP|||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+      <Route
+    path="/trip"
+    element={
+        <ProtectedRoute
+            roles={[
+                "Driver"
+            ]}
+        >
+            <TripLayout />
+        </ProtectedRoute>
+    }
+>
+    <Route path="/trip" element={<Trip />} />
+    <Route path="/trip/:id" element={<TripDetails />}/>
+    <Route path="/trip/create" element={<CreateTrip />} />
+    <Route path="/trip/active" element={<ActiveTrip />} />
+    <Route path="/trip/history" element={<TripHistory />} />
 
 </Route>
     </Routes>
