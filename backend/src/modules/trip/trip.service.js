@@ -40,13 +40,20 @@ const getUserRole = (user) => user?.role?.toString?.() || "";
 /* -------------------------------------------------------------------------- */
 
 const assertTripOwner = (trip, user) => {
+  console.log("user" , user);
+  
   const userId = getUserId(user);
 
+  console.log(userId);
+  console.log("trip.driver?._id?.toString?.()", trip.driver?._id?.toString?.());
+  
   if (!userId) {
     throw new ApiError(401, "User could not be identified.");
   }
 
-  if (trip.driver?.toString?.() !== userId) {
+  if (trip.driver?._id?.toString?.() !== userId) {
+    console.log();
+    
     throw new ApiError(403, "You are not authorized to access this trip.");
   }
 };
@@ -235,7 +242,6 @@ class TripService {
   /* ------------------------------------------------------------------------ */
 
   async createTrip(payload, user) {
-    console.log(payload);
     
     const driverId = payload.driverId || getUserId(user);
 
@@ -254,11 +260,11 @@ class TripService {
       throw new ApiError(400, "At least one destination is required.");
     }
 
-    const activeTrip = await tripRepository.findActiveByDriver(driverId);
+    // const activeTrip = await tripRepository.findActiveByDriver(driverId);
 
-    if (activeTrip) {
-      throw new ApiError(409, "Driver already has an active trip.");
-    }
+    // if (activeTrip) {
+    //   throw new ApiError(409, "Driver already has an active trip.");
+    // }
 
     const vehicleActiveTrip = await tripRepository.findActiveByVehicle(
       payload.vehicleId,
@@ -279,7 +285,7 @@ class TripService {
         `destination[${index}].longitude`,
       );
 
-      validateCoordinates(latitude, longitude);
+      // validateCoordinates(latitude, longitude);
 
       const geofenceRadius =
         Number(destination.geofenceRadiusMeters) ||
@@ -294,16 +300,12 @@ class TripService {
 
       return {
         sequence: index + 1,
-
         name: destination.name?.trim?.(),
-
         address: destination.address?.trim?.() || "",
-
+        startLocation:payload.startLocation,
         latitude,
         longitude,
-
         geofenceRadiusMeters: geofenceRadius,
-
         status: "PENDING",
       };
     });
@@ -320,6 +322,10 @@ class TripService {
       status: "READY",
 
       destinations,
+
+      startMeter:payload.startMeter,
+      
+      startLocation:payload.startLocation,
 
       route: payload.route || undefined,
 

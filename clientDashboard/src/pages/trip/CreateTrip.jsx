@@ -14,6 +14,10 @@ import { FaRoute, FaMapMarkerAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 import { createTrip } from "../../services/trip.service";
+import TripMap from "../../components/trip/map/TripMap";
+import GoogleMapProvider from "../../components/trip/map/GoogleMapProvider";
+import CameraCapture from "../../components/kitchen/uploads/CameraCapture";
+import kitchensLatLng from "../../constants/kitchenLatLng.js";
 
 const CreateTrip = () => {
   const navigate = useNavigate();
@@ -38,50 +42,107 @@ const CreateTrip = () => {
 
   const [destinations, setDestinations] = useState([]);
 
+  const [showCamera, setShowCamera] = useState(false);
+
+  const [cameraType, setCameraType] = useState(null);
+  console.log(destinations);
+
+  /* ==========================================================
+       CAMERA DOCUMENT
+    ========================================================== */
+
+  const cameraDocument = useMemo(() => {
+    return {
+      id: "meter_image",
+      title: "Meter Image",
+    };
+  }, [cameraType]);
+
+  /* ==========================================================
+     CAMERA
+  ========================================================== */
+
+  const openCamera = (type) => {
+    setCameraType(type);
+
+    setShowCamera(true);
+  };
+
+  const handleCameraCapture = (file) => {
+    if (!file) return;
+    setMeterImage(file);
+  };
+
   /*
     |--------------------------------------------------------------------------
     | Current GPS location
     |--------------------------------------------------------------------------
     */
+console.log(startLocation);
 
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by this browser.");
+ const getCurrentLocation = async () => {
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by this browser.");
+    return;
+  }
+
+  try {
+    const permission = await navigator.permissions.query({
+      name: "geolocation",
+    });
+
+    console.log("Location permission:", permission.state);
+
+    if (permission.state === "denied") {
+      alert(
+        "Location access is blocked for this website.\n\n" +
+                "Please click the 🔒 icon near the address bar → " +
+                "Site settings → Location → Allow.\n\n" +
+                "Then click 'Use Current GPS Location' again."
+      );
       return;
     }
+  } catch (error) {
+    console.log("Permission API unavailable:", error);
+  }
 
-    setLocationLoading(true);
+  setLocationLoading(true);
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude, accuracy } = position.coords;
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude, accuracy } = position.coords;
 
-        setStartLocation({
-          address: `(${latitude.toFixed(5)}, ${longitude.toFixed(5)})`,
-          latitude,
-          longitude,
-          source: "GPS",
-          accuracy,
-        });
+      setStartLocation({
+        address: `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`,
+        latitude,
+        longitude,
+        source: "GPS",
+        accuracy,
+      });
 
-        setLocationLoading(false);
-      },
-      (error) => {
-        console.error(error);
+      setLocationLoading(false);
+    },
+    (error) => {
+      setLocationLoading(false);
 
-        setLocationLoading(false);
-
+      if (error.code === error.PERMISSION_DENIED) {
         alert(
-          "Unable to get your current location. Please allow location access.",
+          "Location access was denied. Please enable Location " +
+          "for this website in your browser settings."
         );
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      },
-    );
-  };
+      } else if (error.code === error.POSITION_UNAVAILABLE) {
+        alert("Your location is currently unavailable.");
+      } else if (error.code === error.TIMEOUT) {
+        alert("Location request timed out. Please try again.");
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    }
+  );
+};
 
   /*
     |--------------------------------------------------------------------------
@@ -89,12 +150,16 @@ const CreateTrip = () => {
     |--------------------------------------------------------------------------
     */
 
-  const handleManualLocation = (value) => {
-    setStartLocation((prev) => ({
-      ...prev,
-      address: value,
-      source: "MANUAL",
-    }));
+  const handleManualLocation = (start) => {
+
+    setStartLocation({
+        address: `${start.latitude.toFixed(6)}, ${start.longitude.toFixed(6)}`,
+        latitude:start.latitude,
+        longitude:start.longitude,
+        source: "MANUAL",
+        accuracy:start.accuracy,
+        name:start.name
+    });
   };
 
   /*
@@ -117,23 +182,21 @@ const CreateTrip = () => {
     |--------------------------------------------------------------------------
     */
 
-  const addDestination = () => {
-    const value = destinationInput.trim();
-
+  const addDestination = (value) => {
     if (!value) return;
 
     const destination = {
-      id: crypto.randomUUID(),
+      _id: value._id,
 
       sequence: destinations.length + 1,
 
-      name: value,
+      name: value.name,
 
-      address: value,
+      address: value.name,
 
-      latitude: null,
+      latitude: value.latitude,
 
-      longitude: null,
+      longitude: value.longitude,
 
       status: "PENDING",
     };
@@ -152,7 +215,7 @@ const CreateTrip = () => {
   const removeDestination = (id) => {
     setDestinations((prev) =>
       prev
-        .filter((destination) => destination.id !== id)
+        .filter((destination) => destination._id !== id)
         .map((destination, index) => ({
           ...destination,
           sequence: index + 1,
@@ -216,24 +279,30 @@ const CreateTrip = () => {
     try {
       setLoading(true);
 
-      /*
-       * NOTE:
-       * This assumes the backend accepts JSON for trip creation.
-       * The initial meter image should normally be uploaded
-       * through the start-trip/evidence endpoint.
-       */
+      const formData = new FormData();
 
-      const payload = {
-        vehicleId:"6a743c2d3f54294f6e35d48a",
-        startLocation,
-        startMeter: {
-          reading: Number(meterReading),
-        },
+formData.append("vehicleId", "6a743c2d3f54294f6e35d48a");
+formData.append("startLocation", JSON.stringify(startLocation));
 
-        destinations: destinations.map(({ id, ...destination }) => destination),
-      };
+formData.append(
+  "startMeter",
+  JSON.stringify({
+    reading: Number(meterReading),
+  })
+);
 
-      const trip = await createTrip(payload);
+formData.append(
+  "destinations",
+  JSON.stringify(
+    destinations.map(({ id, ...destination }) => destination)
+  )
+);
+
+formData.append("startMeter.imageUrl", meterImage);
+
+      console.log(formData);
+      
+      const trip = await createTrip(formData);
 
       /*
        * If the backend returns the newly created trip ID,
@@ -296,18 +365,10 @@ const CreateTrip = () => {
 
       <div className="space-y-4">
         {/* START LOCATION */}
-
         <motion.section
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="
-                        rounded-3xl
-                        border
-                        border-gray-100
-                        bg-white
-                        p-5
-                        shadow-sm
-                    "
+          className="rounded-3xl borderborder-gray-100 bg-white p-5 shadow-sm"
         >
           <SectionHeader
             icon={<MdLocationOn size={21} />}
@@ -316,37 +377,34 @@ const CreateTrip = () => {
           />
 
           <div className="mt-5 space-y-3">
+            {kitchensLatLng.map((start, index) => (
+              <label
+                key={start._id ?? index}
+                className="flex cursor-pointer items-center gap-2"
+              >
+                <input
+                  type="radio"
+                  name="kitchen"
+                  value={start.name}
+                  onChange={() => {
+                    handleManualLocation(start);
+                  }}
+                />
+
+                <span>{start.name}</span>
+              </label>
+            ))}
+
             <div className="relative">
               <MdSearch
-                className="
-                                    absolute
-                                    left-3
-                                    top-1/2
-                                    -translate-y-1/2
-                                    text-gray-400
-                                "
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                 size={20}
               />
 
               <input
-                value={startLocation.address}
-                onChange={(event) => handleManualLocation(event.target.value)}
+                value={startLocation.name || startLocation.address}
                 placeholder="Type starting location"
-                className="
-                                    h-12
-                                    w-full
-                                    rounded-2xl
-                                    border
-                                    border-gray-200
-                                    bg-gray-50
-                                    pl-10
-                                    pr-4
-                                    text-sm
-                                    outline-none
-                                    transition
-                                    focus:border-[#1f225f]
-                                    focus:bg-white
-                                "
+                className="h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm outline-none transition focus:border-[#1f225f] focus:bg-white"
               />
             </div>
 
@@ -354,24 +412,7 @@ const CreateTrip = () => {
               type="button"
               onClick={getCurrentLocation}
               disabled={locationLoading}
-              className="
-                                flex
-                                h-11
-                                w-full
-                                items-center
-                                justify-center
-                                gap-2
-                                rounded-2xl
-                                border
-                                border-[#1f225f]/20
-                                bg-[#1f225f]/5
-                                text-sm
-                                font-semibold
-                                text-[#1f225f]
-                                transition
-                                hover:bg-[#1f225f]/10
-                                disabled:opacity-50
-                            "
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-[#1f225f]/20 bg-[#1f225f]/5 text-sm font-semibold text-[#1f225f] transition hover:bg-[#1f225f]/10 disabled:opacity-50"
             >
               <MdMyLocation size={20} />
 
@@ -382,20 +423,12 @@ const CreateTrip = () => {
 
             {startLocation.latitude && (
               <div
-                className="
-                                    rounded-2xl
-                                    bg-green-50
-                                    px-4
-                                    py-3
-                                    text-xs
-                                    text-green-700
-                                "
+                className="rounded-2xl bg-green-50 px-4 py-3 text-xs text-green-700"
               >
                 <p className="font-semibold">GPS location captured</p>
 
                 <p className="mt-1">
-                  {startLocation.latitude.toFixed(6)},{" "}
-                  {startLocation.longitude.toFixed(6)}
+                  {startLocation.address}
                   {startLocation.accuracy
                     ? ` • ±${Math.round(startLocation.accuracy)}m`
                     : ""}
@@ -404,6 +437,20 @@ const CreateTrip = () => {
             )}
           </div>
         </motion.section>
+
+        {/* <div>
+              <label className="mb-2 block text-xs font-semibold text-gray-600">
+               Vehicle Number
+              </label>
+
+              <input
+                type="String"
+                min="0"
+                value={meterReading}
+                onChange={(event) => setMeterReading(event.target.value)}
+                placeholder="e.g. BR09AB8511"
+                className="h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none focus:border-[#1f225f] focus:bg-white"/>
+            </div> */}
 
         {/* INITIAL METER */}
 
@@ -438,19 +485,7 @@ const CreateTrip = () => {
                 value={meterReading}
                 onChange={(event) => setMeterReading(event.target.value)}
                 placeholder="e.g. 125430"
-                className="
-                                    h-12
-                                    w-full
-                                    rounded-2xl
-                                    border
-                                    border-gray-200
-                                    bg-gray-50
-                                    px-4
-                                    text-sm
-                                    outline-none
-                                    focus:border-[#1f225f]
-                                    focus:bg-white
-                                "
+               className="h-12 w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none focus:border-[#1f225f] focus:bg-white"
               />
             </div>
 
@@ -459,38 +494,24 @@ const CreateTrip = () => {
                 Meter Image
               </label>
 
-              <label
-                className="
-                                    flex
-                                    h-12
-                                    cursor-pointer
-                                    items-center
-                                    justify-center
-                                    rounded-2xl
-                                    border
-                                    border-dashed
-                                    border-gray-300
-                                    bg-gray-50
-                                    text-sm
-                                    font-medium
-                                    text-gray-600
-                                    hover:bg-gray-100
-                                "
+              <button
+                type="button"
+                onClick={() => setShowCamera(true)}
+                className="flex h-12 w-full cursor-pointer items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 text-sm font-medium text-gray-600 hover:bg-gray-100"
               >
-                {meterImage ? meterImage.name : "Upload meter photo"}
+                {meterImage ? meterImage.name : "Open Camera"}
+              </button>
 
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handleMeterImage}
-                  className="hidden"
+              {showCamera && (
+                <CameraCapture
+                  documentType={cameraDocument}
+                  onCapture={handleCameraCapture}
+                  onClose={() => setShowCamera(false)}
                 />
-              </label>
+              )}
             </div>
           </div>
         </motion.section>
-
         {/* DESTINATIONS */}
 
         <motion.section
@@ -513,28 +534,26 @@ const CreateTrip = () => {
           />
 
           {/* ADD */}
+          {kitchensLatLng.map((destination, index) => (
+            <label
+              key={destination._id ?? index}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                value={destination.name}
+                onChange={(event) => {
+                  if (event.target.checked) {
+                    addDestination(destination);
+                  } else {
+                    removeDestination(destination._id);
+                  }
+                }}
+              />
 
-          <div className="mt-5 flex gap-2">
-            <input
-              value={destinationInput}
-              onChange={(event) => setDestinationInput(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  addDestination();
-                }
-              }}
-              
-              placeholder="Search or type destination"
-              className="h-12 min-w-0 flex-1 rounded-2xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none focus:border-[#1f225f] focus:bg-white"/>
-
-            <button
-              type="button"
-              onClick={addDestination}
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#1f225f text-white transition hover:bg-[#171a4d]">
-              <MdAdd size={24} />
-            </button>
-          </div>
+              <span>{destination.name}</span>
+            </label>
+          ))}
 
           {/* LIST */}
 
@@ -542,7 +561,7 @@ const CreateTrip = () => {
             <AnimatePresence initial={false}>
               {destinations.map((destination, index) => (
                 <motion.div
-                  key={destination.id}
+                  key={destination._id}
                   initial={{
                     opacity: 0,
                     height: 0,
@@ -555,36 +574,13 @@ const CreateTrip = () => {
                     opacity: 0,
                     height: 0,
                   }}
-                  className="
-                                            overflow-hidden
-                                        "
+                  className="overflow-hidden"
                 >
                   <div
-                    className="
-                                                flex
-                                                items-center
-                                                gap-3
-                                                rounded-2xl
-                                                border
-                                                border-gray-100
-                                                bg-gray-50
-                                                p-3
-                                            "
+                    className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-3"
                   >
                     <div
-                      className="
-                                                    flex
-                                                    h-9
-                                                    w-9
-                                                    shrink-0
-                                                    items-center
-                                                    justify-center
-                                                    rounded-xl
-                                                    bg-[#1f225f]
-                                                    text-xs
-                                                    font-bold
-                                                    text-white
-                                                "
+                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#1f225f] text-xs font-bold text-white"
                     >
                       {index + 1}
                     </div>
@@ -606,28 +602,15 @@ const CreateTrip = () => {
                         type="button"
                         onClick={() => moveDestination(index, "up")}
                         disabled={index === 0}
-                        className="
-                                                        rounded-lg
-                                                        p-2
-                                                        text-gray-400
-                                                        hover:bg-white
-                                                        hover:text-gray-700
-                                                        disabled:opacity-30
-                                                    "
+                      className="rounded-lg p-2 text-gray-400 hover:bg-white hover:text-gray-700 disabled:opacity-30"
                       >
                         <MdSwapVert size={19} />
                       </button>
 
                       <button
                         type="button"
-                        onClick={() => removeDestination(destination.id)}
-                        className="
-                                                        rounded-lg
-                                                        p-2
-                                                        text-gray-400
-                                                        hover:bg-red-50
-                                                        hover:text-red-500
-                                                    "
+                        onClick={() => removeDestination(destination._id)}
+                     className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-500"
                       >
                         <MdDeleteOutline size={20} />
                       </button>
@@ -670,85 +653,47 @@ const CreateTrip = () => {
 
         {/* ROUTE PREVIEW */}
 
-        {destinations.length > 0 && (
-          <motion.section
-            initial={{
-              opacity: 0,
-              y: 10,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            className="
-                            overflow-hidden
-                            rounded-3xl
-                            border
-                            border-gray-100
-                            bg-white
-                            shadow-sm
-                        "
-          >
-            <div
-              className="
-                                flex
-                                items-center
-                                gap-3
-                                border-b
-                                border-gray-100
-                                p-5
-                            "
-            >
-              <div
-                className="
-                                    flex
-                                    h-10
-                                    w-10
-                                    items-center
-                                    justify-center
-                                    rounded-xl
-                                    bg-blue-50
-                                    text-blue-600
-                                "
-              >
-                <FaRoute size={18} />
-              </div>
+       {destinations.length > 0 && (
+  <motion.section
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm"
+  >
+    <div className="flex items-center gap-3 border-b border-gray-100 p-5">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+        <FaRoute size={18} />
+      </div>
 
-              <div>
-                <h3 className="text-sm font-bold text-gray-900">
-                  Route Preview
-                </h3>
+      <div>
+        <h3 className="text-sm font-bold text-gray-900">
+          Route Preview
+        </h3>
 
-                <p className="text-xs text-gray-500">
-                  {destinations.length} destination
-                  {destinations.length > 1 ? "s" : ""}
-                </p>
-              </div>
-            </div>
+        <p className="text-xs text-gray-500">
+          {destinations.length} destination
+          {destinations.length > 1 ? "s" : ""}
+        </p>
+      </div>
+    </div>
 
-            <div
-              className="
-                                flex
-                                min-h-55
-                                items-center
-                                justify-center
-                                bg-gray-100
-                            "
-            >
-              <div className="text-center">
-                <MdLocationOn className="mx-auto text-gray-300" size={40} />
+    <div className="flex min-h-55 items-center justify-center bg-gray-100">
+      <GoogleMapProvider>
+        <TripMap 
+        height={250} 
+        currentLocation={startLocation.address}
+          destinations={destinations}
+          // route={routeCoordinates}
+          // activeDestinationId={
+          //   trip.destinations?.find(
+          //     (destination) => destination.status === "CURRENT",
+          //   )?._id
+          // }
+        />
+      </GoogleMapProvider>
+    </div>
+  </motion.section>
+)}
 
-                <p className="mt-2 text-sm font-semibold text-gray-500">
-                  Map will appear here
-                </p>
-
-                <p className="mt-1 text-xs text-gray-400">
-                  Connect your map provider here.
-                </p>
-              </div>
-            </div>
-          </motion.section>
-        )}
 
         {/* CREATE */}
 
@@ -757,24 +702,7 @@ const CreateTrip = () => {
           type="button"
           disabled={!canCreateTrip || loading}
           onClick={handleCreateTrip}
-          className="
-                        flex
-                        h-14
-                        w-full
-                        items-center
-                        justify-center
-                        gap-2
-                        rounded-2xl
-                        bg-[#1f225f]
-                        text-sm
-                        font-bold
-                        text-white
-                        shadow-sm
-                        transition
-                        hover:bg-[#171a4d]
-                        disabled:cursor-not-allowed
-                        disabled:opacity-40
-                    "
+          className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#1f225f] text-sm font-bold text-white shadow-sm transition hover:bg-[#171a4d] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <FaRoute size={18} />
 
@@ -789,17 +717,7 @@ const SectionHeader = ({ icon, title, description }) => {
   return (
     <div className="flex items-start gap-3">
       <div
-        className="
-                    flex
-                    h-10
-                    w-10
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-xl
-                    bg-[#1f225f]/10
-                    text-[#1f225f]
-                "
+       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1f225f]/10 text-[#1f225f]"
       >
         {icon}
       </div>

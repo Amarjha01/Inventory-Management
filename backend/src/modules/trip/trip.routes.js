@@ -23,7 +23,9 @@ const router = Router();
 router.use(authMiddleware);
 
 // Driver routes
-router.post("/", createTrip);
+router.post("/", 
+  uploadTripStart.single("startMeter.imageUrl"),
+  createTrip);
 router.get("/admin/all", getAllTrips);
 router.get("/my", getMyTrips);
 router.get("/:tripId", getTripById);

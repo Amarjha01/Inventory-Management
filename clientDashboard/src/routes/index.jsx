@@ -35,6 +35,7 @@ import Trip from "../pages/trip/Trip.jsx";
 import CreateTrip from "../pages/trip/CreateTrip.jsx";
 import ActiveTrip from "../pages/trip/ActiveTrip.jsx";
 import TripHistory from "../pages/trip/TripHistory.jsx";
+import TripDetails from "../pages/trip/TripDetails.jsx";
 
 
 const AppRoutes = () => {
@@ -194,11 +195,24 @@ const AppRoutes = () => {
 
 ||||||||||||||||||||||TRIP|||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-<Route element={<TripLayout />}>
+      <Route
+    path="/trip"
+    element={
+        <ProtectedRoute
+            roles={[
+                "Driver"
+            ]}
+        >
+            <TripLayout />
+        </ProtectedRoute>
+    }
+>
     <Route path="/trip" element={<Trip />} />
+    <Route path="/trip/:id" element={<TripDetails />}/>
     <Route path="/trip/create" element={<CreateTrip />} />
     <Route path="/trip/active" element={<ActiveTrip />} />
     <Route path="/trip/history" element={<TripHistory />} />
+
 </Route>
     </Routes>
 

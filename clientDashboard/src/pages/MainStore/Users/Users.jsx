@@ -84,6 +84,7 @@ const Users = () => {
     "district coordinator",
     "Chief Coordinator",
     "Admin",
+    "Driver"
   ];
 
   const filteredUsers = useMemo(() => {
@@ -127,12 +128,10 @@ const Users = () => {
 
     setShowModal(true);
   };
-console.log(DISTRICTS.map((district) => district.name));
 
   const handleChange = (e) => {
   const { name, value, options, multiple } = e.target;
 
-  console.log(name, value);
 
   // Handle role change
   if (

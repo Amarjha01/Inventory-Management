@@ -9,14 +9,7 @@ const CurrentLocationMarker = ({ location }) => {
 
   return (
     <>
-      <Circle
-        center={position}
-        radius={30}
-        pathOptions={{
-          fillOpacity: 0.08,
-          weight: 1,
-        }}
-      />
+     
 
       <CircleMarker
         center={position}

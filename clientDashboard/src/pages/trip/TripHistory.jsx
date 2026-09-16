@@ -11,7 +11,7 @@ import {
 import { FaRoute, FaTruckMoving } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
-import { getDriverTrips } from "../../services/trip.service";
+import { getDriverTrips, getTrips } from "../../services/trip.service";
 
 const TripHistory = () => {
   const [trips, setTrips] = useState([]);
@@ -28,25 +28,34 @@ const TripHistory = () => {
     |--------------------------------------------------------------------------
     */
 
-  useEffect(() => {
-    const loadTrips = async () => {
-      try {
-        setLoading(true);
+useEffect(() => {
+  const loadTrips = async () => {
+    try {
+      setLoading(true);
 
-        const data = await getDriverTrips();
+      const response = await getTrips();
 
-        setTrips(Array.isArray(data) ? data : data?.trips || []);
-      } catch (error) {
-        console.error(error);
+      console.log("getTrips response:", response);
 
-        alert(error?.response?.data?.message || "Unable to load trip history.");
-      } finally {
-        setLoading(false);
-      }
-    };
+      const items = response?.items ?? [];
+      console.log("items", items);
+      
+      setTrips(Array.isArray(items) ? items : []);
+    } catch (error) {
+      console.error("Failed to load trips:", error);
 
-    loadTrips();
-  }, []);
+      setTrips([]);
+
+      alert(
+        error?.response?.data?.message || "Unable to load trip history."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadTrips();
+}, []);
 
   /*
     |--------------------------------------------------------------------------
@@ -71,6 +80,8 @@ const TripHistory = () => {
     });
   }, [trips, search, status]);
 
+  console.log("filteredTrip" , filteredTrips);
+  
   return (
     <div className="mx-auto w-full max-w-4xl pb-6">
       {/* HEADER */}

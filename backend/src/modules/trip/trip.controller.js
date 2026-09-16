@@ -35,18 +35,50 @@ const parseJsonField = (value, fieldName) => {
 };
 
 export const createTrip = asyncHandler(async (req, res) => {
+  const startMeter = parseJsonField(req.body.startMeter, "startMeter");
+
+  const destinations = parseJsonField(
+    req.body.destinations,
+    "destinations"
+  );
+
+  const route = req.body.route
+    ? parseJsonField(req.body.route, "route")
+    : undefined;
+
+  const startLocation = req.body.startLocation
+    ? parseJsonField(req.body.startLocation, "startLocation")
+    : undefined;
+
+  const startMeterImg = req.file?.filename;
+
   const payload = {
     ...req.body,
-    destinations: parseJsonField(req.body.destinations, "destinations"),
-    route: parseJsonField(req.body.route, "route"),
-  };
-  console.log(payload);
-  
-  const trip = await tripService.createTrip(payload, req.user);
 
-  return res
-    .status(201)
-    .json(new ApiResponse(201, trip, "Trip created successfully."));
+    startLocation,
+
+    destinations,
+
+    ...(route !== undefined && { route }),
+
+    startMeter: {
+      imageUrl: startMeterImg,
+      reading: Number(startMeter.reading),
+    },
+  };
+
+  console.log(payload);
+
+  const trip = await tripService.createTrip(
+    payload,
+    req.user
+  );
+
+  return ApiResponse.success(
+    res,
+    "Trip created successfully.",
+    trip
+  );
 });
 
 export const getMyTrips = asyncHandler(async (req, res) => {
@@ -55,11 +87,11 @@ export const getMyTrips = asyncHandler(async (req, res) => {
     getPagination(req.query)
   );
 
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(200, result, "Trips fetched successfully.")
-    );
+  return ApiResponse.success(
+    res,
+    "Trips fetched successfully.",
+    result
+  );
 });
 
 export const getAllTrips = asyncHandler(async (req, res) => {
@@ -69,11 +101,11 @@ export const getAllTrips = asyncHandler(async (req, res) => {
     vehicleId: req.query.vehicleId || undefined,
   });
 
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(200, result, "Trips fetched successfully.")
-    );
+  return ApiResponse.success(
+    res,
+    "Trips fetched successfully.",
+    result
+  );
 });
 
 export const getTripById = asyncHandler(async (req, res) => {
@@ -82,9 +114,11 @@ export const getTripById = asyncHandler(async (req, res) => {
     req.user
   );
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, trip, "Trip fetched successfully."));
+  return ApiResponse.success(
+    res,
+    "Trip fetched successfully.",
+    trip
+  );
 });
 
 export const updateTrip = asyncHandler(async (req, res) => {
@@ -94,9 +128,11 @@ export const updateTrip = asyncHandler(async (req, res) => {
     req.user
   );
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, trip, "Trip updated successfully."));
+  return ApiResponse.success(
+    res,
+    "Trip updated successfully.",
+    trip
+  );
 });
 
 export const startTrip = asyncHandler(async (req, res) => {
@@ -113,9 +149,11 @@ export const startTrip = asyncHandler(async (req, res) => {
     req.user
   );
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, trip, "Trip started successfully."));
+  return ApiResponse.success(
+    res,
+    "Trip started successfully.",
+    trip
+  );
 });
 
 export const updateCurrentLocation = asyncHandler(
@@ -126,15 +164,11 @@ export const updateCurrentLocation = asyncHandler(
       req.user
     );
 
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          trip,
-          "Current location updated successfully."
-        )
-      );
+    return ApiResponse.success(
+      res,
+      "Current location updated successfully.",
+      trip
+    );
   }
 );
 
@@ -147,15 +181,11 @@ export const arriveAtDestination = asyncHandler(
       req.user
     );
 
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          trip,
-          "Destination arrival verified successfully."
-        )
-      );
+    return ApiResponse.success(
+      res,
+      "Destination arrival verified successfully.",
+      trip
+    );
   }
 );
 
@@ -179,15 +209,11 @@ export const submitDestinationEvidence = asyncHandler(
       req.user
     );
 
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          trip,
-          "Destination evidence submitted successfully."
-        )
-      );
+    return ApiResponse.success(
+      res,
+      "Destination evidence submitted successfully.",
+      trip
+    );
   }
 );
 
@@ -207,15 +233,11 @@ export const addFuel = asyncHandler(async (req, res) => {
     req.user
   );
 
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        trip,
-        "Fuel entry added successfully."
-      )
-    );
+  return ApiResponse.success(
+    res,
+    "Fuel entry added successfully.",
+    trip
+  );
 });
 
 export const completeDestination = asyncHandler(
@@ -226,15 +248,11 @@ export const completeDestination = asyncHandler(
       req.user
     );
 
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          trip,
-          "Destination completed successfully."
-        )
-      );
+    return ApiResponse.success(
+      res,
+      "Destination completed successfully.",
+      trip
+    );
   }
 );
 
@@ -252,9 +270,11 @@ export const finalizeTrip = asyncHandler(async (req, res) => {
     req.user
   );
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, trip, "Trip completed successfully."));
+  return ApiResponse.success(
+    res,
+    "Trip completed successfully.",
+    trip
+  );
 });
 
 export const cancelTrip = asyncHandler(async (req, res) => {
@@ -264,7 +284,9 @@ export const cancelTrip = asyncHandler(async (req, res) => {
     req.user
   );
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, trip, "Trip cancelled successfully."));
+  return ApiResponse.success(
+    res,
+    "Trip cancelled successfully.",
+    trip
+  );
 });

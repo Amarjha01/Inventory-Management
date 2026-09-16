@@ -98,6 +98,9 @@ const Login = () => {
       navigate("/store", { replace: true });
       break;
 
+    case "Driver":
+      navigate("/trip" , {replace:true})
+      break;
     default:
       navigate("/login", { replace: true });
   }

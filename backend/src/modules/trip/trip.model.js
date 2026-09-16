@@ -4,7 +4,7 @@ const tripSchema = new mongoose.Schema(
   {
     driver: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Driver",
+      ref: "User",
       required: true,
     },
 
@@ -28,25 +28,21 @@ const tripSchema = new mongoose.Schema(
 
     startLocation: {
       address: String,
-
+      name:String,  
       latitude: {
         type: Number,
         required: true,
       },
-
       longitude: {
         type: Number,
         required: true,
       },
-
       source: {
         type: String,
         enum: ["GPS", "MANUAL"],
         required: true,
       },
-
       accuracy: Number,
-
       capturedAt: Date,
     },
 
@@ -86,6 +82,8 @@ const tripSchema = new mongoose.Schema(
           accuracy: Number,
           capturedAt: Date,
         },
+
+        distance: Number,
 
         selfie: {
           imageUrl: String,

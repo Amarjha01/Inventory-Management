@@ -12,7 +12,7 @@ import {
   MdWarning,
 } from "react-icons/md";
 import { FaRoute, FaMapMarkerAlt } from "react-icons/fa";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useSearchParams} from "react-router-dom";
 
 import {
   getTripById,
@@ -23,12 +23,12 @@ import {
 
 const ActiveTrip = () => {
   const navigate = useNavigate();
-
-  const { id } = useParams();
+  const [searchParams] = useSearchParams();
+ const tripId = searchParams.get("tripId");
 
   const [trip, setTrip] = useState(null);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const [locationLoading, setLocationLoading] = useState(false);
 
@@ -56,27 +56,36 @@ const ActiveTrip = () => {
     |--------------------------------------------------------------------------
     */
 
-  useEffect(() => {
-    const loadTrip = async () => {
-      try {
-        setLoading(true);
+useEffect(() => {
+  console.log("ActiveTrip useEffect fired");
+  console.log("Trip ID:", tripId);
 
-        const data = await getTripById(id);
+  if (!tripId) {
+    console.log("No trip ID, skipping API call");
+    return;
+  }
 
-        setTrip(data);
-      } catch (error) {
-        console.error(error);
+  const loadTrip = async () => {
+    try {
+      setLoading(true);
 
-        alert(error?.response?.data?.message || "Unable to load trip.");
-      } finally {
-        setLoading(false);
-      }
-    };
+      console.log("Calling getTripById:", tripId);
 
-    if (id) {
-      loadTrip();
+      const response = await getTripById(tripId);
+
+      console.log("getTripById response:", response);
+
+      setTrip(response);
+    } catch (error) {
+      console.error("getTripById failed:", error);
+    } finally {
+      setLoading(false);
     }
-  }, [id]);
+  };
+
+  loadTrip();
+}, [tripId]);
+
 
   /*
     |--------------------------------------------------------------------------

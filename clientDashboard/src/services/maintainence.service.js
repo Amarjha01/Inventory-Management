@@ -23,7 +23,8 @@ export const getAllMaintenanceForAdmin = async () => {
   const { data } = await api.get(
     `${ENDPOINTS.MAINTENANCE}/admin`,
   );
-
+  console.log(data);
+  
   return data.data;
 };
 

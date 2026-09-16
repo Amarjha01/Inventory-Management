@@ -4,7 +4,7 @@ import { ENDPOINTS } from "../api/endpoints.js";
 
 export const getTrips = async () => {
     const { data } = await api.get(
-        ENDPOINTS.TRIPS
+        `${ENDPOINTS.TRIPS}/my`
     );
 
     return data.data;
@@ -23,7 +23,12 @@ export const createTrip = async (payload) => {
     
     const { data } = await api.post(
         ENDPOINTS.TRIPS,
-        payload
+        payload,
+        {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
     );
 
     return data.data;
@@ -94,12 +99,12 @@ export const getDriverTrips = async (params = {}) => {
     return data.data;
 };
 
-export const getActiveTrip = async () => {
-    const { data } = await api.get(
-        `${ENDPOINTS.TRIPS}/active`
-    );
+export const getMyTrips = async (params = {}) => {
+  const { data } = await api.get(`${ENDPOINTS.TRIPS}/my`, {
+    params,
+  });
 
-    return data.data;
+  return data.data;
 };
 
 export const getDrivingRoute = async (points) => {
