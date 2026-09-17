@@ -7,7 +7,7 @@ import {
   FiPlus,
 } from "react-icons/fi";
 import { motion } from "framer-motion";
-
+const BASE_URL = import.meta.env.VITE_SERVER_BASE_URL
 /* ============================================================
    DATE HELPERS
 ============================================================ */
@@ -479,7 +479,7 @@ export const RecordImages = ({
         {images.map((image, index) => (
           <a
             key={index}
-            href={`http://localhost:5000/api/v1/uploads/maintenance/${image}`}
+            href={`${BASE_URL}/uploads/maintenance/${image}`}
             target="_blank"
             rel="noreferrer"
             className="
@@ -491,7 +491,7 @@ export const RecordImages = ({
             "
           >
             <img
-              src={`http://localhost:5000/api/v1/uploads/maintenance/${image}`}
+              src={`${BASE_URL}/uploads/maintenance/${image}`}
               alt={`Maintenance ${index + 1}`}
               className="
                 h-36

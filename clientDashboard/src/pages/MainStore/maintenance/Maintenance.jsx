@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getAllMaintenanceForAdmin } from "../../../services/maintainence.service";
 import { parseAnimateLayoutArgs } from "framer-motion";
+const BASE_URL = import.meta.env.VITE_SERVER_BASE_URL
 
 const Maintenance = () => {
   const [maintenance, setMaintenance] = useState([]);
@@ -168,7 +169,7 @@ const Maintenance = () => {
   const getImageUrl = (image) => {
     if (!image) return "";
 
-    return `http://localhost:5000/api/v1/uploads/maintenance/${image}`;
+    return `${BASE_URL}/uploads/maintenance/${image}`;
   };
 
   /*
