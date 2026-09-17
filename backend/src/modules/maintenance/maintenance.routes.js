@@ -87,6 +87,12 @@ router.delete(
 
 router.post(
   "/visitor",
+  uploadMaintenance.fields([
+    {
+      name: "otherImages",
+      maxCount: 3,
+    },
+  ]),
   createVisitor
 );
 

@@ -94,6 +94,11 @@ const visitorSchema = new Schema(
       trim: true,
       default: "",
     },
+    
+    otherImages: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,

@@ -200,14 +200,19 @@ const createVisitor = async (
 ) => {
   try {
     const userId = req.user._id;
+    const files = req.files;
+     
 
-    const {...body} = req.body
+    const body = { ...req.body };    
+    body.otherImages =
+      files?.otherImages?.map((element) => element.filename) || [];
     const kitchenId = req?.user.kitchenId
       const  data = {
           userId,
           kitchenId,
           visitor: body,
         };
+
     const savedData =
       await maintenanceService.addVisitor(data);
 
