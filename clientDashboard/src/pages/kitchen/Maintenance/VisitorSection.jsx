@@ -3,18 +3,21 @@ import {
   FiCalendar,
   FiFileText,
   FiPhone,
-  FiTool,
   FiUser,
 } from "react-icons/fi";
 
 import {
   Input,
   Textarea,
+  ImageSection,
 } from "./MaintenanceCommon";
 
 const VisitorSection = ({
   form,
   onChange,
+  onCamera,
+  onFiles,
+  onRemoveImage,
 }) => {
   return (
     <div className="space-y-4">
@@ -61,6 +64,16 @@ const VisitorSection = ({
         value={form.narration}
         onChange={onChange}
         placeholder="Mention parts changed, work performed or other details... / बदले गए पार्ट्स, किए गए काम या अन्य डिटेल्स लिखें..."
+      />
+
+      <ImageSection
+        title="Other Photos / अदर फोटो"
+        subtitle="Maximum 3 photos / अधिकतम 3 फोटो"
+        images={form.otherImages}
+        maxImages={3}
+        onCamera={onCamera}
+        onFiles={onFiles}
+        onRemove={onRemoveImage}
       />
     </div>
   );

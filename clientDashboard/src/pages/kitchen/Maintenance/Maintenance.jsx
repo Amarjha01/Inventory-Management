@@ -64,6 +64,7 @@ const EMPTY_VISITOR = {
   phoneNumber: "",
   reason: "",
   narration: "",
+  otherImages: [],
 };
 
 const EMPTY_PURCHASE = {
@@ -248,19 +249,16 @@ const Maintenance = () => {
       });
     }
 
-    if (activeTab === TABS.VISITOR) {
-      setVisitorForm({
-        problemDate: formatInputDate(record.problemDate),
-
-        visitorName: record.visitorName || "",
-
-        phoneNumber: record.phoneNumber || "",
-
-        reason: record.reason || "",
-
-        narration: record.narration || "",
-      });
-    }
+   if (activeTab === TABS.VISITOR) {
+  setVisitorForm({
+    problemDate: formatInputDate(record.problemDate),
+    visitorName: record.visitorName || "",
+    phoneNumber: record.phoneNumber || "",
+    reason: record.reason || "",
+    narration: record.narration || "",
+    otherImages: record.otherImages || [],
+  });
+} 
 
     if (activeTab === TABS.PURCHASE) {
       setPurchaseForm({
@@ -334,43 +332,81 @@ const Maintenance = () => {
     setShowCamera(true);
   };
 
-  const handleCameraCapture = (file, documentType) => {
-    if (!file) return;
+const handleCameraCapture = (file, documentType) => {
+  if (!file) return;
 
-    if (documentType?.id === "service-image") {
-      setServiceForm((previous) => {
-        if (previous.images.length >= 2) {
-          return previous;
-        }
+  if (documentType?.id === "service-image") {
+    setServiceForm((previous) => {
+      if (previous.images.length >= 2) {
+        return previous;
+      }
 
-        return {
-          ...previous,
-          images: [...previous.images, file],
-        };
-      });
-    }
-
-    if (documentType?.id === "guarantee-photo") {
-      setPurchaseForm((previous) => ({
+      return {
         ...previous,
-        guaranteePhoto: file,
-      }));
-    }
+        images: [...previous.images, file],
+      };
+    });
 
-    if (documentType?.id === "purchase-image") {
-      setPurchaseForm((previous) => {
-        if (previous.otherImages.length >= 1) {
-          return previous;
-        }
+    return;
+  }
 
-        return {
-          ...previous,
-          otherImages: [...previous.otherImages, file],
-        };
-      });
-    }
-  };
+  if (documentType?.id === "visitor-image") {
+    setVisitorForm((previous) => {
+      if (previous.otherImages.length >= 3) {
+        return previous;
+      }
 
+      return {
+        ...previous,
+        otherImages: [...previous.otherImages, file],
+      };
+    });
+
+    return;
+  }
+
+  if (documentType?.id === "guarantee-photo") {
+    setPurchaseForm((previous) => ({
+      ...previous,
+      guaranteePhoto: file,
+    }));
+
+    return;
+  }
+
+  if (documentType?.id === "purchase-image") {
+    setPurchaseForm((previous) => {
+      if (previous.otherImages.length >= 1) {
+        return previous;
+      }
+
+      return {
+        ...previous,
+        otherImages: [...previous.otherImages, file],
+      };
+    });
+  }
+};
+
+  const handleVisitorFiles = (event) => {
+  const files = Array.from(event.target.files || []);
+
+  setVisitorForm((previous) => ({
+    ...previous,
+    otherImages: [...previous.otherImages, ...files].slice(0, 3),
+  }));
+
+  event.target.value = "";
+};
+
+const removeVisitorImage = (index) => {
+  setVisitorForm((previous) => ({
+    ...previous,
+    otherImages: previous.otherImages.filter(
+      (_, imageIndex) => imageIndex !== index
+    ),
+  }));
+};
   /* ==========================================================
      SERVICE FILES
   ========================================================== */
@@ -476,24 +512,28 @@ const Maintenance = () => {
   };
 
   const validateVisitor = () => {
-    if (!visitorForm.problemDate) {
-      return "Problem date is required.";
-    }
+  if (!visitorForm.problemDate) {
+    return "Problem date is required.";
+  }
 
-    if (!visitorForm.visitorName.trim()) {
-      return "Visitor name is required.";
-    }
+  if (!visitorForm.visitorName.trim()) {
+    return "Visitor name is required.";
+  }
 
-    if (!visitorForm.phoneNumber.trim()) {
-      return "Phone number is required.";
-    }
+  if (!visitorForm.phoneNumber.trim()) {
+    return "Phone number is required.";
+  }
 
-    if (!visitorForm.reason.trim()) {
-      return "Reason is required.";
-    }
+  if (!visitorForm.reason.trim()) {
+    return "Reason is required.";
+  }
 
-    return "";
-  };
+  if (visitorForm.otherImages.length > 3) {
+    return "Maximum 3 photos are allowed.";
+  }
+
+  return "";
+};
 
   const validatePurchase = () => {
     if (!purchaseForm.purchaseDate) {
@@ -539,21 +579,27 @@ const Maintenance = () => {
     return formData;
   };
 
-  const buildVisitorFormData = () => {
-    const formData = new FormData();
+const buildVisitorFormData = () => {
+  const formData = new FormData();
 
-    formData.append("problemDate", visitorForm.problemDate);
+  formData.append("problemDate", visitorForm.problemDate);
 
-    formData.append("visitorName", visitorForm.visitorName);
+  formData.append("visitorName", visitorForm.visitorName);
 
-    formData.append("phoneNumber", visitorForm.phoneNumber);
+  formData.append("phoneNumber", visitorForm.phoneNumber);
 
-    formData.append("reason", visitorForm.reason);
+  formData.append("reason", visitorForm.reason);
 
-    formData.append("narration", visitorForm.narration);
+  formData.append("narration", visitorForm.narration);
 
-    return formData;
-  };
+  visitorForm.otherImages?.forEach((image) => {
+    if (image instanceof File) {
+      formData.append("otherImages", image);
+    }
+  });
+
+  return formData;
+};
 
   const buildPurchaseFormData = () => {
     const formData = new FormData();
@@ -756,6 +802,12 @@ const Maintenance = () => {
       };
     }
 
+    if (cameraType === "visitor-image") {
+      return {
+        id: "visitor-image",
+        title: "Visitor Service Image",
+      };
+    }
     if (cameraType === "guarantee-photo") {
       return {
         id: "guarantee-photo",
@@ -1091,6 +1143,9 @@ const Maintenance = () => {
                     <VisitorSection
                       form={visitorForm}
                       onChange={handleVisitorChange}
+                      onCamera={() => openCamera("visitor-image")}
+                      onFiles={handleVisitorFiles}
+                      onRemoveImage={removeVisitorImage}
                     />
                   )}
 

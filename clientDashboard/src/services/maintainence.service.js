@@ -118,6 +118,11 @@ export const createVisitorRecord = async (payload) => {
   const { data } = await api.post(
     `${ENDPOINTS.MAINTENANCE}/visitor`,
     payload,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
   );
 
   return data.data;

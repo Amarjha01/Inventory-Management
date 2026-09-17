@@ -357,6 +357,13 @@ const VisitorDetails = ({
           icon={FiTool}
         />
       )}
+
+      {record.otherImages?.length > 0 && (
+        <RecordImages
+          images={record.otherImages}
+          title="Other Image"
+        />
+      )}
     </div>
   );
 };
