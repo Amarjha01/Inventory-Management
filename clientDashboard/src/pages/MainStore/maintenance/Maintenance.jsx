@@ -12,7 +12,7 @@ import {
 import MaintenanceSideBar from "./MaintenanceSideBar";
 import kitchens from "../../../constants/kitchen.js";
 import { getAllMaintenanceForAdmin } from "../.../../../../services/maintainence.service.js"
-
+const BASE_URL = import.meta.env.VITE_SERVER_BASE_URL
 const EmptyRecordState = ({ type }) => {
   const config = {
     service: {
@@ -535,7 +535,7 @@ const VisitorRecordCard = ({ record }) => {
             {record.otherPhotos.map((photo, index) => (
               <img
                 key={photo?._id || index}
-                src={photo?.url || photo}
+                src={`${BASE_URL}/uploads/maintenance/${photo}`}
                 alt={`Other ${index + 1}`}
                 className="h-20 w-20 rounded-xl object-cover ring-1 ring-slate-200"
               />
@@ -603,9 +603,7 @@ const PurchaseRecordCard = ({ record }) => {
             </p>
 
             <img
-              src={
-                record.guaranteePhoto?.url ||
-                record.guaranteePhoto
+              src={`${BASE_URL}/uploads/maintenance/${record.guaranteePhoto}`
               }
               alt="Guarantee / Warranty"
               className="h-32 w-full rounded-xl object-cover ring-1 ring-slate-200"
@@ -625,7 +623,7 @@ const PurchaseRecordCard = ({ record }) => {
                 (photo, index) => (
                   <img
                     key={photo?._id || index}
-                    src={photo?.url || photo}
+                    src={`${BASE_URL}/uploads/maintenance/${photo}`}
                     alt={`Other ${index + 1}`}
                     className="h-20 w-20 rounded-xl object-cover ring-1 ring-slate-200"
                   />
@@ -712,7 +710,7 @@ const ServiceRecordCard = ({ record }) => {
           {record.images.map((photo, index) => (
             <img
               key={photo?._id || index}
-              src={photo?.url || photo}
+              src={`${BASE_URL}/uploads/maintenance/${photo}`}
               alt={`Service ${index + 1}`}
               className="h-14 w-14 rounded-lg object-cover ring-1 ring-slate-200"
             />
