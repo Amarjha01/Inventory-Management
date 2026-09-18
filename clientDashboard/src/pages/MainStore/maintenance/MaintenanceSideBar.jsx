@@ -11,7 +11,7 @@ import { FaFolder , FaFolderOpen} from "react-icons/fa";
 const RECORD_TYPES = {
   SERVICE: "service",
   VISITOR: "visitor",
-  PURCHASE: "purchase",
+  PURCHASERECORD: "purchaseRecord",
 };
 
 const MaintenanceSideBar = ({
@@ -38,7 +38,7 @@ const MaintenanceSideBar = ({
       icon: FiUsers,
     },
     {
-      id: RECORD_TYPES.PURCHASE,
+      id: RECORD_TYPES.PURCHASERECORD,
       label: "Purchase Record",
       hindiLabel: "परचेज रिकॉर्ड",
       icon: FiShoppingBag,
@@ -68,7 +68,7 @@ const MaintenanceSideBar = ({
   };
 
   return (
-    <aside className="w-72 md:max-h-[450px] shrink-0 border-r border-slate-200 bg-white overflow-hidden">
+    <aside className="w-72 md:max-h-112.5 shrink-0 border-r border-slate-200 bg-white overflow-hidden">
       <div className="sticky top-0 h-screen overflow-y-auto">
 
         {/* Header */}
@@ -106,7 +106,7 @@ const MaintenanceSideBar = ({
             </p>
           </div>
 
-          <div className="space-y-1 md:max-h-[300px] overflow-y-scroll">
+          <div className="space-y-1 md:max-h-75 overflow-y-scroll">
 
             {kitchens.map((kitchen) => {
 

@@ -25,7 +25,7 @@ const EmptyRecordState = ({ type }) => {
       hindi: "कोई विजिटर रिकॉर्ड नहीं मिला",
       icon: FiUsers,
     },
-    purchase: {
+    purchaseRecord: {
       title: "No Purchase Records",
       hindi: "कोई परचेज रिकॉर्ड नहीं मिला",
       icon: FiShoppingBag,
@@ -61,7 +61,7 @@ const EmptyRecordState = ({ type }) => {
 const RECORD_TYPES = {
   SERVICE: "service",
   VISITOR: "visitor",
-  PURCHASE: "purchase",
+  PURCHASERECORD: "purchaseRecord",
 };
 
 const Maintenance = () => {
@@ -141,8 +141,8 @@ const Maintenance = () => {
 const filteredRecords = useMemo(() => {
   if (!selectedKitchen) return [];
 
-  const kitchenId =
-    selectedKitchen._id;
+  const kitchenId = selectedKitchen._id;
+
 
   return maintenanceData
     .filter((record) => {
@@ -156,16 +156,16 @@ const filteredRecords = useMemo(() => {
       );
     })
     .filter((record) => {
-      if (selectedType === "service") {
-        return record.service !== null;
+      if (selectedType === RECORD_TYPES.SERVICE) {
+        return !!record.service;
       }
 
-      if (selectedType === "visitor") {
-        return record.visitor !== null;
+      if (selectedType === RECORD_TYPES.VISITOR) {
+        return !!record.visitor;
       }
 
-      if (selectedType === "purchase") {
-        return record.purchase !== null;
+      if (selectedType === RECORD_TYPES.PURCHASERECORD) {
+        return !!record.purchaseRecord;
       }
 
       return false;
@@ -196,7 +196,7 @@ const filteredRecords = useMemo(() => {
           icon: FiUsers,
         };
 
-      case RECORD_TYPES.PURCHASE:
+      case RECORD_TYPES.PURCHASERECORD:
         return {
           title: "Purchase Records",
           hindi: "परचेज रिकॉर्ड",
@@ -459,10 +459,10 @@ const MaintenanceRecordCard = ({
     );
   }
 
-  if (type === "purchase") {
+  if (type === "purchaseRecord") {
     return (
       <PurchaseRecordCard
-        record={record.purchase}
+        record={record.purchaseRecord}
       />
     );
   }
