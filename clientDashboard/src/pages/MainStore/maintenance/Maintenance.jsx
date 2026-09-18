@@ -1,788 +1,544 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { getAllMaintenanceForAdmin } from "../../../services/maintainence.service";
-import { parseAnimateLayoutArgs } from "framer-motion";
-const BASE_URL = import.meta.env.VITE_SERVER_BASE_URL
+import {
+  FiMenu,
+  FiSearch,
+  FiFilter,
+  FiPlus,
+  FiTool,
+  FiUsers,
+  FiShoppingBag,
+} from "react-icons/fi";
+
+import MaintenanceSideBar from "./MaintenanceSideBar";
+import kitchens from "../../../constants/kitchen.js";
+import { getAllMaintenanceForAdmin } from "../.../../../../services/maintainence.service.js"
+
+const EmptyRecordState = ({ type }) => {
+  const config = {
+    service: {
+      title: "No Service Records",
+      hindi: "कोई सर्विस रिकॉर्ड नहीं मिला",
+      icon: FiTool,
+    },
+    visitor: {
+      title: "No Visitor Records",
+      hindi: "कोई विजिटर रिकॉर्ड नहीं मिला",
+      icon: FiUsers,
+    },
+    purchase: {
+      title: "No Purchase Records",
+      hindi: "कोई परचेज रिकॉर्ड नहीं मिला",
+      icon: FiShoppingBag,
+    },
+  };
+
+  const current = config[type] || config.service;
+  const Icon = current.icon;
+
+  return (
+    <div className="flex py-5 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white px-6 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
+        <Icon
+          size={24}
+          className="text-slate-400"
+        />
+      </div>
+
+      <h3 className="mt-4 text-sm font-semibold text-slate-700">
+        {current.title}
+      </h3>
+
+      <p className="mt-1 text-xs text-slate-400">
+        {current.hindi}
+      </p>
+
+      <p className="mt-3 max-w-sm text-xs text-slate-400">
+        There are no records available for this kitchen.
+      </p>
+    </div>
+  );
+};
+const RECORD_TYPES = {
+  SERVICE: "service",
+  VISITOR: "visitor",
+  PURCHASE: "purchase",
+};
 
 const Maintenance = () => {
-  const [maintenance, setMaintenance] = useState([]);
+  const [selectedKitchen, setSelectedKitchen] = useState(null);
+  const [selectedType, setSelectedType] = useState(
+    RECORD_TYPES.SERVICE
+  );
+
+  const [maintenanceData, setMaintenanceData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Kitchen -> true/false
-  const [expandedKitchens, setExpandedKitchens] = useState({});
+  const [search, setSearch] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Kitchen -> category -> true/false
-  const [expandedCategories, setExpandedCategories] = useState({});
+  // --------------------------------------------------
+  // GET ALL MAINTENANCE DATA
+  // --------------------------------------------------
 
   useEffect(() => {
+    const fetchMaintenance = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await getAllMaintenanceForAdmin();
+
+        /*
+         * If your API returns:
+         *
+         * { data: [...] }
+         *
+         * this handles it.
+         *
+         * If your service already returns the array,
+         * it also handles that.
+         */
+        const data = Array.isArray(response)
+          ? response
+          : response?.data || [];
+
+        setMaintenanceData(data);
+      } catch (err) {
+        console.error(
+          "Failed to fetch maintenance records:",
+          err
+        );
+
+        setError(
+          "Failed to load maintenance records."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchMaintenance();
   }, []);
 
-  const fetchMaintenance = async () => {
-    try {
-      setLoading(true);
-      setError("");
+  // --------------------------------------------------
+  // SELECT FIRST KITCHEN BY DEFAULT
+  // --------------------------------------------------
 
-      const response = await getAllMaintenanceForAdmin();
-
-      /*
-       * API response:
-       *
-       * {
-       *   success: true,
-       *   message: "...",
-       *   data: [...]
-       * }
-       *
-       * Therefore use response.data
-       */
-      setMaintenance(response || []);
-    } catch (error) {
-      console.error("Failed to fetch maintenance:", error);
-
-      setError(
-        error?.response?.data?.message ||
-          "Failed to load maintenance records."
-      );
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (
+      !selectedKitchen &&
+      kitchens?.length > 0
+    ) {
+      setSelectedKitchen(kitchens[0]);
     }
-  };
+  }, [selectedKitchen]);
 
-  /*
-  |--------------------------------------------------------------------------
-  | Group maintenance records by kitchen
-  |--------------------------------------------------------------------------
-  */
+  // --------------------------------------------------
+  // GET SELECTED KITCHEN RECORDS
+  // --------------------------------------------------
 
-  const kitchens = useMemo(() => {
-    const grouped = {};
-    console.log(maintenance);
-    maintenance.forEach((record) => {
-      
-      
-      const kitchenId =
-        record?.kitchenId?._id ||
-        record?.kitchenId ||
-        "unknown";
+const filteredRecords = useMemo(() => {
+  if (!selectedKitchen) return [];
 
-      const kitchenName =
-        record?.kitchenId?.name ||
-        "Unknown Kitchen";
+  const kitchenId =
+    selectedKitchen._id;
 
-      if (!grouped[kitchenId]) {
-        grouped[kitchenId] = {
-          _id: kitchenId,
-          name: kitchenName,
-          records: [],
-        };
+  return maintenanceData
+    .filter((record) => {
+      const recordKitchenId =
+        record.kitchenId?._id ||
+        record.kitchenId;
+
+      return (
+        String(recordKitchenId) ===
+        String(kitchenId)
+      );
+    })
+    .filter((record) => {
+      if (selectedType === "service") {
+        return record.service !== null;
       }
 
-      grouped[kitchenId].records.push(record);
-    });
-
-    return Object.values(grouped);
-  }, [maintenance]);
-
-  /*
-  |--------------------------------------------------------------------------
-  | Get category records for a kitchen
-  |--------------------------------------------------------------------------
-  */
-
-  const getCategoryRecords = (records, category) => {
-    console.log(records , category);
-    
-    return records.filter((record) => {
-      if (category === "service") {
-        return !!record?.service;
+      if (selectedType === "visitor") {
+        return record.visitor !== null;
       }
 
-      if (category === "visitor") {
-        return !!record?.visitor;
-      }
-
-      if (category === "purchase") {
-        return !!record?.purchaseRecord;
+      if (selectedType === "purchase") {
+        return record.purchase !== null;
       }
 
       return false;
     });
-  };
+}, [
+  maintenanceData,
+  selectedKitchen,
+  selectedType,
+]);
 
-  /*
-  |--------------------------------------------------------------------------
-  | Toggle Kitchen
-  |--------------------------------------------------------------------------
-  */
+  // --------------------------------------------------
+  // TYPE DETAILS
+  // --------------------------------------------------
 
-  const toggleKitchen = (kitchenId) => {
-    setExpandedKitchens((prev) => ({
-      ...prev,
-      [kitchenId]: !prev[kitchenId],
-    }));
-  };
+  const typeDetails = useMemo(() => {
+    switch (selectedType) {
+      case RECORD_TYPES.SERVICE:
+        return {
+          title: "Service Records",
+          hindi: "सर्विस रिकॉर्ड",
+          icon: FiTool,
+        };
 
-  /*
-  |--------------------------------------------------------------------------
-  | Toggle Category
-  |--------------------------------------------------------------------------
-  */
+      case RECORD_TYPES.VISITOR:
+        return {
+          title: "Visitor Records",
+          hindi: "विजिटर रिकॉर्ड",
+          icon: FiUsers,
+        };
 
-  const toggleCategory = (kitchenId, category) => {
-    const key = `${kitchenId}-${category}`;
+      case RECORD_TYPES.PURCHASE:
+        return {
+          title: "Purchase Records",
+          hindi: "परचेज रिकॉर्ड",
+          icon: FiShoppingBag,
+        };
 
-    setExpandedCategories((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
-
-  /*
-  |--------------------------------------------------------------------------
-  | Format Date
-  |--------------------------------------------------------------------------
-  */
-
-  const formatDate = (date) => {
-    if (!date) return "—";
-
-    const parsedDate = new Date(date);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-      return "—";
+      default:
+        return {
+          title: "Records",
+          hindi: "रिकॉर्ड",
+          icon: FiTool,
+        };
     }
+  }, [selectedType]);
 
-    return parsedDate.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
+  const TypeIcon = typeDetails.icon;
 
-  /*
-  |--------------------------------------------------------------------------
-  | Image URL
-  |--------------------------------------------------------------------------
-  */
-
-  const getImageUrl = (image) => {
-    if (!image) return "";
-
-    return `${BASE_URL}/uploads/maintenance/${image}`;
-  };
-
-  /*
-  |--------------------------------------------------------------------------
-  | Loading
-  |--------------------------------------------------------------------------
-  */
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 w-64 rounded bg-gray-200" />
-
-          <div className="h-20 rounded-xl bg-gray-200" />
-          <div className="h-20 rounded-xl bg-gray-200" />
-          <div className="h-20 rounded-xl bg-gray-200" />
-        </div>
-      </div>
-    );
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Error
-  |--------------------------------------------------------------------------
-  */
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-5">
-          <p className="font-medium text-red-700">
-            {error}
-          </p>
-
-          <button
-            onClick={fetchMaintenance}
-            className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // --------------------------------------------------
+  // RENDER
+  // --------------------------------------------------
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      {/* ------------------------------------------------------------------ */}
-      {/* Header */}
-      {/* ------------------------------------------------------------------ */}
+    <div className="max-h-112.5">
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Maintenance
-          </h1>
+      <div className="flex">
 
-          <p className="mt-1 text-sm text-gray-500">
-            Manage maintenance records kitchen-wise
-          </p>
+        {/* =========================================
+            DESKTOP SIDEBAR
+        ========================================= */}
+
+        <div className="hidden lg:block ">
+          <MaintenanceSideBar
+            kitchens={kitchens}
+            selectedKitchen={selectedKitchen}
+            selectedType={selectedType}
+            onKitchenSelect={setSelectedKitchen}
+            onTypeSelect={setSelectedType}
+          />
         </div>
 
-        <div className="rounded-lg bg-white px-4 py-2 shadow-sm ring-1 ring-gray-200">
-          <span className="text-sm text-gray-500">
-            Total Records
-          </span>
+        {/* =========================================
+            MAIN CONTENT
+        ========================================= */}
 
-          <span className="ml-2 font-semibold text-gray-900">
-            {maintenance.length}
-          </span>
-        </div>
-      </div>
+        <main className="min-w-0 flex-1 lg:max-h-[450px]">
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Empty */}
-      {/* ------------------------------------------------------------------ */}
+          {/* Mobile Header */}
+          <div className="sticky top-20 z-30 flex h-16 items-center gap-3 border-b border-slate-200 bg-white px-4 lg:hidden">
 
-      {kitchens.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
-          <div className="text-4xl">🔧</div>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="rounded-lg p-2 hover:bg-slate-100"
+            >
+              <FiMenu size={21} />
+            </button>
 
-          <h2 className="mt-3 text-lg font-semibold text-gray-900">
-            No maintenance records
-          </h2>
+            <div>
+              <p className="text-sm font-bold">
+                Maintenance
+              </p>
 
-          <p className="mt-1 text-sm text-gray-500">
-            There are no maintenance records available.
-          </p>
-        </div>
-      ) : (
-        /* ---------------------------------------------------------------- */
-        /* Kitchen Folders */
-        /* ---------------------------------------------------------------- */
+              <p className="text-[11px] text-slate-400">
+                मेंटेनेंस
+              </p>
+            </div>
 
-        <div className="grid grid-cols-1 gap-4">
-          {kitchens.map((kitchen) => {
-            const isKitchenExpanded =
-              !!expandedKitchens[kitchen._id];
+          </div>
 
-            const serviceRecords = getCategoryRecords(
-              kitchen.records,
-              "service"
-            );
+          <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
 
-            const visitorRecords = getCategoryRecords(
-              kitchen.records,
-              "visitor"
-            );
+            {/* =====================================
+                LOADING
+            ===================================== */}
 
-            const purchaseRecords = getCategoryRecords(
-              kitchen.records,
-              "purchase"
-            );
+            {loading && (
+              <div className="flex min-h-[400px] items-center justify-center">
+                <div className="text-sm text-slate-400">
+                  Loading maintenance records...
+                </div>
+              </div>
+            )}
 
-            return (
-              <div
-                key={kitchen._id}
-                className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
-              >
-                {/* ====================================================== */}
-                {/* Kitchen Folder */}
-                {/* ====================================================== */}
+            {/* =====================================
+                ERROR
+            ===================================== */}
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    toggleKitchen(kitchen._id)
-                  }
-                  className="flex w-full items-center justify-between gap-4 p-5 text-left transition hover:bg-gray-50"
-                >
-                  <div className="flex min-w-0 items-center gap-4">
-                    {/* Folder Icon */}
+            {!loading && error && (
+              <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-600">
+                {error}
+              </div>
+            )}
 
-                    <div
-                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-2xl ${
-                        isKitchenExpanded
-                          ? "bg-blue-100"
-                          : "bg-yellow-100"
-                      }`}
-                    >
-                      {isKitchenExpanded ? "📂" : "📁"}
+            {/* =====================================
+                CONTENT
+            ===================================== */}
+
+            {!loading && !error && selectedKitchen && (
+              <>
+                {/* Header */}
+                <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+                  <div className="flex items-center gap-3">
+
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+                      <TypeIcon
+                        size={21}
+                        className="text-slate-700"
+                      />
                     </div>
 
-                    <div className="min-w-0">
-                      <h2 className="truncate text-base font-semibold text-gray-900">
-                        {kitchen.name}
-                      </h2>
+                    <div>
+                      <p className="text-xs font-medium text-slate-400">
+                        {selectedKitchen.name}
+                      </p>
 
-                      <p className="mt-1 text-xs text-gray-500">
-                        Kitchen ID: {kitchen._id}
+                      <h1 className="text-xl font-bold text-slate-900">
+                        {typeDetails.title}
+                      </h1>
+
+                      <p className="text-xs text-slate-400">
+                        {typeDetails.hindi}
                       </p>
                     </div>
+
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-3">
-                    <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-                      {kitchen.records.length}{" "}
-                      {kitchen.records.length === 1
-                        ? "Record"
-                        : "Records"}
-                    </span>
+                  {/* <button
+                    type="button"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white"
+                  >
+                    <FiPlus size={17} />
+                    Add Record
+                  </button> */}
 
-                    <svg
-                      className={`h-5 w-5 text-gray-500 transition-transform ${
-                        isKitchenExpanded
-                          ? "rotate-180"
-                          : ""
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                </div>
+
+                {/* Search */}
+                {/* <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-3">
+
+                  <div className="flex flex-col gap-3 sm:flex-row">
+
+                    <div className="relative flex-1">
+
+                      <FiSearch
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        size={17}
+                      />
+
+                      <input
+                        value={search}
+                        onChange={(e) =>
+                          setSearch(e.target.value)
+                        }
+                        placeholder="Search records / रिकॉर्ड खोजें..."
+                        className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm outline-none focus:border-slate-400 focus:bg-white"
+                      />
+
+                    </div>
+
+                    <button
+                      type="button"
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-medium text-slate-600 hover:bg-slate-50"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
+                      <FiFilter size={16} />
+                      Filter
+                    </button>
+
                   </div>
-                </button>
 
-                {/* ====================================================== */}
-                {/* Categories */}
-                {/* ====================================================== */}
+                </div> */}
 
-                {isKitchenExpanded && (
-                  <div className="border-t border-gray-100 bg-gray-50 p-4">
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                {/* Record Count */}
+                <div className="mb-3">
+                  <p className="text-sm text-slate-500">
+                    {filteredRecords.length}{" "}
+                    {filteredRecords.length === 1
+                      ? "record"
+                      : "records"}
+                  </p>
+                </div>
 
-                      {/* ------------------------------------------------ */}
-                      {/* Service Category */}
-                      {/* ------------------------------------------------ */}
+                {/* Records */}
+                {filteredRecords.length > 0 ? (
+                  <div className="space-y-4 lg:max-h-75 lg:overflow-y-scroll grid md:grid-cols-2 lg:grid-cols-3">
 
-                      <CategoryFolder
-                        icon="🔧"
-                        title="Service"
-                        count={serviceRecords.length}
-                        color="blue"
-                        isExpanded={
-                          !!expandedCategories[
-                            `${kitchen._id}-service`
-                          ]
-                        }
-                        onClick={() =>
-                          toggleCategory(
-                            kitchen._id,
-                            "service"
-                          )
-                        }
-                      />
-
-                      {/* ------------------------------------------------ */}
-                      {/* Visitor Category */}
-                      {/* ------------------------------------------------ */}
-
-                      <CategoryFolder
-                        icon="👤"
-                        title="Visitor"
-                        count={visitorRecords.length}
-                        color="orange"
-                        isExpanded={
-                          !!expandedCategories[
-                            `${kitchen._id}-visitor`
-                          ]
-                        }
-                        onClick={() =>
-                          toggleCategory(
-                            kitchen._id,
-                            "visitor"
-                          )
-                        }
-                      />
-
-                      {/* ------------------------------------------------ */}
-                      {/* Purchase Category */}
-                      {/* ------------------------------------------------ */}
-
-                      <CategoryFolder
-                        icon="🛒"
-                        title="Purchase Record"
-                        count={purchaseRecords.length}
-                        color="green"
-                        isExpanded={
-                          !!expandedCategories[
-                            `${kitchen._id}-purchase`
-                          ]
-                        }
-                        onClick={() =>
-                          toggleCategory(
-                            kitchen._id,
-                            "purchase"
-                          )
-                        }
-                      />
-                    </div>
-
-                    {/* ================================================== */}
-                    {/* Category Data */}
-                    {/* ================================================== */}
-
-                    <div className="mt-4 space-y-4">
-                      {/* Service Data */}
-
-                      {expandedCategories[
-                        `${kitchen._id}-service`
-                      ] && (
-                        <CategoryContent
-                          title="Service Records"
-                          icon="🔧"
-                          records={serviceRecords}
-                          type="service"
-                          formatDate={formatDate}
-                          getImageUrl={getImageUrl}
+                    {filteredRecords.map(
+                      (record) => (
+                        <MaintenanceRecordCard
+                          key={record._id}
+                          record={record}
+                          type={selectedType}
                         />
-                      )}
+                      )
+                    )}
 
-                      {/* Visitor Data */}
-
-                      {expandedCategories[
-                        `${kitchen._id}-visitor`
-                      ] && (
-                        <CategoryContent
-                          title="Visitor Records"
-                          icon="👤"
-                          records={visitorRecords}
-                          type="visitor"
-                          formatDate={formatDate}
-                          getImageUrl={getImageUrl}
-                        />
-                      )}
-
-                      {/* Purchase Data */}
-
-                      {expandedCategories[
-                        `${kitchen._id}-purchase`
-                      ] && (
-                        <CategoryContent
-                          title="Purchase Records"
-                          icon="🛒"
-                          records={purchaseRecords}
-                          type="purchase"
-                          formatDate={formatDate}
-                          getImageUrl={getImageUrl}
-                        />
-                      )}
-                    </div>
                   </div>
+                ) : (
+                  <EmptyRecordState
+                    type={selectedType}
+                  />
                 )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-};
+              </>
+            )}
 
-/* ==========================================================================
-   CATEGORY FOLDER
-========================================================================== */
-
-const CategoryFolder = ({
-  icon,
-  title,
-  count,
-  color,
-  isExpanded,
-  onClick,
-}) => {
-  const colors = {
-    blue: {
-      border: "border-blue-200",
-      bg: "bg-blue-50",
-      iconBg: "bg-blue-100",
-      text: "text-blue-700",
-      badge: "bg-blue-100 text-blue-700",
-    },
-
-    orange: {
-      border: "border-orange-200",
-      bg: "bg-orange-50",
-      iconBg: "bg-orange-100",
-      text: "text-orange-700",
-      badge: "bg-orange-100 text-orange-700",
-    },
-
-    green: {
-      border: "border-green-200",
-      bg: "bg-green-50",
-      iconBg: "bg-green-100",
-      text: "text-green-700",
-      badge: "bg-green-100 text-green-700",
-    },
-  };
-
-  const theme = colors[color];
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex items-center justify-between rounded-xl border p-4 text-left transition hover:shadow-sm ${theme.border} ${
-        isExpanded ? theme.bg : "bg-white"
-      }`}
-    >
-      <div className="flex items-center gap-3">
-        <div
-          className={`flex h-10 w-10 items-center justify-center rounded-lg text-lg ${theme.iconBg}`}
-        >
-          {isExpanded ? "📂" : icon}
-        </div>
-
-        <div>
-          <h3 className="text-sm font-semibold text-gray-900">
-            {title}
-          </h3>
-
-          <p className="mt-0.5 text-xs text-gray-500">
-            {count} {count === 1 ? "record" : "records"}
-          </p>
-        </div>
+          </div>
+        </main>
       </div>
 
-      <div className="flex items-center gap-2">
-        <span
-          className={`rounded-full px-2.5 py-1 text-xs font-medium ${theme.badge}`}
-        >
-          {count}
-        </span>
+      {/* ===========================================
+          MOBILE SIDEBAR
+      =========================================== */}
 
-        <svg
-          className={`h-4 w-4 ${theme.text} transition-transform ${
-            isExpanded ? "rotate-180" : ""
-          }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 flex lg:hidden">
+
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() =>
+              setSidebarOpen(false)
+            }
           />
-        </svg>
-      </div>
-    </button>
-  );
-};
 
-/* ==========================================================================
-   CATEGORY CONTENT
-========================================================================== */
-
-const CategoryContent = ({
-  title,
-  icon,
-  records,
-  type,
-  formatDate,
-  getImageUrl,
-}) => {
-  return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-      {/* Header */}
-
-      <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{icon}</span>
-
-          <h3 className="font-semibold text-gray-900">
-            {title}
-          </h3>
-        </div>
-
-        <span className="rounded-full bg-gray-200 px-2.5 py-1 text-xs font-medium text-gray-700">
-          {records.length}
-        </span>
-      </div>
-
-      {/* No records */}
-
-      {records.length === 0 ? (
-        <div className="p-8 text-center">
-          <p className="text-sm text-gray-500">
-            No {title.toLowerCase()} available.
-          </p>
-        </div>
-      ) : (
-        <div className="divide-y divide-gray-100">
-          {records.map((record) => (
-            <MaintenanceRecord
-              key={record._id}
-              record={record}
-              type={type}
-              formatDate={formatDate}
-              getImageUrl={getImageUrl}
+          <div className="relative">
+            <MaintenanceSideBar
+              kitchens={kitchens}
+              selectedKitchen={selectedKitchen}
+              selectedType={selectedType}
+              onKitchenSelect={setSelectedKitchen}
+              onTypeSelect={(type) => {
+                setSelectedType(type);
+                setSidebarOpen(false);
+              }}
             />
-          ))}
+          </div>
+
         </div>
       )}
+
     </div>
   );
 };
-
-/* ==========================================================================
-   MAINTENANCE RECORD
-========================================================================== */
-
-const MaintenanceRecord = ({
+const MaintenanceRecordCard = ({
   record,
   type,
-  formatDate,
-  getImageUrl,
 }) => {
-  const user = record?.userId;
+  if (type === "service") {
+    return (
+      <ServiceRecordCard
+        record={record.service}
+      />
+    );
+  }
 
-  return (
-    <div className="p-5">
-      {/* User / Created */}
+  if (type === "visitor") {
+    return (
+      <VisitorRecordCard
+        record={record.visitor}
+      />
+    );
+  }
 
-      <div className="mb-5 flex flex-col gap-3 border-b border-gray-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
-            User
-          </p>
+  if (type === "purchase") {
+    return (
+      <PurchaseRecordCard
+        record={record.purchase}
+      />
+    );
+  }
 
-          <h3 className="mt-1 font-semibold text-gray-900">
-            {user?.name || "Unknown User"}
-          </h3>
-
-          <p className="mt-1 break-all text-xs text-gray-500">
-            ID: {user?._id || record?.userId}
-          </p>
-        </div>
-
-        <div className="text-left sm:text-right">
-          <p className="text-xs text-gray-400">
-            Record Created
-          </p>
-
-          <p className="mt-1 text-sm font-medium text-gray-700">
-            {formatDate(record?.createdAt)}
-          </p>
-        </div>
-      </div>
-
-      {/* ================================================================ */}
-      {/* SERVICE */}
-      {/* ================================================================ */}
-
-      {type === "service" && record?.service && (
-        <ServiceDetails
-          service={record.service}
-          formatDate={formatDate}
-          getImageUrl={getImageUrl}
-        />
-      )}
-
-      {/* ================================================================ */}
-      {/* VISITOR */}
-      {/* ================================================================ */}
-
-      {type === "visitor" && record?.visitor && (
-        <VisitorDetails
-          visitor={record.visitor}
-          formatDate={formatDate}
-        />
-      )}
-
-      {/* ================================================================ */}
-      {/* PURCHASE */}
-      {/* ================================================================ */}
-
-      {type === "purchase" && record?.purchaseRecord && (
-        <PurchaseDetails
-          purchase={record.purchaseRecord}
-          formatDate={formatDate}
-          getImageUrl={getImageUrl}
-        />
-      )}
-    </div>
-  );
+  return null;
 };
 
-/* ==========================================================================
-   SERVICE DETAILS
-========================================================================== */
+const VisitorRecordCard = ({ record }) => {
+  if (!record) return null;
 
-const ServiceDetails = ({
-  service,
-  formatDate,
-  getImageUrl,
-}) => {
   return (
-    <div className="rounded-lg border border-blue-100 bg-blue-50/50 p-4">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      {/* Header */}
+      <div className="flex items-start justify-between ">
+        <div>
+          <h3 className="text-base font-bold text-slate-900">
+            {record.visitorName || "Unknown Visitor"}
+          </h3>
+        </div>
+
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+          Visitor
+        </span>
+      </div>
+
+      {/* Details */}
+      <div className=" grid grid-cols-3 gap-3 sm:grid-cols-3">
         <Info
-          label="Part Name"
-          value={service.partName}
+          label="Problem Date"
+          value={new Date(record.problemDate).toLocaleString("en-IN", {
+                          dateStyle: "medium",
+                          // timeStyle: "medium",
+                          timeZone: "Asia/Kolkata",
+                        })}
+          
         />
 
         <Info
-          label="Party Name"
-          value={service.partyName}
+          label="Phone Number"
+          value={record.phoneNumber}
         />
 
         <Info
-          label="Service Date"
-          value={formatDate(service.serviceDate)}
-        />
-
-        <Info
-          label="Next Service"
-          value={formatDate(service.nextServiceDate)}
+          label="Reason"
+          value={record.reason}
         />
       </div>
 
-      {service.narration && (
-        <div className="mt-4">
-          <Info
-            label="Narration"
-            value={service.narration}
-          />
+      {/* Narration */}
+      {record.narration && (
+        <div className="mt-4 rounded-xl bg-slate-50 p-3">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+            Narration
+          </p>
+
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            {record.narration}
+          </p>
         </div>
       )}
 
-      {/* Images */}
-
-      {service.images?.length > 0 && (
+      {/* Other Photos */}
+      {record.otherPhotos?.length > 0 && (
         <div className="mt-4">
-          <p className="mb-2 text-xs font-medium text-gray-500">
-            Service Images
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+            Other Photos
           </p>
 
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {service.images.map((image, index) => (
-              <a
-                key={`${image}-${index}`}
-                href={getImageUrl(image)}
-                target="_blank"
-                rel="noreferrer"
-                className="overflow-hidden rounded-lg"
-              >
-                <img
-                  src={getImageUrl(image)}
-                  alt={`Service ${index + 1}`}
-                  className="h-28 w-full object-cover transition hover:scale-105"
-                />
-              </a>
+          <div className="flex flex-wrap gap-2">
+            {record.otherPhotos.map((photo, index) => (
+              <img
+                key={photo?._id || index}
+                src={photo?.url || photo}
+                alt={`Other ${index + 1}`}
+                className="h-20 w-20 rounded-xl object-cover ring-1 ring-slate-200"
+              />
             ))}
           </div>
         </div>
@@ -791,155 +547,197 @@ const ServiceDetails = ({
   );
 };
 
-/* ==========================================================================
-   VISITOR DETAILS
-========================================================================== */
+const PurchaseRecordCard = ({ record }) => {
+  if (!record) return null;
 
-const VisitorDetails = ({
-  visitor,
-  formatDate,
-}) => {
   return (
-    <div className="rounded-lg border border-orange-100 bg-orange-50/50 p-4">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Info
-          label="Visitor Name"
-          value={visitor.visitorName}
-        />
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-base font-bold text-slate-900">
+            {record.companyName || "Purchase Record"}
+          </h3>
 
-        <Info
-          label="Phone Number"
-          value={visitor.phoneNumber}
-        />
+          <p className="mt-0.5 text-xs text-slate-400">
+            परचेज रिकॉर्ड
+          </p>
+        </div>
 
-        <Info
-          label="Problem Date"
-          value={formatDate(visitor.problemDate)}
-        />
-
-        <Info
-          label="Reason"
-          value={visitor.reason}
-        />
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+          Purchase
+        </span>
       </div>
 
-      {visitor.narration && (
-        <div className="mt-4">
-          <Info
-            label="Narration"
-            value={visitor.narration}
-          />
-        </div>
-      )}
-    </div>
-  );
-};
-
-/* ==========================================================================
-   PURCHASE DETAILS
-========================================================================== */
-
-const PurchaseDetails = ({
-  purchase,
-  formatDate,
-  getImageUrl,
-}) => {
-  return (
-    <div className="rounded-lg border border-green-100 bg-green-50/50 p-4">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Details */}
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Info
-          label="Company"
-          value={purchase.companyName}
+          label="Purchase Date"
+          value={record.purchaseDate}
         />
 
         <Info
           label="Party Name"
-          value={purchase.partyName}
+          value={record.partyName}
         />
 
         <Info
-          label="Purchase Date"
-          value={formatDate(purchase.purchaseDate)}
+          label="Company Name"
+          value={record.companyName}
         />
 
         <Info
-          label="Warranty"
-          value={purchase.expiryWarrantyYear}
+          label="Warranty / Expiry"
+          value={record.expiryWarrantyYear}
         />
       </div>
 
-      {/* Guarantee Photo */}
+      {/* Photos */}
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
 
-      {purchase.guaranteePhoto && (
-        <div className="mt-4">
-          <p className="mb-2 text-xs font-medium text-gray-500">
-            Guarantee Document
-          </p>
+        {/* Guarantee / Warranty Photo */}
+        {record.guaranteePhoto && (
+          <div>
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              Guarantee / Warranty
+            </p>
 
-          <a
-            href={getImageUrl(purchase.guaranteePhoto)}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-block overflow-hidden rounded-lg"
-          >
             <img
-              src={getImageUrl(purchase.guaranteePhoto)}
-              alt="Guarantee"
-              className="h-32 w-48 object-cover transition hover:scale-105"
+              src={
+                record.guaranteePhoto?.url ||
+                record.guaranteePhoto
+              }
+              alt="Guarantee / Warranty"
+              className="h-32 w-full rounded-xl object-cover ring-1 ring-slate-200"
             />
-          </a>
-        </div>
-      )}
-
-      {/* Other Images */}
-
-      {purchase.otherImages?.length > 0 && (
-        <div className="mt-4">
-          <p className="mb-2 text-xs font-medium text-gray-500">
-            Other Images
-          </p>
-
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {purchase.otherImages.map(
-              (image, index) => (
-                <a
-                  key={`${image}-${index}`}
-                  href={getImageUrl(image)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="overflow-hidden rounded-lg"
-                >
-                  <img
-                    src={getImageUrl(image)}
-                    alt={`Purchase ${index + 1}`}
-                    className="h-28 w-full object-cover transition hover:scale-105"
-                  />
-                </a>
-              )
-            )}
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Other Images */}
+        {record.otherImages?.length > 0 && (
+          <div>
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              Other Photos
+            </p>
+
+            <div className="flex flex-wrap gap-2">
+              {record.otherImages.map(
+                (photo, index) => (
+                  <img
+                    key={photo?._id || index}
+                    src={photo?.url || photo}
+                    alt={`Other ${index + 1}`}
+                    className="h-20 w-20 rounded-xl object-cover ring-1 ring-slate-200"
+                  />
+                )
+              )}
+            </div>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 };
 
-/* ==========================================================================
-   INFO
-========================================================================== */
+const ServiceRecordCard = ({ record }) => {
+  if (!record) return null;
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="truncate text-sm font-bold text-slate-900">
+            {record.partName || "Service Record"}
+          </h3>
+
+          <p className="text-[11px] text-slate-400">
+            Service / सर्विस
+          </p>
+        </div>
+
+        <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600">
+          Service
+        </span>
+      </div>
+
+      {/* Details */}
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+
+       <Info
+  label="Service Date"
+  value={
+    record.serviceDate
+      ? new Date(record.serviceDate).toLocaleString("en-IN", {
+          dateStyle: "medium",
+          timeZone: "Asia/Kolkata",
+        })
+      : "-"
+  }
+/>
+
+<Info
+  label="Next Service"
+  value={
+    record.nextServiceDate
+      ? new Date(record.nextServiceDate).toLocaleString("en-IN", {
+          dateStyle: "medium",
+          timeZone: "Asia/Kolkata",
+        })
+      : "-"
+  }
+/>
+
+        <Info
+          label="Party"
+          value={record.partyName}
+        />
+
+      </div>
+
+      {/* Narration */}
+      {record.narration && (
+        <div className="mt-2 rounded-lg bg-slate-50 px-3 py-2">
+          <p className="line-clamp-2 text-xs text-slate-600">
+            {record.narration}
+          </p>
+        </div>
+      )}
+
+      {/* Images */}
+      {record.images?.length > 0 && (
+        <div className="mt-3 flex gap-2">
+          {record.images.map((photo, index) => (
+            <img
+              key={photo?._id || index}
+              src={photo?.url || photo}
+              alt={`Service ${index + 1}`}
+              className="h-14 w-14 rounded-lg object-cover ring-1 ring-slate-200"
+            />
+          ))}
+        </div>
+      )}
+
+    </div>
+  );
+};
 
 const Info = ({ label, value }) => {
   return (
-    <div>
-      <p className="text-xs font-medium text-gray-400">
+    <div className="rounded-xl bg-slate-50  p-1">
+      <p className="text-[7px] font-semibold uppercase tracking-wide text-slate-400">
         {label}
       </p>
 
-      <p className="mt-0.5 break-words text-sm text-gray-700">
-        {value || "—"}
+      <p className="mt-1 wrap-break-word text-[10px] font-semibold text-slate-700">
+        {value || "-"}
       </p>
     </div>
   );
 };
+
+
 
 export default Maintenance;

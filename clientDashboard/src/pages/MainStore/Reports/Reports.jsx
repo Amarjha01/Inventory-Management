@@ -646,7 +646,7 @@ console.log(reportData);
                 className={`border rounded-xl p-3 text-sm font-medium transition ${
                   filters.dateType ===
                   "single"
-                    ? "bg-blue-600 text-white border-blue-600"
+                    ? "bg-[#1f225f] text-white border-blue-900"
                     : "bg-white text-gray-700 hover:bg-gray-50"
                 }`}
               >
@@ -663,7 +663,7 @@ console.log(reportData);
                 className={`border rounded-xl p-3 text-sm font-medium transition ${
                   filters.dateType ===
                   "range"
-                    ? "bg-blue-600 text-white border-blue-600"
+                    ? "bg-[#1f225f] text-white border-blue-900"
                     : "bg-white text-gray-700 hover:bg-gray-50"
                 }`}
               >
@@ -822,7 +822,7 @@ console.log(reportData);
                   onClick={
                     handleSelectAllItems
                   }
-                  className="text-sm text-blue-600 hover:text-blue-800"
+                  className="text-sm text-[#1f225f] hover:text-blue-800"
                 >
                   Select All
                 </button>
@@ -844,7 +844,7 @@ console.log(reportData);
                       )
                     }
                     placeholder="Search items..."
-                    className="w-full border rounded-lg p-2.5 pr-10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border rounded-lg p-2.5 pr-10 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1f225f]"
                   />
 
                   {itemSearch && (
