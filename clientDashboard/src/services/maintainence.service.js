@@ -7,21 +7,25 @@ import { ENDPOINTS } from "../api/endpoints";
    SERVICE RECORDS
    ========================================================= */
 
-/**
- * Create a new service record
- *
- * Fields:
- * - partName
- * - serviceDate
- * - partyName
- * - nextServiceDate
- * - narration
- * - images [max 2]
- */
-
-export const getAllMaintenanceForAdmin = async () => {
+export const getAllVisitorForAdmin = async () => {
   const { data } = await api.get(
-    `${ENDPOINTS.MAINTENANCE}/admin`,
+    `${ENDPOINTS.MAINTENANCE}/admin/visitor`,
+  );
+  console.log(data);
+  
+  return data.data;
+};
+export const getAllServiceForAdmin = async () => {
+  const { data } = await api.get(
+    `${ENDPOINTS.MAINTENANCE}/admin/service`,
+  );
+  console.log(data);
+  
+  return data.data;
+};
+export const getAllPurchaseForAdmin = async () => {
+  const { data } = await api.get(
+    `${ENDPOINTS.MAINTENANCE}/admin/purchase`,
   );
   console.log(data);
   
@@ -104,16 +108,6 @@ export const deleteServiceRecord = async (id) => {
    VISITOR RECORDS
    ========================================================= */
 
-/**
- * Create a visitor record
- *
- * Fields:
- * - problemDate
- * - visitorName
- * - phoneNumber
- * - reason
- * - partChanges / narration
- */
 export const createVisitorRecord = async (payload) => {
   const { data } = await api.post(
     `${ENDPOINTS.MAINTENANCE}/visitor`,

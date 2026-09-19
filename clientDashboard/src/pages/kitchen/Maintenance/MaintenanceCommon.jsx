@@ -144,7 +144,7 @@ export const CaptureActions = ({
   onCamera,
   onFiles,
   label = "Add Image",
-  accept = "image/*",
+  accept = "image/*,.pdf",
   multiple = false,
 }) => {
   return (
@@ -209,6 +209,7 @@ export const CaptureActions = ({
   );
 };
 
+
 /* ============================================================
    IMAGE PREVIEW
 ============================================================ */
@@ -218,24 +219,35 @@ export const ImagePreview = ({
   onRemove,
 }) => {
   const [preview, setPreview] = useState(null);
+  const [isPdf, setIsPdf] = useState(false);
 
   useEffect(() => {
     if (!image) {
       setPreview(null);
+      setIsPdf(false);
       return;
     }
 
+    // Existing uploaded file URL/string
     if (typeof image === "string") {
-      setPreview(image);
+      setPreview(
+        image.startsWith("http")
+          ? image
+          : `${BASE_URL}/uploads/maintenance/${image}`
+      );
+
+      setIsPdf(image.toLowerCase().endsWith(".pdf"));
       return;
     }
 
-    const url = URL.createObjectURL(image);
+    // Newly selected File
+    const fileUrl = URL.createObjectURL(image);
 
-    setPreview(url);
+    setPreview(fileUrl);
+    setIsPdf(image.type === "application/pdf");
 
     return () => {
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(fileUrl);
     };
   }, [image]);
 
@@ -252,14 +264,40 @@ export const ImagePreview = ({
         rounded-xl
         border
         border-(--theme-border)
-        bg-black/5
+        bg-(--theme-background)
       "
     >
-      <img
-        src={preview}
-        alt="Maintenance attachment"
-        className="h-36 w-full object-cover"
-      />
+      {isPdf ? (
+        <div className="flex h-36 flex-col items-center justify-center bg-red-50">
+          <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-red-100">
+            <span className="text-xs font-bold text-red-600">
+              PDF
+            </span>
+          </div>
+
+          <p className="max-w-[85%] truncate px-3 text-xs font-medium text-(--theme-text)">
+            {typeof image === "string"
+              ? image.split("/").pop()
+              : image.name}
+          </p>
+
+          <a
+            href={preview}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-1 text-[11px] font-medium text-(--theme-primary)"
+            onClick={(event) => event.stopPropagation()}
+          >
+            Open PDF
+          </a>
+        </div>
+      ) : (
+        <img
+          src={preview}
+          alt="Maintenance attachment"
+          className="h-36 w-full object-cover"
+        />
+      )}
 
       <button
         type="button"
@@ -344,7 +382,7 @@ export const ImageSection = ({
         <CaptureActions
           onCamera={onCamera}
           onFiles={onFiles}
-          accept="image/*"
+          accept="image/*,.pdf"
           multiple
           label="Add Image"
         />

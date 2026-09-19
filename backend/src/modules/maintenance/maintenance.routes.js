@@ -15,7 +15,9 @@ import {
   deletePurchaseRecord,
 
   getMaintenance,
-  getAllMaintenanceForAdmin,
+  getAllVisitorForAdmin,
+  getAllServiceForAdmin,
+  getAllPurchaseForAdmin,
 } from "./maintenance.controller.js";
 import { uploadMaintenance } from "../../middleware/upload.middleware.js";
 import authenticate from "../../middleware/auth.middleware.js";
@@ -32,14 +34,34 @@ router.get(
 );
 
 router.get(
-  "/admin",
+  "/admin/purchase",
   authorize(
     ROLE.ADMIN,
     ROLE.CHIEF_COORDINATOR,
     ROLE.DISTRICT_COORDINATOR,
     ROLE.STORE_SUPERVISOR
   ),
-  getAllMaintenanceForAdmin
+  getAllPurchaseForAdmin
+);
+router.get(
+  "/admin/service",
+  authorize(
+    ROLE.ADMIN,
+    ROLE.CHIEF_COORDINATOR,
+    ROLE.DISTRICT_COORDINATOR,
+    ROLE.STORE_SUPERVISOR
+  ),
+  getAllServiceForAdmin
+);
+router.get(
+  "/admin/visitor",
+  authorize(
+    ROLE.ADMIN,
+    ROLE.CHIEF_COORDINATOR,
+    ROLE.DISTRICT_COORDINATOR,
+    ROLE.STORE_SUPERVISOR
+  ),
+  getAllVisitorForAdmin
 );
 
 
@@ -54,7 +76,7 @@ router.post(
   uploadMaintenance.fields([
     {
       name: "images",
-      maxCount: 2,
+      maxCount: 5,
     },
   ]),
   createService
@@ -66,7 +88,7 @@ router.put(
   uploadMaintenance.fields([
     {
       name: "images",
-      maxCount: 2,
+      maxCount: 5,
     },
   ]),
   updateService
@@ -97,7 +119,7 @@ router.post(
 );
 
 
-router.put(
+router.patch(
   "/visitor/:visitorId",
   updateVisitor
 );
@@ -124,7 +146,7 @@ router.post(
     },
     {
       name: "otherImages",
-      maxCount: 1,
+      maxCount: 5,
     },
   ]),
   createPurchaseRecord
@@ -140,7 +162,7 @@ router.put(
     },
     {
       name: "otherImages",
-      maxCount: 1,
+      maxCount: 5,
     },
   ]),
   updatePurchaseRecord

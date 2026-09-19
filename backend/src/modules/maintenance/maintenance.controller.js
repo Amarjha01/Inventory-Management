@@ -20,14 +20,67 @@ const sendSuccess = (
   });
 };
 
-const getAllMaintenanceForAdmin = async (req, res, next) => {
+const getAllVisitorForAdmin = async (req, res, next) => {
   try {
+    const filter = {
+      visitor: {
+        $exists: true,
+        $ne: null,
+      },
+    };
+
     const data =
-      await maintenanceService.findAllForAdmin();
+      await maintenanceService.findAllForAdmin(filter);
 
     return ApiResponse.success(
       res,
-      "All maintenance records fetched successfully.",
+      "All visitor records fetched successfully.",
+      data
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+const getAllServiceForAdmin = async (req, res, next) => {
+  try {
+    const filter = {
+      service: {
+        $exists: true,
+        $ne: null,
+      },
+    };
+
+    const data =
+      await maintenanceService.findAllForAdmin(filter);
+
+    return ApiResponse.success(
+      res,
+      "All service records fetched successfully.",
+      data
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+const getAllPurchaseForAdmin = async (req, res, next) => {
+  try {
+    const filter = {
+      purchaseRecord: {
+        $exists: true,
+        $ne: null,
+      },
+    };
+
+    const data =
+      await maintenanceService.findAllForAdmin(filter);
+
+    return ApiResponse.success(
+      res,
+      "All purchase records fetched successfully.",
       data
     );
   } catch (error) {
@@ -234,14 +287,12 @@ const updateVisitor = async (
   next
 ) => {
   try {
-    const {
-      userId,
-      visitorId,
-    } = req.params;
+    const visitorId= req.params;
+    const user = req.user;
 
     const data =
       await maintenanceService.updateVisitor(
-        userId,
+        user._id,
         visitorId,
         req.body
       );
@@ -298,7 +349,7 @@ const createPurchaseRecord = async (req, res, next) => {
     const kitchenId = req?.user.kitchenId
     const files = req.files;
 
-    console.log(files);
+    console.log("files" , files);
 
     // Add guarantee photo
     body.guaranteePhoto = files?.guaranteePhoto?.[0]?.filename;
@@ -312,7 +363,6 @@ const createPurchaseRecord = async (req, res, next) => {
       kitchenId,
       purchaseRecord: body,
     };
-
     const savedData =
       await maintenanceService.addPurchaseRecord(data);
 
@@ -387,8 +437,10 @@ const deletePurchaseRecord = async (
 
 export {
   getMaintenance,
-  getAllMaintenanceForAdmin,
   createMaintenance,
+  getAllVisitorForAdmin,
+  getAllServiceForAdmin,
+  getAllPurchaseForAdmin,
 
   createService,
   updateService,

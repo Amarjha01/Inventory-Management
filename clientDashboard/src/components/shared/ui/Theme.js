@@ -158,7 +158,8 @@ ELECTRICAL: {
     secondary: "#F5B82E",
   }
   },
-  HistoryTheme : {
+
+HistoryTheme : {
   background: "#F7F8FC",
 
   header: "#191F55",
@@ -179,6 +180,7 @@ ELECTRICAL: {
 
   secondary: "#65B741",
 },
+
 TRACKING: {
   background: "#F7F8FC",
   header: "#101A45",
@@ -248,6 +250,7 @@ EXCEL_REPORT: {
   // Supporting color
   secondary: "#65B741",
 },
+
 USERS: {
   // Main areas
   background: "#F5F7FF",
@@ -481,7 +484,36 @@ USERS: {
     // Supporting color
     secondary: "#22A06B",
   },
+// ==================================================
+// MAINTENANCE
+// ==================================================
 
+MAINTENANCE: {
+  image: "/ui/type/MAINTENANCE.png",
+
+  // Main areas
+  background: "#F5F7FA",
+  header: "#111827",
+  surface: "#FFFFFF",
+  surfaceAlt: "#E9EDF2",
+
+  // Maintenance / operations dark theme
+  primary: "#334155",
+  primaryLight: "#E2E8F0",
+  primaryDark: "#1E293B",
+
+  // Text
+  text: "#111827",
+  textSecondary: "#64748B",
+  textOnPrimary: "#FFFFFF",
+
+  // Borders / states
+  border: "#D8DEE7",
+  selectedBorder: "#64748B",
+
+  // Supporting color
+  secondary: "#475569",
+},
 
 
 };

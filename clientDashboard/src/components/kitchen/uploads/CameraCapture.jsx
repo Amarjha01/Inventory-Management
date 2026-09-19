@@ -725,97 +725,7 @@ const captureImage = async () => {
 
                     {/* DOCUMENT FRAME */}
 
-                    <div className="
-                      absolute
-                      left-[6%]
-                      right-[6%]
-                      top-[18%]
-                      bottom-[18%]
-                      sm:left-[10%]
-                      sm:right-[10%]
-                      sm:top-[15%]
-                      sm:bottom-[15%]
-                    ">
-
-                      {/* TOP LEFT */}
-
-                      <span className="
-                        absolute
-                        left-0
-                        top-0
-                        w-7
-                        h-7
-                        border-l-[3px]
-                        border-t-[3px]
-                        border-[#35A96F]
-                        rounded-tl-md
-                      " />
-
-                      {/* TOP RIGHT */}
-
-                      <span className="
-                        absolute
-                        right-0
-                        top-0
-                        w-7
-                        h-7
-                        border-r-[3px]
-                        border-t-[3px]
-                        border-[#35A96F]
-                        rounded-tr-md
-                      " />
-
-                      {/* BOTTOM LEFT */}
-
-                      <span className="
-                        absolute
-                        left-0
-                        bottom-0
-                        w-7
-                        h-7
-                        border-l-[3px]
-                        border-b-[3px]
-                        border-[#35A96F]
-                        rounded-bl-md
-                      " />
-
-                      {/* BOTTOM RIGHT */}
-
-                      <span className="
-                        absolute
-                        right-0
-                        bottom-0
-                        w-7
-                        h-7
-                        border-r-[3px]
-                        border-b-[3px]
-                        border-[#35A96F]
-                        rounded-br-md
-                      " />
-
-                      {/* CENTER GUIDE */}
-
-                      <div className="
-                        absolute
-                        inset-0
-                        flex
-                        items-center
-                        justify-center
-                      ">
-                        <div className="
-                          rounded-full
-                          bg-black/50
-                          backdrop-blur-sm
-                          px-3
-                          py-1.5
-                          text-[11px]
-                          text-white
-                        ">
-                          Align all 4 corners
-                        </div>
-                      </div>
-
-                    </div>
+                    
 
                     {/* INSTRUCTION */}
 
@@ -828,7 +738,7 @@ const captureImage = async () => {
                       justify-center
                       px-4
                     ">
-                      <div className="
+                      {/* <div className="
                         flex
                         items-center
                         gap-2
@@ -847,7 +757,7 @@ const captureImage = async () => {
 
                         Keep the entire page
                         inside the frame
-                      </div>
+                      </div> */}
                     </div>
 
                   </div>

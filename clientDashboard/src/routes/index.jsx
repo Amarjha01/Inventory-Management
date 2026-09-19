@@ -36,6 +36,9 @@ import CreateTrip from "../pages/trip/CreateTrip.jsx";
 import ActiveTrip from "../pages/trip/ActiveTrip.jsx";
 import TripHistory from "../pages/trip/TripHistory.jsx";
 import TripDetails from "../pages/trip/TripDetails.jsx";
+import Service from "../pages/MainStore/maintenance/Service.jsx";
+import Visitor from "../pages/MainStore/maintenance/Visitor.jsx";
+import Purchase from "../pages/MainStore/maintenance/Purchase.jsx";
 
 
 const AppRoutes = () => {
@@ -182,10 +185,26 @@ const AppRoutes = () => {
     path="pending"
     element={<Pending />}
     />
-   <Route
-    path="maintenance"
-    element={<MaintenanceStore />}
-    />
+
+
+  <Route path="maintenance" element={<MaintenanceStore />}>
+  <Route index element={<Navigate to="service" replace />} />
+  <Route
+    path="service"
+    element={<Service />}
+  />
+
+  <Route
+    path="visitor"
+    element={<Visitor />}
+  />
+
+  <Route
+    path="purchase"
+    element={<Purchase />}
+  />
+</Route>
+
    <Route
     path="downloads"
     element={<Downloads />}
