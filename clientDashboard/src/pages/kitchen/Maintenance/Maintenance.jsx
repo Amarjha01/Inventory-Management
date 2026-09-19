@@ -69,10 +69,15 @@ const EMPTY_VISITOR = {
 
 const EMPTY_PURCHASE = {
   purchaseDate: "",
+  ReceivedDate:"",
+  partName:"",
   partyName: "",
-  guaranteePhoto: null,
-  expiryWarrantyYear: "",
   companyName: "",
+  guaranteeWarrantyType:"",
+  guaranteePhoto: null,
+  guaranteeWarrantyDuration:"",
+  guaranteeWarrantyUnit:"",
+  expiryWarrantyYear:"",
   otherImages: [],
 };
 
@@ -264,6 +269,8 @@ const Maintenance = () => {
       setPurchaseForm({
         purchaseDate: formatInputDate(record.purchaseDate),
 
+        partName: record.partName || "",
+
         partyName: record.partyName || "",
 
         guaranteePhoto: record.guaranteePhoto || null,
@@ -315,7 +322,8 @@ const Maintenance = () => {
 
   const handlePurchaseChange = (event) => {
     const { name, value } = event.target;
-
+    console.log("name " , name , "value" , value);
+    
     setPurchaseForm((previous) => ({
       ...previous,
       [name]: value,
@@ -337,7 +345,7 @@ const handleCameraCapture = (file, documentType) => {
 
   if (documentType?.id === "service-image") {
     setServiceForm((previous) => {
-      if (previous.images.length >= 2) {
+      if (previous.images.length >= 5) {
         return previous;
       }
 
@@ -376,7 +384,7 @@ const handleCameraCapture = (file, documentType) => {
 
   if (documentType?.id === "purchase-image") {
     setPurchaseForm((previous) => {
-      if (previous.otherImages.length >= 1) {
+      if (previous.otherImages.length >= 5) {
         return previous;
       }
 
@@ -412,12 +420,13 @@ const removeVisitorImage = (index) => {
   ========================================================== */
 
   const handleServiceFiles = (event) => {
+    console.log(event.target.files);
     const files = Array.from(event.target.files || []);
 
     setServiceForm((previous) => ({
       ...previous,
 
-      images: [...previous.images, ...files].slice(0, 2),
+      images: [...previous.images, ...files].slice(0, 5),
     }));
 
     event.target.value = "";
@@ -441,14 +450,16 @@ const removeVisitorImage = (index) => {
   };
 
   const handlePurchaseFiles = (event) => {
-    const file = event.target.files?.[0];
+    console.log(event.target.files);
+    
+     const files = Array.from(event.target.files || []);
 
-    if (!file) return;
+    if (!files) return;
 
     setPurchaseForm((previous) => ({
       ...previous,
 
-      otherImages: [file],
+      otherImages: [...previous.otherImages, ...files].slice(0, 5),
     }));
 
     event.target.value = "";
@@ -473,10 +484,10 @@ const removeVisitorImage = (index) => {
     }));
   };
 
-  const removePurchaseImage = () => {
+  const removePurchaseImage = (index) => {
     setPurchaseForm((previous) => ({
       ...previous,
-      otherImages: [],
+      otherImages: previous.otherImages.filter((_, imageIndex) => imageIndex !== index),
     }));
   };
 
@@ -504,7 +515,7 @@ const removeVisitorImage = (index) => {
       return "Next service date cannot be before service date.";
     }
 
-    if (serviceForm.images.length > 2) {
+    if (serviceForm.images.length > 5) {
       return "Maximum 2 images are allowed.";
     }
 
@@ -605,12 +616,14 @@ const buildVisitorFormData = () => {
     const formData = new FormData();
 
     formData.append("purchaseDate", purchaseForm.purchaseDate);
-
+    formData.append("partName" , purchaseForm.partName);
+    formData.append("ReceivedDate", purchaseForm.ReceivedDate);
     formData.append("partyName", purchaseForm.partyName);
-
-    formData.append("expiryWarrantyYear", purchaseForm.expiryWarrantyYear);
-
     formData.append("companyName", purchaseForm.companyName);
+    formData.append("guaranteeWarrantyType", purchaseForm.guaranteeWarrantyType);
+    formData.append("expiryWarrantyYear", `${purchaseForm.guaranteeWarrantyDuration} ${purchaseForm.guaranteeWarrantyUnit}`);
+
+    
 
     if (purchaseForm.guaranteePhoto instanceof File) {
       formData.append("guaranteePhoto", purchaseForm.guaranteePhoto);
@@ -661,15 +674,6 @@ const buildVisitorFormData = () => {
       let response;
       if (activeTab === TABS.SERVICE) {
         formData = buildServiceFormData();
-        formData.append("type","service")
-      }
-      if (activeTab === TABS.PURCHASE) {
-        formData = buildServiceFormData();
-        formData.append("type","service")
-      }
-      if (activeTab === TABS.VISITOR) {
-        formData = buildServiceFormData();
-        formData.append("type","service")
       }
 
       if (activeTab === TABS.VISITOR) {
@@ -1196,23 +1200,7 @@ const buildVisitorFormData = () => {
                       type="button"
                       onClick={handleSubmit}
                       disabled={saving}
-                      className="
-                        flex
-                        items-center
-                        justify-center
-                        gap-2
-                        rounded-xl
-                        bg-(--theme-primary)
-                        px-4
-                        py-3
-                        text-sm
-                        font-semibold
-                        text-white
-                        transition
-                        hover:opacity-90
-                        disabled:cursor-not-allowed
-                        disabled:opacity-50
-                      "
+                      className="flex items-center justify-center gap-2 rounded-xl bg-(--theme-primary) px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {saving ? (
                         <>

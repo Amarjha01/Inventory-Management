@@ -4,13 +4,14 @@ import fs from "fs";
 
 const createUpload = (
   folder,
-  maxFiles = 2
+  maxFiles = 2,
+  allowPdf = false
 ) => {
   const uploadDir = path.join(
-  process.cwd(),
-  "uploads",
-  folder
-);
+    process.cwd(),
+    "uploads",
+    folder
+  );
 
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, {
@@ -24,9 +25,7 @@ const createUpload = (
     },
 
     filename(req, file, cb) {
-      const extension = path.extname(
-        file.originalname
-      );
+      const extension = path.extname(file.originalname);
 
       cb(
         null,
@@ -37,23 +36,14 @@ const createUpload = (
     },
   });
 
-  const fileFilter = (
-    req,
-    file,
-    cb
-  ) => {
-    if (
-      file.mimetype.startsWith(
-        "image/"
-      )
-    ) {
+  const fileFilter = (req, file, cb) => {
+    const isImage = file.mimetype.startsWith("image/");
+    const isPdf = file.mimetype === "application/pdf";
+
+    if (isImage || (allowPdf && isPdf)) {
       cb(null, true);
     } else {
-      cb(
-        new Error(
-          "Only image files are allowed"
-        )
-      );
+      cb(new Error("Only image files are allowed"));
     }
   };
 
@@ -61,8 +51,7 @@ const createUpload = (
     storage,
     fileFilter,
     limits: {
-      fileSize:
-        5 * 1024 * 1024,
+      fileSize: 20 * 1024 * 1024,
       files: maxFiles,
     },
   });
@@ -91,7 +80,8 @@ export const upload =
 export const uploadMaintenance =
   createUpload(
     "maintenance",
-    3
+    6,
+    true
   );
 
 

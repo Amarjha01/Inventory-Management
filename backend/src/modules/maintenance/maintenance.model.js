@@ -45,9 +45,9 @@ const serviceSchema = new Schema(
       default: [],
       validate: {
         validator: function (value) {
-          return value.length <= 2;
+          return value.length <= 5;
         },
-        message: "Maximum 2 images are allowed for a service record.",
+        message: "Maximum 5 images are allowed for a service record.",
       },
     },
   },
@@ -88,6 +88,19 @@ const visitorSchema = new Schema(
       trim: true,
     },
 
+    status: {
+    type: String,
+    enum: ["PENDING", "COMPLETED"],
+    default: "PENDING",
+    required: true,
+    trim: true,
+  },
+
+  feedbackTrail: {
+    type: [String],
+    default: [],
+  },
+
     // Any part changed / work done
     narration: {
       type: String,
@@ -119,6 +132,17 @@ const purchaseRecordSchema = new Schema(
       required: true,
     },
 
+    ReceivedDate: {
+      type: Date,
+      required: true,
+    },
+
+    partName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
     partyName: {
       type: String,
       required: true,
@@ -131,15 +155,6 @@ const purchaseRecordSchema = new Schema(
       default: null,
     },
 
-    /*
-     * Example:
-     * "2 years"
-     * "5 years"
-     * "2028-12-31"
-     *
-     * Kept as String because warranty information can be
-     * represented in different ways.
-     */
     expiryWarrantyYear: {
       type: String,
       trim: true,

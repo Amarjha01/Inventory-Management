@@ -143,25 +143,25 @@ const ServiceSection = ({
     <div className="space-y-4">
 
       <Input
-        label="Part Name / पार्ट नेम"
-        name="partName"
-        value={form.partName}
-        onChange={handlePartChange}
-        placeholder="e.g. Engine Oil / जैसे: इंजन ऑयल"
-        icon={FiTool}
-        list="maintenance-parts"
-      />
+  label="Machine Name / मशीन नेम"
+  name="partName"
+  value={form.partName}
+  onChange={handlePartChange}
+  placeholder="e.g. Engine Oil / जैसे: इंजन ऑयल"
+  icon={FiTool}
+  list="maintenance-parts"
+/>
 
-      <datalist id="maintenance-parts">
-        {partName.map((part) => (
-          <option
-            key={part.name}
-            value={part.name}
-          >
-            {part.hindiName}
-          </option>
-        ))}
-      </datalist>
+<datalist id="maintenance-parts">
+  {partName.map((part) => (
+    <option
+      key={part.name}
+      value={part.name}
+      label={part.hindiName}
+    />
+  ))}
+</datalist>
+
 
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -208,9 +208,9 @@ const ServiceSection = ({
 
       <ImageSection
         title="Service Images / सर्विस इमेजेज"
-        subtitle="Maximum 2 images / अधिकतम 2 इमेजेज"
+        subtitle="Maximum 5 images / अधिकतम 2 इमेजेज"
         images={form.images}
-        maxImages={2}
+        maxImages={5}
         onCamera={onCamera}
         onFiles={onFiles}
         onRemove={onRemoveImage}

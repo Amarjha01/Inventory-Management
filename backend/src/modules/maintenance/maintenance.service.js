@@ -2,8 +2,8 @@ import maintenanceRepository from "./maintenance.repository.js";
 
 class MaintenanceService {
 
-  async findAllForAdmin() {
-    return await maintenanceRepository.findAllForAdmin();
+  async findAllForAdmin(filter) {
+    return await maintenanceRepository.findAllForAdmin(filter);
   }
 
   

@@ -133,6 +133,7 @@ const MainStoreNavbar = () => {
     "/store/reports",
     "/store/downloads",
     "/store/settings",
+    "/store/maintenance",
   ];
 
   /*

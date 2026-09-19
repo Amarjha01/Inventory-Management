@@ -3,8 +3,8 @@ import Maintenance from "./maintenance.model.js";
 class MaintenanceRepository {
 
 
-    async findAllForAdmin() {
-    return await Maintenance.find({})
+    async findAllForAdmin(filter) {
+    return await Maintenance.find(filter)
       .populate({
         path: "userId",
         select: "_id name",
@@ -127,23 +127,35 @@ class MaintenanceRepository {
   |--------------------------------------------------------------------------
   */
 
-  async updateVisitor(userId, visitorId, visitorData) {
-    return await Maintenance.findOneAndUpdate(
-      {
-        userId,
-        "visitor._id": visitorId,
-      },
-      {
-        $set: {
-          "visitor.$": visitorData,
-        },
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+async updateVisitor(userId,  {visitorId} , visitorData) {
+  console.log("visitorId:", visitorId);
+  console.log("visitorData:", visitorData);
+
+  const updateFields = {};
+
+  if (visitorData.status !== undefined) {
+    updateFields["visitor.status"] = visitorData.status;
   }
+
+  if (visitorData.feedbackTrail !== undefined) {
+    updateFields["visitor.feedbackTrail"] =
+      visitorData.feedbackTrail;
+  }
+
+  const updated = await Maintenance.findByIdAndUpdate(visitorId,
+    {
+      $set: updateFields,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  console.log("updated:", updated);
+
+  return updated;
+}
 
   /*
   |--------------------------------------------------------------------------

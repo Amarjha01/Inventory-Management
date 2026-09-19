@@ -36,6 +36,8 @@ const MaintenanceRecordCard = ({
   onEdit,
   onDelete,
 }) => {
+  console.log(record);
+  
   const getTitle = () => {
     if (type === TYPES.SERVICE) {
       return record.partName;
@@ -62,14 +64,14 @@ const MaintenanceRecordCard = ({
 
   const getDate = () => {
     if (type === TYPES.SERVICE) {
-      return record.serviceDate;
+      return record.createdAt;
     }
 
     if (type === TYPES.VISITOR) {
-      return record.problemDate;
+      return record.createdAt;
     }
 
-    return record.purchaseDate;
+    return record.createdAt;
   };
 
   const Icon =
@@ -145,7 +147,7 @@ const MaintenanceRecordCard = ({
 
         <div className="shrink-0 text-right">
           <p className="text-[11px] font-medium text-(--theme-text-muted)">
-            {formatDate(getDate())}
+           createdAt: {formatDate(getDate())}
           </p>
 
           <div className="mt-1 flex justify-end">
@@ -380,7 +382,13 @@ const PurchaseDetails = ({
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <DetailItem
           label="Purchase Date"
-          value={formatDate(record.purchaseDate)}
+          value={formatDate(record?.purchaseDate)}
+          icon={FiCalendar}
+        />
+
+        <DetailItem
+          label="Received Date"
+          value={formatDate(record?.ReceivedDate)}
           icon={FiCalendar}
         />
 
