@@ -833,7 +833,7 @@ const handleCameraCapture = (file, documentType) => {
         {filteredRecords.length === 0 ? (
           <div className="flex min-h-[360px] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white">
             <div className="px-6 text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 ">
                 <FiTool size={22} className="text-slate-400" />
               </div>
 

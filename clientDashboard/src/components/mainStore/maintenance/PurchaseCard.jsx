@@ -181,10 +181,13 @@ const PurchaseCard = ({ record, onClick }) => {
             items-center
             justify-center
             rounded-full
-            text-slate-400
+            md:bg-transparent
+            md:text-slate-400
             transition
-            group-hover:bg-slate-100
-            group-hover:text-slate-700
+            md:group-hover:bg-black
+            md:group-hover:text-white
+            bg-black
+            text-white
           "
         >
           <FiChevronRight size={17} />
