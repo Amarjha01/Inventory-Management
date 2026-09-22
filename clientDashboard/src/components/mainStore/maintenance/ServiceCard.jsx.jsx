@@ -86,11 +86,13 @@ const ServiceCard = ({ record, onClick }) => {
               flex h-10 w-10 shrink-0
               items-center justify-center
               rounded-xl
-              bg-slate-100
-              text-slate-600
+              md:bg-slate-100
+              md:text-slate-600
               transition-colors
-              group-hover:bg-slate-900
-              group-hover:text-white
+              md:group-hover:bg-black
+              md:group-hover:text-white
+              bg-black
+              text-white
             "
           >
             <FiTool size={18} />
@@ -114,11 +116,13 @@ const ServiceCard = ({ record, onClick }) => {
             flex h-8 w-8 shrink-0
             items-center justify-center
             rounded-full
-            bg-slate-50
-            text-slate-400
+            md:bg-slate-50
+            md:text-slate-400
             transition-all
-            group-hover:bg-slate-900
-            group-hover:text-white
+            md:group-hover:bg-slate-900
+            md:group-hover:text-white
+            bg-black
+            text-white
           "
         >
           <FiArrowUpRight size={15} />

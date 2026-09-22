@@ -94,8 +94,8 @@ const InfoRow = ({ icon: Icon, label, value }) => {
           shrink-0
           items-center justify-center
           rounded-xl
-          bg-slate-100
-          text-slate-500
+         bg-black
+        text-white
         "
       >
         <Icon size={15} />
