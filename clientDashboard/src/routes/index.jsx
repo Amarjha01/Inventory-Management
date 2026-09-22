@@ -24,8 +24,8 @@ import VehicleTracking from "../pages/VehicleTracking/VehicleTracking.jsx"
 import Pending from "../pages/MainStore/Pending/Pending.jsx";
 import Downloads from "../pages/MainStore/Downloads/Downloads.jsx";
 import Uploads from "../pages/kitchen/Uploads/Uploads.jsx";
-import Maintenance from "../pages/kitchen/Maintenance/Maintenance.jsx";
 import MaintenanceStore from "../pages/MainStore/maintenance/Maintenance.jsx";
+import MaintenanceKitchen from "../pages/kitchen/maintenanceNew/Maintenance.jsx";
 
 
 
@@ -39,6 +39,12 @@ import TripDetails from "../pages/trip/TripDetails.jsx";
 import Service from "../pages/MainStore/maintenance/Service.jsx";
 import Visitor from "../pages/MainStore/maintenance/Visitor.jsx";
 import Purchase from "../pages/MainStore/maintenance/Purchase.jsx";
+
+import KitchenService from "../pages/kitchen/maintenanceNew/Service.jsx";
+import KitchenVisitor from "../pages/kitchen/maintenanceNew/Visitor.jsx";
+import KitchenPurchase from "../pages/kitchen/maintenanceNew/Purchase.jsx";
+
+import Notification from "../pages/notifications/Notification.jsx";
 
 
 const AppRoutes = () => {
@@ -97,13 +103,35 @@ const AppRoutes = () => {
     }
 />
 <Route
-    path="/maintenance"
-    element={
-        <ProtectedRoute roles={["Kitchen Incharge" ,"Store Incharge"]}>
-            <Maintenance />
-        </ProtectedRoute>
-    }
-/>
+  path="/maintenance"
+  element={
+    <ProtectedRoute
+      roles={["Kitchen Incharge", "Store Incharge"]}
+    >
+      <MaintenanceKitchen />
+    </ProtectedRoute>
+  }
+>
+  <Route
+    index
+    element={<Navigate to="service" replace />}
+  />
+
+  <Route
+    path="service"
+    element={<KitchenService />}
+  />
+
+  <Route
+    path="visitor"
+    element={<KitchenVisitor />}
+  />
+
+  <Route
+    path="purchase"
+    element={<KitchenPurchase />}
+  />
+</Route>
 
 <Route
     path="/settings"
@@ -113,7 +141,10 @@ const AppRoutes = () => {
         </ProtectedRoute>
     }
 />
-
+<Route 
+path="/notifications"
+element={<Notification />}
+/>
 {/* ||||||||||||MAIN STORE||||||||||||||||||||||||||||||||||||||||MAIN STORE|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| */}
 
       <Route

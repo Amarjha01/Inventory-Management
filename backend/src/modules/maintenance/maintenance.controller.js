@@ -94,6 +94,75 @@ const getAllPurchaseForAdmin = async (req, res, next) => {
 |--------------------------------------------------------------------------
 */
 
+const getAllServiceForKitchen = async (req, res, next) => {
+  try {
+   const userId = req.user._id;
+    const filter = {
+      service: {
+        $exists: true,
+        $ne: null,
+      },
+    };
+
+    const data =
+            await maintenanceService.findByUserId(userId , filter);
+
+    return ApiResponse.success(
+      res,
+      "All service records fetched successfully.",
+      data
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getAllVisitorsForKitchen = async (req, res, next) => {
+  try {
+   const userId = req.user._id;
+    const filter = {
+      visitor: {
+        $exists: true,
+        $ne: null,
+      },
+    };
+
+    const data =
+            await maintenanceService.findByUserId(userId , filter);
+
+    return ApiResponse.success(
+      res,
+      "All service records fetched successfully.",
+      data
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getAllPurchasesForKitchen = async (req, res, next) => {
+  try {
+   const userId = req.user._id;
+    const filter = {
+      purchaseRecord: {
+        $exists: true,
+        $ne: null,
+      },
+    };
+
+    const data =
+            await maintenanceService.findByUserId(userId , filter);
+
+    return ApiResponse.success(
+      res,
+      "All service records fetched successfully.",
+      data
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getMaintenance = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -289,12 +358,18 @@ const updateVisitor = async (
   try {
     const visitorId= req.params;
     const user = req.user;
+    console.log(req.body);
 
+const images = req?.files?.otherImages 
+  ? req.files.otherImages.map((image) => image.filename) 
+  : [];
+    
     const data =
       await maintenanceService.updateVisitor(
         user._id,
         visitorId,
-        req.body
+        req.body,
+        images
       );
 
     return sendSuccess(
@@ -438,6 +513,7 @@ const deletePurchaseRecord = async (
 export {
   getMaintenance,
   createMaintenance,
+  
   getAllVisitorForAdmin,
   getAllServiceForAdmin,
   getAllPurchaseForAdmin,
@@ -445,12 +521,15 @@ export {
   createService,
   updateService,
   deleteService,
+  getAllServiceForKitchen,
 
   createVisitor,
   updateVisitor,
   deleteVisitor,
+  getAllVisitorsForKitchen,
 
   createPurchaseRecord,
   updatePurchaseRecord,
   deletePurchaseRecord,
+  getAllPurchasesForKitchen
 };

@@ -1,5 +1,4 @@
-import mongoose from "mongoose"
-
+import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
@@ -53,9 +52,8 @@ const serviceSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
-
 
 /*
 |--------------------------------------------------------------------------
@@ -89,17 +87,25 @@ const visitorSchema = new Schema(
     },
 
     status: {
-    type: String,
-    enum: ["PENDING", "COMPLETED"],
-    default: "PENDING",
-    required: true,
-    trim: true,
-  },
+      type: String,
+      enum: ["PENDING", "COMPLETED"],
+      default: "PENDING",
+      required: true,
+      trim: true,
+    },
 
-  feedbackTrail: {
-    type: [String],
-    default: [],
-  },
+    feedbackTrail: [{
+      sentBy: {
+        type: mongoose.Types.ObjectId,
+        ref:"User",
+        required: true,
+      },
+      message: {
+        type: String,
+        default: "",
+      },
+      createdAt: Date,
+    }],
 
     // Any part changed / work done
     narration: {
@@ -107,7 +113,7 @@ const visitorSchema = new Schema(
       trim: true,
       default: "",
     },
-    
+
     otherImages: {
       type: [String],
       default: [],
@@ -115,9 +121,8 @@ const visitorSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
-
 
 /*
 |--------------------------------------------------------------------------
@@ -175,9 +180,8 @@ const purchaseRecordSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
-
 
 /*
 |--------------------------------------------------------------------------
@@ -199,8 +203,8 @@ const maintenanceSchema = new Schema(
       required: true,
       index: true,
     },
-    
-    kitchenId:{
+
+    kitchenId: {
       type: Schema.Types.ObjectId,
       ref: "Kitchen",
       required: true,
@@ -232,9 +236,8 @@ const maintenanceSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
-
 
 /*
 |--------------------------------------------------------------------------
@@ -244,16 +247,12 @@ const maintenanceSchema = new Schema(
 
 maintenanceSchema.index({ userId: 1 });
 
-
 /*
 |--------------------------------------------------------------------------
 | Model
 |--------------------------------------------------------------------------
 */
 
-const Maintenance = mongoose.model(
-  "Maintenance",
-  maintenanceSchema
-);
+const Maintenance = mongoose.model("Maintenance", maintenanceSchema);
 
 export default Maintenance;

@@ -13,8 +13,11 @@ class MaintenanceService {
   |--------------------------------------------------------------------------
   */
 
-  async findByUserId(userId) {
-    return await maintenanceRepository.findByUserId(userId);
+  async findByUserId(userId , filter) {
+    return await maintenanceRepository.findByUserId(
+      userId,
+      filter
+    );
   }
 
   /*
@@ -94,12 +97,14 @@ class MaintenanceService {
   async updateVisitor(
     userId,
     visitorId,
-    visitorData
+    visitorData,
+    images
   ) {
     return await maintenanceRepository.updateVisitor(
       userId,
       visitorId,
-      visitorData
+      visitorData,
+      images
     );
   }
 

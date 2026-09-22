@@ -90,11 +90,7 @@ const Maintenance = () => {
 
   const [maintenance, setMaintenance] = useState(null);
 
-  const [loading, setLoading] = useState(true);
 
-  const [saving, setSaving] = useState(false);
-
-  const [showForm, setShowForm] = useState(false);
 
   const [editingId, setEditingId] = useState(null);
 
@@ -114,6 +110,11 @@ const Maintenance = () => {
 
   const [purchaseForm, setPurchaseForm] = useState(EMPTY_PURCHASE);
 
+    const [loading, setLoading] = useState(true);
+
+  const [saving, setSaving] = useState(false);
+
+  const [showForm, setShowForm] = useState(false);
   /* ==========================================================
      FETCH
   ========================================================== */

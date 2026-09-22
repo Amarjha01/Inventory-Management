@@ -10,7 +10,7 @@ import {
   ImageSection,
   Input,
   SingleImageField,
-} from "./MaintenanceCommon";
+} from "../../../components/shared/MaintenanceCommon";
 
 const PurchaseSection = ({
   form,
