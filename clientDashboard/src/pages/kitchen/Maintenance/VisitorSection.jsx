@@ -10,7 +10,7 @@ import {
   Input,
   Textarea,
   ImageSection,
-} from "./MaintenanceCommon";
+} from "../../../components/shared/MaintenanceCommon";
 
 const VisitorSection = ({
   form,

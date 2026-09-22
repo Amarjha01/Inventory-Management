@@ -108,7 +108,7 @@ const Login = () => {
   return (
     <div className="min-h-screen relative overflow-hidden bg-linear-to-br from-slate-950 via-blue-950 to-indigo-950 flex items-center justify-center px-4 py-8">
       <span className=" fixed top-1 right-3">
-            <InstallPrompt />
+      <InstallPrompt />
       </span>
       {/* Background decorations */}
       <div className="absolute -top-32 -left-32 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl" />

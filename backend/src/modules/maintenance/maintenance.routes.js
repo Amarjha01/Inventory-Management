@@ -18,6 +18,9 @@ import {
   getAllVisitorForAdmin,
   getAllServiceForAdmin,
   getAllPurchaseForAdmin,
+  getAllServiceForKitchen,
+  getAllVisitorsForKitchen,
+  getAllPurchasesForKitchen,
 } from "./maintenance.controller.js";
 import { uploadMaintenance } from "../../middleware/upload.middleware.js";
 import authenticate from "../../middleware/auth.middleware.js";
@@ -35,32 +38,32 @@ router.get(
 
 router.get(
   "/admin/purchase",
-  authorize(
-    ROLE.ADMIN,
-    ROLE.CHIEF_COORDINATOR,
-    ROLE.DISTRICT_COORDINATOR,
-    ROLE.STORE_SUPERVISOR
-  ),
+  // authorize(
+  //   ROLE.ADMIN,
+  //   ROLE.CHIEF_COORDINATOR,
+  //   ROLE.DISTRICT_COORDINATOR,
+  //   ROLE.STORE_SUPERVISOR
+  // ),
   getAllPurchaseForAdmin
 );
 router.get(
   "/admin/service",
-  authorize(
-    ROLE.ADMIN,
-    ROLE.CHIEF_COORDINATOR,
-    ROLE.DISTRICT_COORDINATOR,
-    ROLE.STORE_SUPERVISOR
-  ),
+  // authorize(
+  //   ROLE.ADMIN,
+  //   ROLE.CHIEF_COORDINATOR,
+  //   ROLE.DISTRICT_COORDINATOR,
+  //   ROLE.STORE_SUPERVISOR
+  // ),
   getAllServiceForAdmin
 );
 router.get(
   "/admin/visitor",
-  authorize(
-    ROLE.ADMIN,
-    ROLE.CHIEF_COORDINATOR,
-    ROLE.DISTRICT_COORDINATOR,
-    ROLE.STORE_SUPERVISOR
-  ),
+  // authorize(
+  //   ROLE.ADMIN,
+  //   ROLE.CHIEF_COORDINATOR,
+  //   ROLE.DISTRICT_COORDINATOR,
+  //   ROLE.STORE_SUPERVISOR
+  // ),
   getAllVisitorForAdmin
 );
 
@@ -70,6 +73,39 @@ router.get(
 | Service
 |--------------------------------------------------------------------------
 */
+
+router.get(
+  "/kitchen/service",
+  // authorize(
+  //   ROLE.ADMIN,
+  //   ROLE.CHIEF_COORDINATOR,
+  //   ROLE.DISTRICT_COORDINATOR,
+  //   ROLE.STORE_SUPERVISOR
+  // ),
+  getAllServiceForKitchen
+);
+
+router.get(
+  "/kitchen/visitor",
+  // authorize(
+  //   ROLE.ADMIN,
+  //   ROLE.CHIEF_COORDINATOR,
+  //   ROLE.DISTRICT_COORDINATOR,
+  //   ROLE.STORE_SUPERVISOR
+  // ),
+  getAllVisitorsForKitchen
+);
+
+router.get(
+  "/kitchen/purchase",
+  // authorize(
+  //   ROLE.ADMIN,
+  //   ROLE.CHIEF_COORDINATOR,
+  //   ROLE.DISTRICT_COORDINATOR,
+  //   ROLE.STORE_SUPERVISOR
+  // ),
+  getAllPurchasesForKitchen
+);
 
 router.post(
   "/service",
@@ -121,6 +157,12 @@ router.post(
 
 router.patch(
   "/visitor/:visitorId",
+  uploadMaintenance.fields([
+    {
+      name: "otherImages",
+      maxCount: 5,
+    },
+  ]),
   updateVisitor
 );
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   FiCalendar,
   FiCheckCircle,
@@ -7,11 +7,17 @@ import {
   FiMapPin,
   FiMessageSquare,
   FiPhone,
+  FiRefreshCw,
+  FiSave,
   FiSend,
   FiUser,
   FiX,
 } from "react-icons/fi";
 import { updateVisitorRecord } from "../../../services/maintainence.service";
+import { ImageSection } from "../../shared/MaintenanceCommon";
+import CameraCapture from "../../kitchen/uploads/CameraCapture";
+import { AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
 const base_url = import.meta.env.VITE_SERVER_BASE_URL;
 
 const formatDate = (value) => {
@@ -30,7 +36,6 @@ const formatDate = (value) => {
   });
 };
 
-
 const formatDateTime = (value) => {
   if (!value) return "—";
 
@@ -46,7 +51,6 @@ const formatDateTime = (value) => {
     timeZone: "Asia/Kolkata",
   });
 };
-
 
 const getKitchenName = (record) => {
   if (!record) return "—";
@@ -66,7 +70,6 @@ const getKitchenName = (record) => {
   return record.kitchenName || "—";
 };
 
-
 const getUserName = (record) => {
   if (!record?.userId) return "—";
 
@@ -82,11 +85,9 @@ const getUserName = (record) => {
   return "—";
 };
 
-
 const InfoRow = ({ icon: Icon, label, value }) => {
   return (
     <div className="flex gap-3">
-
       <div
         className="
           flex h-9 w-9
@@ -101,7 +102,6 @@ const InfoRow = ({ icon: Icon, label, value }) => {
       </div>
 
       <div className="min-w-0">
-
         <p
           className="
             text-[10px]
@@ -125,13 +125,10 @@ const InfoRow = ({ icon: Icon, label, value }) => {
         >
           {value || "—"}
         </p>
-
       </div>
-
     </div>
   );
 };
-
 
 const Section = ({ title, children }) => {
   return (
@@ -143,7 +140,6 @@ const Section = ({ title, children }) => {
         p-5
       "
     >
-
       <h3
         className="
           mb-4
@@ -158,56 +154,116 @@ const Section = ({ title, children }) => {
       </h3>
 
       {children}
-
     </section>
   );
 };
-
 
 const VisitorDetails = ({
   record,
   onUpdated,
 }) => {
-const images = record.visitor.otherImages
-
   if (!record) return null;
 
+  const images = record?.visitor?.otherImages || [];
 
   const [status, setStatus] = useState(
     record.status || "PENDING"
   );
 
   const [feedback, setFeedback] = useState("");
-
   const [savingStatus, setSavingStatus] = useState(false);
-
   const [addingFeedback, setAddingFeedback] = useState(false);
 
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraType, setCameraType] = useState(null);
+  const [visitorImage, setVisitorImage] = useState([]);
+  const [saving, setSaving] = useState(false);
+  // Local feedbackTrail state synchronized with record prop
+  const [feedbackTrail, setFeedbackTrail] = useState(() => {
+    return Array.isArray(record?.visitor?.feedbackTrail)
+      ? record.visitor.feedbackTrail
+      : Array.isArray(record?.feedbackTrail)
+        ? record.feedbackTrail
+        : Array.isArray(record?.feedBackTrail)
+          ? record.feedBackTrail
+          : [];
+  });
 
-  const feedbackTrail = Array.isArray(record.feedbackTrail)
-    ? record.feedbackTrail
-    : Array.isArray(record.feedBackTrail)
-      ? record.feedBackTrail
-      : [];
+  useEffect(() => {
+    const trails = Array.isArray(record?.visitor?.feedbackTrail)
+      ? record.visitor.feedbackTrail
+      : Array.isArray(record?.feedbackTrail)
+        ? record.feedbackTrail
+        : Array.isArray(record?.feedBackTrail)
+          ? record.feedBackTrail
+          : [];
+          
+    setFeedbackTrail(trails);
+  }, [record]);
 
+  /* ==========================================================
+      CAMERA DOCUMENT
+  ========================================================== */
+  const cameraDocument = useMemo(() => {
+    if (cameraType === "visitor-image") {
+      return {
+        id: "visitor-image",
+        title: "Visitor Service Image",
+      };
+    }
+  }, [cameraType]);
+
+  /* ==========================================================
+      CAMERA / IMAGE HANDLERS
+  ========================================================== */
+  const openCamera = (type) => {
+    setCameraType(type);
+    setShowCamera(true);
+  };
+
+  const handleCameraCapture = (file, documentType) => {
+    if (!file) return;
+
+    if (documentType?.id === "visitor-image") {
+      setVisitorImage((previous) => {
+        if (previous?.length >= 5) {
+          return previous;
+        }
+        return [...previous, file];
+      });
+    }
+  };
+
+  const handleVisitorFiles = (event) => {
+    const files = Array.from(event.target.files || []);
+
+    setVisitorImage((previous) => {
+      const combined = [...previous, ...files];
+      return combined.slice(0, 5);
+    });
+
+    event.target.value = "";
+  };
+
+  const removeVisitorImage = (index) => {
+    setVisitorImage((previous) =>
+      previous.filter((_, imageIndex) => imageIndex !== index)
+    );
+  };
 
   const isCompleted = status === "COMPLETED";
-
 
   /*
    * ---------------------------------------------------------
    * UPDATE STATUS
    * ---------------------------------------------------------
    */
-
   const handleStatusChange = async (newStatus) => {
-
     if (newStatus === status) {
       return;
     }
 
     try {
-
       setSavingStatus(true);
 
       const updated = await updateVisitorRecord(
@@ -218,44 +274,24 @@ const images = record.visitor.otherImages
       );
 
       setStatus(newStatus);
-
-      /*
-       * Tell parent about updated record.
-       *
-       * This allows Visitor.jsx to update its local list
-       * without another API request.
-       */
-
       onUpdated?.(updated);
-
     } catch (error) {
-
-      console.error(
-        "Failed to update visitor status:",
-        error
-      );
-
+      console.error("Failed to update visitor status:", error);
       alert(
         error?.response?.data?.message ||
         "Failed to update status."
       );
-
     } finally {
-
       setSavingStatus(false);
-
     }
   };
-
 
   /*
    * ---------------------------------------------------------
    * ADD FEEDBACK
    * ---------------------------------------------------------
    */
-
   const handleAddFeedback = async () => {
-
     const trimmedFeedback = feedback.trim();
 
     if (!trimmedFeedback) {
@@ -263,79 +299,69 @@ const images = record.visitor.otherImages
     }
 
     try {
-
       setAddingFeedback(true);
-
-      const updatedFeedbackTrail = [
-        ...feedbackTrail,
-        trimmedFeedback,
-      ];
 
       const updated = await updateVisitorRecord(
         record._id,
         {
-          feedbackTrail: updatedFeedbackTrail,
+          message: trimmedFeedback
         }
       );
 
       setFeedback("");
-
+      
+      const newTrails = updated?.visitor?.feedbackTrail || updated?.feedbackTrail || [];
+      setFeedbackTrail(newTrails);
+      
       onUpdated?.(updated);
-
     } catch (error) {
-
-      console.error(
-        "Failed to add feedback:",
-        error
-      );
-
+      console.error("Failed to add feedback:", error);
       alert(
         error?.response?.data?.message ||
         "Failed to add feedback."
       );
-
     } finally {
-
       setAddingFeedback(false);
-
     }
   };
 
-
-  /*
-   * ---------------------------------------------------------
-   * HANDLE ENTER
-   * ---------------------------------------------------------
-   */
-
   const handleFeedbackKeyDown = (event) => {
-
     if (
       event.key === "Enter" &&
       !event.shiftKey
     ) {
       event.preventDefault();
-
       handleAddFeedback();
     }
   };
 
+    const handleSubmit = async (event) => {
+      event.preventDefault();
 
+      try {
+      let formData = new FormData();
+
+      visitorImage?.forEach((image)=>{
+            if (image instanceof File) {
+            formData.append("otherImages", image);
+        }
+      })
+      const response = updateVisitorRecord(record._id , formData)
+      toast.success(response.message || "image upload successfully")
+      setVisitorImage([])
+      } catch (error) {
+        toast.error(error)
+      }
+      
+    };
 
   return (
     <div className="space-y-4">
 
-
-      {/* =====================================================
-          STATUS
-      ===================================================== */}
-
+      {/* STATUS */}
       <Section title="Status">
-
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
           <div className="flex items-center gap-3">
-
             <div
               className={`
                 flex h-10 w-10
@@ -348,18 +374,14 @@ const images = record.visitor.otherImages
                 }
               `}
             >
-
               {isCompleted ? (
                 <FiCheckCircle size={19} />
               ) : (
                 <FiClock size={19} />
               )}
-
             </div>
 
-
             <div>
-
               <p
                 className="
                   text-[10px]
@@ -388,16 +410,10 @@ const images = record.visitor.otherImages
                   ? "COMPLETED"
                   : "PENDING"}
               </p>
-
             </div>
-
           </div>
 
-
-          {/* Status buttons */}
-
           <div className="flex gap-2">
-
             <button
               type="button"
               disabled={savingStatus}
@@ -423,7 +439,6 @@ const images = record.visitor.otherImages
               Pending
             </button>
 
-
             <button
               type="button"
               disabled={savingStatus}
@@ -448,22 +463,13 @@ const images = record.visitor.otherImages
             >
               Completed
             </button>
-
           </div>
-
         </div>
-
       </Section>
 
-
-      {/* =====================================================
-          VISITOR INFORMATION
-      ===================================================== */}
-
+      {/* VISITOR INFORMATION */}
       <Section title="Visitor Information">
-
         <div className="grid gap-5 sm:grid-cols-2">
-
           <InfoRow
             icon={FiUser}
             label="Visitor Name"
@@ -472,7 +478,6 @@ const images = record.visitor.otherImages
               record.name
             }
           />
-
 
           <InfoRow
             icon={FiPhone}
@@ -483,13 +488,11 @@ const images = record.visitor.otherImages
             }
           />
 
-
           <InfoRow
             icon={FiMapPin}
             label="Kitchen"
             value={getKitchenName(record)}
           />
-
 
           <InfoRow
             icon={FiCalendar}
@@ -499,7 +502,6 @@ const images = record.visitor.otherImages
             )}
           />
 
-
           <InfoRow
             icon={FiClock}
             label="Created At"
@@ -508,7 +510,6 @@ const images = record.visitor.otherImages
             )}
           />
 
-
           <InfoRow
             icon={FiClock}
             label="Updated At"
@@ -516,22 +517,13 @@ const images = record.visitor.otherImages
               record.updatedAt
             )}
           />
-
         </div>
-
       </Section>
 
-
-      {/* =====================================================
-          REASON
-      ===================================================== */}
-
+      {/* REASON */}
       {record.reason && (
-
         <Section title="Reason">
-
           <div className="flex gap-3">
-
             <div
               className="
                 flex h-9 w-9
@@ -545,7 +537,6 @@ const images = record.visitor.otherImages
               <FiFileText size={15} />
             </div>
 
-
             <p
               className="
                 whitespace-pre-wrap
@@ -556,26 +547,15 @@ const images = record.visitor.otherImages
             >
               {record.reason}
             </p>
-
           </div>
-
         </Section>
-
       )}
 
-
-      {/* =====================================================
-          FEEDBACK TRAIL
-      ===================================================== */}
-
+      {/* FEEDBACK TRAIL */}
       <Section
         title={`Feedback Trail (${feedbackTrail.length})`}
       >
-
-        {/* Existing feedback */}
-
         {feedbackTrail.length === 0 ? (
-
           <div
             className="
               rounded-xl
@@ -586,7 +566,6 @@ const images = record.visitor.otherImages
               text-center
             "
           >
-
             <FiMessageSquare
               size={20}
               className="mx-auto text-slate-300"
@@ -601,99 +580,51 @@ const images = record.visitor.otherImages
             >
               No feedback has been added yet.
             </p>
-
           </div>
-
         ) : (
-
           <div className="space-y-3">
+            {feedbackTrail.map((item, index) => {
+              const date = new Date(item.createdAt);
+              const day = date.getDate();
+              const month = date.toLocaleString('en', { month: 'short' });
+              const year = date.getFullYear();
+              const time = date.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
+              
+              const formattedDate = !isNaN(date.getTime()) ? `${day} ${month}, ${year} at ${time}` : '';
 
-            {feedbackTrail.map(
-              (item, index) => (
-
-                <div
-                  key={index}
-                  className="
-                    flex gap-3
-                  "
-                >
-
-                  {/* Timeline icon */}
-
-                  <div
-                    className="
-                      flex h-8 w-8
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-full
-                      bg-slate-900
-                      text-white
-                    "
-                  >
-                    <FiMessageSquare
-                      size={13}
-                    />
+              return (
+                <div key={item._id || index} className="flex gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white shadow-sm">
+                    <FiMessageSquare size={13} />
                   </div>
 
+                  <div className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 p-3.5 shadow-sm">
+                    <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                          Feedback {index + 1}
+                        </span>
+                        <span className="text-xs font-semibold text-slate-900">
+                          • {item?.sentBy?.name || item?.sentBy?.username || "Unknown User"}
+                        </span>
+                      </div>
+                      
+                      <span className="text-[11px] font-medium text-slate-400">
+                        {formattedDate}
+                      </span>
+                    </div>
 
-                  {/* Feedback */}
-
-                  <div
-                    className="
-                      min-w-0
-                      flex-1
-                      rounded-xl
-                      border
-                      border-slate-200
-                      bg-slate-50
-                      p-3.5
-                    "
-                  >
-
-                    <p
-                      className="
-                        mb-1
-                        text-[10px]
-                        font-bold
-                        uppercase
-                        tracking-wider
-                        text-slate-400
-                      "
-                    >
-                      Feedback {index + 1}
+                    <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                      {item.message}
                     </p>
-
-
-                    <p
-                      className="
-                        whitespace-pre-wrap
-                        text-sm
-                        leading-6
-                        text-slate-700
-                      "
-                    >
-                      {item}
-                    </p>
-
                   </div>
-
                 </div>
-
-              )
-            )}
-
+              );
+            })}
           </div>
-
         )}
 
-
-        {/* =================================================
-            ADD FEEDBACK
-        ================================================= */}
-
         <div className="mt-5 border-t border-slate-100 pt-5">
-
           <p
             className="
               mb-2
@@ -705,9 +636,7 @@ const images = record.visitor.otherImages
             Add Feedback
           </p>
 
-
           <div className="relative">
-
             <textarea
               value={feedback}
               onChange={(event) =>
@@ -742,7 +671,6 @@ const images = record.visitor.otherImages
               "
             />
 
-
             <button
               type="button"
               disabled={
@@ -771,13 +699,9 @@ const images = record.visitor.otherImages
                 disabled:text-slate-400
               "
             >
-
               <FiSend size={14} />
-
             </button>
-
           </div>
-
 
           <p
             className="
@@ -789,62 +713,37 @@ const images = record.visitor.otherImages
             Press Enter to add feedback.
             Use Shift + Enter for a new line.
           </p>
-
         </div>
-
       </Section>
 
-
-      {/* =====================================================
-          NARRATION
-      ===================================================== */}
-
-      {record.visitor.narration && (
-
+      {/* NARRATION */}
+      {record.visitor?.narration && (
         <Section title="Narration">
-
           <InfoRow
             icon={FiUser}
             label="Narration"
             value={record.visitor.narration}
           />
-
         </Section>
-
       )}
 
-      {/* =====================================================
-          CREATED BY
-      ===================================================== */}
-
+      {/* CREATED BY */}
       {record.userId && (
-
         <Section title="Created By">
-
           <InfoRow
             icon={FiUser}
             label="User"
             value={getUserName(record)}
           />
-
         </Section>
-
       )}
 
-
-      {/* =====================================================
-          OTHER IMAGES
-      ===================================================== */}
-
-
-            {images.length > 0 && (
+      {/* OTHER IMAGES */}
+      {images.length > 0 && (
         <Section title="Images">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {images.map((image, index) => {
-              const imageUrl = `${base_url}/uploads/maintenance/${image}` || `https://esfserver.axeiro.com/api/v1/uploads/maintenance/${image}`
-              if (!imageUrl) {
-                return null;
-              }
+              const imageUrl = `${base_url}/uploads/maintenance/${image}`;
 
               return (
                 <a
@@ -879,9 +778,59 @@ const images = record.visitor.otherImages
         </Section>
       )}
 
+      {/* IMAGE SECTION & CAMERA CAPTURE */}
+      <ImageSection
+        title="Other Photos / अन्य फोटो"
+        subtitle="Maximum 5 photos / अधिकतम 5 फोटो"
+        images={visitorImage}
+        maxImages={5}
+        onCamera={() => openCamera("visitor-image")}
+        onFiles={handleVisitorFiles}
+        onRemove={removeVisitorImage}
+      />
+
+      <AnimatePresence>
+        {showCamera && (
+          <CameraCapture
+            documentType={cameraDocument}
+            onCapture={handleCameraCapture}
+            onClose={() => setShowCamera(false)}
+          />
+        )}
+      </AnimatePresence>
+
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={saving}
+                      className="flex items-center justify-center gap-2 rounded-xl bg-(--theme-primary) px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                    >
+                      {saving ? (
+                        <>
+                          <motion.span
+                            animate={{
+                              rotate: 360,
+                            }}
+                            transition={{
+                              duration: 0.8,
+                              repeat: Infinity,
+                              ease: "linear",
+                            }}
+                          >
+                            <FiRefreshCw size={17} />
+                          </motion.span>
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <FiSave size={17} />
+                          Save
+                        </>
+                      )}
+                    </button>
+
     </div>
   );
 };
-
 
 export default VisitorDetails;

@@ -1,11 +1,11 @@
 import { storage } from "../../../utils/storage";
-
+import { IoIosNotificationsOutline } from "react-icons/io";
 const Navbar = () => {
   const user = storage.getUser();
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200 shadow-sm">
-      <div className="flex h-16 items-center justify-between px-5">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200 shadow-sm flex">
+      <div className="flex h-16 items-center justify-between px-5 flex-1">
         {/* Left */}
         <div className="flex items-center gap-4">
           <img
@@ -43,6 +43,11 @@ const Navbar = () => {
           </div> */}
         </div>
       </div>
+          {/* Notification */}
+
+          <div className="flex justify-center items-center pr-3 text-2xl cursor-pointer">
+          <IoIosNotificationsOutline />
+        </div>
     </header>
   );
 };

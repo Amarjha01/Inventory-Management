@@ -15,14 +15,14 @@ export const getAllVisitorForAdmin = async () => {
   
   return data.data;
 };
+
 export const getAllServiceForAdmin = async () => {
   const { data } = await api.get(
     `${ENDPOINTS.MAINTENANCE}/admin/service`,
   );
-  console.log(data);
-  
   return data.data;
 };
+
 export const getAllPurchaseForAdmin = async () => {
   const { data } = await api.get(
     `${ENDPOINTS.MAINTENANCE}/admin/purchase`,
@@ -47,6 +47,27 @@ export const createServiceRecord = async (formData) => {
   return data.data;
 };
 
+
+export const getAllServiceForKitchen = async () => {
+  const { data } = await api.get(
+    `${ENDPOINTS.MAINTENANCE}/kitchen/service`,
+  );
+  return data.data;
+};
+
+export const getAllvisitorForKitchen = async () => {
+  const { data } = await api.get(
+    `${ENDPOINTS.MAINTENANCE}/kitchen/visitor`,
+  );
+  return data.data;
+};
+
+export const getAllPurchaseForKitchen = async () => {
+  const { data } = await api.get(
+    `${ENDPOINTS.MAINTENANCE}/kitchen/purchase`,
+  );
+  return data.data;
+};
 
 /**
  * Get all service records
@@ -154,11 +175,14 @@ export const updateVisitorRecord = async (id, payload) => {
   const { data } = await api.patch(
     `${ENDPOINTS.MAINTENANCE}/visitor/${id}`,
     payload,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
   );
-
   return data.data;
 };
-
 
 /**
  * Delete visitor record

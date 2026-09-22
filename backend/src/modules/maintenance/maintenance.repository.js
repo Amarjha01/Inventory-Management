@@ -13,21 +13,35 @@ class MaintenanceRepository {
         path: "kitchenId",
         select: "_id name",
       })
+      ?.populate({
+        path: "visitor.feedbackTrail.sentBy",
+        select: "name",
+      })
       .sort({ createdAt: -1 });
   }
 
   
   /*
   |--------------------------------------------------------------------------
-  | Find maintenance document
+  | Find maintenance document by user ID
   |--------------------------------------------------------------------------
   */
 
-  async findByUserId(userId) {
-    console.log(userId , "at repo");
-    
-    const data = await Maintenance.find( {userId} );
-    console.log(data , "at repo");
+  async findByUserId(userId , filter) {
+    const data = await Maintenance.find({userId , ...filter})
+      .populate({
+        path: "userId",
+        select: "_id name",
+      })
+      .populate({
+        path: "kitchenId",
+        select: "_id name",
+      })
+      ?.populate({
+        path: "visitor.feedbackTrail.sentBy",
+        select: "name",
+      })
+      .sort({ createdAt: -1 });
     return data;
     
   }
@@ -127,35 +141,60 @@ class MaintenanceRepository {
   |--------------------------------------------------------------------------
   */
 
-async updateVisitor(userId,  {visitorId} , visitorData) {
-  console.log("visitorId:", visitorId);
-  console.log("visitorData:", visitorData);
-
+async updateVisitor(userId, { visitorId }, visitorData , images) {
   const updateFields = {};
 
   if (visitorData.status !== undefined) {
     updateFields["visitor.status"] = visitorData.status;
   }
 
-  if (visitorData.feedbackTrail !== undefined) {
-    updateFields["visitor.feedbackTrail"] =
-      visitorData.feedbackTrail;
+  const updateQuery = {};
+
+  if (Object.keys(updateFields).length) {
+    updateQuery.$set = updateFields;
   }
 
-  const updated = await Maintenance.findByIdAndUpdate(visitorId,
-    {
-      $set: updateFields,
-    },
+
+if (images && images.length > 0) {
+  updateQuery.$push = {
+    "visitor.otherImages": {
+      $each: images
+    }
+  };
+}
+
+  if (visitorData.message !== undefined) {
+    console.log("visitorData.message" , visitorData.message);
+    
+    updateQuery.$push = {
+      "visitor.feedbackTrail": {
+        sentBy: userId,
+        message: visitorData.message,
+        createdAt: new Date(),
+      },
+    };
+  }
+
+  console.log("updateQuery" , updateQuery);
+  
+  const updated = await Maintenance.findByIdAndUpdate(
+    visitorId,
+    updateQuery,
     {
       new: true,
       runValidators: true,
     }
-  );
-
-  console.log("updated:", updated);
+  )
+  .populate({
+    path: "visitor.feedbackTrail.sentBy", 
+    select: "name"
+  })
 
   return updated;
 }
+
+
+
 
   /*
   |--------------------------------------------------------------------------

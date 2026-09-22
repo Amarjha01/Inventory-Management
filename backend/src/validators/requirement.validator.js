@@ -29,7 +29,7 @@ console.log(currentMinutes); // Will correctly print ~1105 at 6:25 PM
 };
 
 export const createRequirementValidator = [
-  requirementSubmissionTimeValidator(),
+  // requirementSubmissionTimeValidator(),
 
   body("kitchen")
     .notEmpty()
