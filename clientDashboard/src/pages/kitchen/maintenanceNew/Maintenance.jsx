@@ -8,6 +8,7 @@ import {
 import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
 import { themes } from "../../../components/shared/ui/Theme";
 import PageHeader from "../../../components/shared/ui/PageHeader";
+import DashboardLayout from "../../../layouts/DashboardLayout";
 
 const tabs = [
   {
@@ -32,6 +33,7 @@ const tabs = [
 
 const Maintenance = () => {
   return (
+    <DashboardLayout>
     <div className="flex h-full min-h-0 flex-col bg-slate-50">
 
       {/* =====================================================
@@ -145,6 +147,7 @@ const Maintenance = () => {
       </main>
         </ThemeProvider>
     </div>
+    </DashboardLayout>
   );
 };
 
