@@ -38,6 +38,11 @@ const serviceSchema = new Schema(
       default: "",
     },
 
+      updatedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+
     // Maximum 2 images
     images: {
       type: [String],
@@ -114,6 +119,11 @@ const visitorSchema = new Schema(
       default: "",
     },
 
+      updatedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+
     otherImages: {
       type: [String],
       default: [],
@@ -170,6 +180,11 @@ const purchaseRecordSchema = new Schema(
       type: String,
       required: true,
       trim: true,
+    },
+
+      updatedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
 
     // Other supporting images

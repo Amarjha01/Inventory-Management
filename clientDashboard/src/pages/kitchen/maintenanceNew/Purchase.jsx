@@ -946,7 +946,7 @@ const Purchase = () => {
               onClick={() => setShowForm(true)}
               className="hidden md:block px-3 py-1 bg-black cursor-pointer text-white "
             >
-              Create New Service +
+              Create New Purchase +
             </button>
           </div>
 
@@ -1249,7 +1249,7 @@ const Purchase = () => {
           onClick={() => setShowForm(true)}
           className=" w-full md:hidden px-3 py-1 mb-3 bg-black cursor-pointer text-white "
         >
-          Create New Service +
+          Create New Purchase +
         </button>
         {/* =================================================
             RESULT HEADER

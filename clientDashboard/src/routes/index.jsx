@@ -27,7 +27,7 @@ import Uploads from "../pages/kitchen/Uploads/Uploads.jsx";
 import MaintenanceStore from "../pages/MainStore/maintenance/Maintenance.jsx";
 import MaintenanceKitchen from "../pages/kitchen/maintenanceNew/Maintenance.jsx";
 
-
+import NewAdminRequirement from "../pages/MainStore/NewRequirements/Requirements.jsx"
 
 import TripLayout from "../layouts/TripLayout";
 
@@ -45,6 +45,9 @@ import KitchenVisitor from "../pages/kitchen/maintenanceNew/Visitor.jsx";
 import KitchenPurchase from "../pages/kitchen/maintenanceNew/Purchase.jsx";
 
 import Notification from "../pages/notifications/Notification.jsx";
+import Submitted from "../pages/MainStore/NewRequirements/Submitted.jsx";
+import Received from "../pages/MainStore/NewRequirements/Received.jsx";
+import OutForDelivery from "../pages/MainStore/NewRequirements/OutForDelivery.jsx";
 
 
 const AppRoutes = () => {
@@ -168,10 +171,10 @@ element={<Notification />}
         element={<Navigate to="requirements" replace />}
     />
 
-    <Route
+    {/* <Route
         path="requirements"
         element={<Requirements />}
-    />
+    /> */}
 
     <Route
         path="requirements/:id"
@@ -216,7 +219,13 @@ element={<Notification />}
     path="pending"
     element={<Pending />}
     />
-
+    
+   <Route path="requirements" element={<NewAdminRequirement />}>
+    <Route index element={<Navigate to="submitted" replace />} />
+    <Route path="submitted" element={<Submitted />}/>
+     <Route path="Out For Delivery" element={<OutForDelivery />}/>
+    <Route path="received" element={<Received />}/>
+    </Route>
 
   <Route path="maintenance" element={<MaintenanceStore />}>
   <Route index element={<Navigate to="service" replace />} />

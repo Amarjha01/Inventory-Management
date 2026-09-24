@@ -12,8 +12,13 @@ const partName = [
   {
     name: "Boiler Disk Cleaning",
     hindiName: "बॉयलर डिस्क क्लीनिंग",
-    maintenanceTiming: "1 year",
+    maintenanceTiming: "6 months",
   },
+  {
+  name: "RO",
+  hindiName: "आरओ",
+  maintenanceTiming: "6 months",
+},
   {
     name: "Boiler",
     hindiName: "बॉयलर",

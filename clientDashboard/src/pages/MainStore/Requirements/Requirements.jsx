@@ -20,6 +20,7 @@ const Requirements = () => {
   const [loading, setLoading] = useState(true);
   const [requirements, setRequirements] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
+
   const [search, setSearch] = useState(() => {
     try {
       const saved = sessionStorage.getItem(REQUIREMENTS_STATE_KEY);
@@ -67,7 +68,7 @@ const Requirements = () => {
 
     return "All";
   });
-
+  
   useEffect(() => {
     if (loading) return;
 

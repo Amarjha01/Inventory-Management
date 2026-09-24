@@ -12,10 +12,14 @@ export const createRequirement = async (payload) => {
   return data.data;
 };
 
-export const getAllKitchenRequirements = async () => {
+export const getAllKitchenRequirements = async (type) => {
+  
   const { data } = await api.get(
     `${ENDPOINTS.REQUIREMENTS}/allKitchenRequirements`,
-  );
+    {
+      params: {type},
+    },
+  )
 
   return data.data;
 };

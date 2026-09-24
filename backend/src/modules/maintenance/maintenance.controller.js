@@ -252,23 +252,40 @@ const createService = async (
 };
 
 
-const updateService = async (
-  req,
-  res,
-  next
-) => {
+const updateService = async (req, res, next) => {
   try {
-    const {
-      userId,
-      serviceId,
-    } = req.params;
+    const { serviceId } = req.params;
+    const userId = req.user._id;
 
-    const data =
-      await maintenanceService.updateService(
-        userId,
-        serviceId,
-        req.body
-      );
+    // 1. Safely normalize existingImages (can be undefined, string, or array)
+    let existingImages = req.body.existingImages || [];
+    if (typeof existingImages === "string") {
+      existingImages = [existingImages];
+    }
+
+    // 2. Extract filenames from newly uploaded files (handles both req.files array and object)
+    const uploadedFiles = req.files 
+      ? (Array.isArray(req.files) ? req.files : req.files.images || []) 
+      : [];
+    const newImageFilenames = uploadedFiles.map((file) => file.filename);
+
+    // 3. Combine both into the final images array
+    const finalImages = [...existingImages, ...newImageFilenames];
+
+    // 4. Construct updatedData for your schema
+    const updatedData = {
+      ...req.body,
+      images: finalImages, // maps directly to your service.images array schema
+    };
+
+    // Remove helper fields that don't belong directly in the Mongoose schema
+    delete updatedData.existingImages;
+
+    const data = await maintenanceService.updateService(
+      serviceId,
+      updatedData,
+      userId
+    );
 
     return sendSuccess(
       res,
@@ -288,13 +305,11 @@ const deleteService = async (
 ) => {
   try {
     const {
-      userId,
       serviceId,
     } = req.params;
 
     const data =
       await maintenanceService.deleteService(
-        userId,
         serviceId
       );
 
@@ -334,7 +349,8 @@ const createVisitor = async (
           kitchenId,
           visitor: body,
         };
-
+        console.log("visitor create data " , data);
+        
     const savedData =
       await maintenanceService.addVisitor(data);
 
@@ -390,13 +406,11 @@ const deleteVisitor = async (
 ) => {
   try {
     const {
-      userId,
       visitorId,
     } = req.params;
 
     const data =
       await maintenanceService.deleteVisitor(
-        userId,
         visitorId
       );
 
@@ -453,23 +467,16 @@ const createPurchaseRecord = async (req, res, next) => {
 
 
 
-const updatePurchaseRecord = async (
-  req,
-  res,
-  next
-) => {
+const updatePurchaseRecord = async (req, res, next) => {
   try {
-    const {
+    const { userId, purchaseId } = req.params;
+
+    const data = await maintenanceService.updatePurchaseRecord(
       userId,
       purchaseId,
-    } = req.params;
-
-    const data =
-      await maintenanceService.updatePurchaseRecord(
-        userId,
-        purchaseId,
-        req.body
-      );
+      req.body,
+      req.files 
+    );
 
     return sendSuccess(
       res,
@@ -489,13 +496,11 @@ const deletePurchaseRecord = async (
 ) => {
   try {
     const {
-      userId,
       purchaseId,
     } = req.params;
 
     const data =
       await maintenanceService.deletePurchaseRecord(
-        userId,
         purchaseId
       );
 

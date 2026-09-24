@@ -119,7 +119,7 @@ router.post(
 );
 
 
-router.put(
+router.patch(
   "/service/:serviceId",
   uploadMaintenance.fields([
     {
@@ -195,7 +195,7 @@ router.post(
 );
 
 
-router.put(
+router.patch(
   "/purchase-record/:purchaseId",
   uploadMaintenance.fields([
     {

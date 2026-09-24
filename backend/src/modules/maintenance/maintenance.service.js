@@ -51,16 +51,15 @@ class MaintenanceService {
   |--------------------------------------------------------------------------
   */
 
-  async updateService(
-    userId,
+  async updateService(serviceId, serviceData, userId) {
+    const updated =  await maintenanceRepository.updateService(
     serviceId,
-    serviceData
-  ) {
-    return await maintenanceRepository.updateService(
-      userId,
-      serviceId,
-      serviceData
-    );
+    serviceData,
+    userId
+  );
+  console.log("updated " , updated);
+  
+  return updated;
   }
 
   /*
@@ -69,9 +68,10 @@ class MaintenanceService {
   |--------------------------------------------------------------------------
   */
 
-  async deleteService(userId, serviceId) {
+  async deleteService(serviceId) {
+    console.log(serviceId);
+    
     return await maintenanceRepository.deleteService(
-      userId,
       serviceId
     );
   }
@@ -114,9 +114,8 @@ class MaintenanceService {
   |--------------------------------------------------------------------------
   */
 
-  async deleteVisitor(userId, visitorId) {
+  async deleteVisitor( visitorId) {
     return await maintenanceRepository.deleteVisitor(
-      userId,
       visitorId
     );
   }
@@ -137,17 +136,14 @@ class MaintenanceService {
   |--------------------------------------------------------------------------
   */
 
-  async updatePurchaseRecord(
+ async updatePurchaseRecord(userId, purchaseId, purchaseData, files) {
+  return await maintenanceRepository.updatePurchaseRecord(
     userId,
     purchaseId,
-    purchaseData
-  ) {
-    return await maintenanceRepository.updatePurchaseRecord(
-      userId,
-      purchaseId,
-      purchaseData
-    );
-  }
+    purchaseData,
+    files
+  );
+}
 
   /*
   |--------------------------------------------------------------------------
@@ -156,11 +152,9 @@ class MaintenanceService {
   */
 
   async deletePurchaseRecord(
-    userId,
     purchaseId
   ) {
     return await maintenanceRepository.deletePurchaseRecord(
-      userId,
       purchaseId
     );
   }

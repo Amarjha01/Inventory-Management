@@ -4,8 +4,11 @@ import { FiX } from "react-icons/fi";
 import ServiceDetails from "./ServiceDetails";
 import VisitorDetails from "./VisitorDetails";
 import PurchaseDetails from "./PurchaseDetails";
+import { useState } from "react";
 
 const MaintenanceDetailModal = ({ record, type, onClose }) => {
+
+  const [updatedData , setUpdatedData] = useState()
   /* -------------------------------------------------------
      ESCAPE KEY
   ------------------------------------------------------- */
@@ -66,18 +69,25 @@ const MaintenanceDetailModal = ({ record, type, onClose }) => {
   };
 
   const currentTitle = titles[type] || titles.service;
-
+ console.log("updatedData state changed:", updatedData);
   /* -------------------------------------------------------
      DETAIL COMPONENT
   ------------------------------------------------------- */
-
+  const updatedRecord = (newRecord)=>{
+    setUpdatedData(newRecord);
+  }
+  useEffect(() => {
+    if (updatedData) {
+      console.log("updatedData state changed:", updatedData);
+    }
+  }, [updatedData]);
   const renderDetails = () => {
     switch (type) {
       case "service":
-        return <ServiceDetails record={record} />;
+        return <ServiceDetails record={record} onUpdateSuccess={updatedRecord} />;
 
       case "visitor":
-        return <VisitorDetails record={record} />;
+        return <VisitorDetails record={record} onClose={onClose}/>;
 
       case "purchase":
         return <PurchaseDetails record={record} />;
