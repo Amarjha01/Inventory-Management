@@ -34,13 +34,14 @@ export const getRequirements = asyncHandler(async (req, res) => {
 });
 
 export const getAllKitchenRequirements = asyncHandler(async (req, res) => {
-  console.log(req.user);
-  
-  const filter =
-    req.user.role === 'district coordinator' || req.user.role === 'Chief Coordinator'
-      ? { district: req.user.district }
-      : {};
+  const {type} = req.query
 
+  const filter = {
+    district : req.user.role === 'district coordinator' || req.user.role === 'Chief Coordinator'
+      ?  req.user.district 
+      : {},
+      type:type
+  }
   const requirements = await requirementService.allKitchenRequirements(filter);
 
   return ApiResponse.success(

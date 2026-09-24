@@ -875,7 +875,7 @@ const Visitor = () => {
               <span className="hidden sm:inline">Refresh</span>
             </button>
               <button onClick={()=>setShowForm(true)} className="hidden md:block px-3 py-1 bg-black cursor-pointer text-white ">
-              Create New Service +
+              Create New Visitor +
             </button>
           </div>
 
@@ -1176,7 +1176,7 @@ const Visitor = () => {
         </div>
 
         <button onClick={()=>setShowForm(true)} className=" w-full md:hidden px-3 py-1 mb-3 bg-black cursor-pointer text-white ">
-          Create New Service +
+          Create New Visitor +
         </button>
         {/* =================================================
             RESULT HEADER

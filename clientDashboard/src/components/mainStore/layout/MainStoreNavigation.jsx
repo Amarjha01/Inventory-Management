@@ -35,7 +35,7 @@ const MainStoreNavbar = () => {
     {
       title: "Requirements",
       icon: MdAssignment,
-      path: "/store/requirements",
+      path: "/store/requirements/Submitted",
     },
     {
       title: "Pending",
@@ -127,7 +127,7 @@ const MainStoreNavbar = () => {
   */
 
   const restrictedPaths = [
-    "/store/requirements",
+    "/store/requirements/Submitted",
     "/store/pending",
     "/store/inventory",
     "/store/reports",

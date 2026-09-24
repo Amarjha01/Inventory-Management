@@ -11,12 +11,25 @@ async create(payload) {
   return requirement;
 }
 
- async findMany(filter = {}) {
-  let requirementFilter = filter;
+async findMany(filter = {}) {
+  console.log("filter" , filter);
+  const { district, type } = filter;
+  const {kitchen} = filter
+  // 1. Initialize requirementFilter as an object
+  let requirementFilter = {};
+  if (type) {
+    requirementFilter.status = type;
+  }
+  if(kitchen){
+    requirementFilter.kitchen = kitchen
+  }
+  
+  // 2. Check if district is valid and not an empty object
+  const hasValidDistrict = district && (typeof district === 'string' || Object.keys(district).length > 0);
 
-  if (filter.district) {
+  if (hasValidDistrict) {
     const kitchens = await Kitchen.find({
-      district: filter.district,
+      district: district,
     }).select("_id").lean();
 
     requirementFilter.kitchen = {
@@ -24,6 +37,7 @@ async create(payload) {
     };
   }
 
+  // 3. Query Requirement with a proper object filter
   return await Requirement.find(requirementFilter)
     .populate("kitchen")
     .populate("createdBy", "-password")

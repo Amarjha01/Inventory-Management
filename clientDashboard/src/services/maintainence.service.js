@@ -98,9 +98,9 @@ export const getServiceRecordById = async (id) => {
  *
  * Can also contain new images.
  */
-export const updateServiceRecord = async (id, formData) => {
+export const updateServiceRecord = async (serviceId, formData) => {
   const { data } = await api.patch(
-    `${ENDPOINTS.MAINTENANCE}/service/${id}`,
+    `${ENDPOINTS.MAINTENANCE}/service/${serviceId}`,
     formData,
     {
       headers: {
@@ -116,9 +116,9 @@ export const updateServiceRecord = async (id, formData) => {
 /**
  * Delete service record
  */
-export const deleteServiceRecord = async (id) => {
+export const deleteServiceRecord = async (serviceId) => {
   const { data } = await api.delete(
-    `${ENDPOINTS.MAINTENANCE}/service/${id}`,
+    `${ENDPOINTS.MAINTENANCE}/service/${serviceId}`,
   );
 
   return data.data;
