@@ -221,7 +221,7 @@ element={<Notification />}
     />
     
    <Route path="requirements" element={<NewAdminRequirement />}>
-    <Route index element={<Navigate to="submitted" replace />} />
+    <Route index element={<Navigate to="Submitted" replace />} />
     <Route path="submitted" element={<Submitted />}/>
      <Route path="Out For Delivery" element={<OutForDelivery />}/>
     <Route path="received" element={<Received />}/>
