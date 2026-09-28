@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   FiCalendar,
   FiFileText,
@@ -7,10 +7,14 @@ import {
   FiUsers,
   FiX,
   FiSave,
+  FiLoader,
 } from "react-icons/fi";
 
-import { Input, Textarea, ImageSection } from "../../../components/shared/MaintenanceCommon.jsx";
-
+import {
+  Input,
+  Textarea,
+  ImageSection,
+} from "../../../components/shared/MaintenanceCommon.jsx";
 
 const VisitorSection = ({
   form,
@@ -20,54 +24,39 @@ const VisitorSection = ({
   onRemoveImage,
   onCancel,
   onSubmit,
-  saving = false,
 }) => {
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (saving) return;
+
+    setSaving(true);
+
+    try {
+      await onSubmit(event);
+    } catch (error) {
+      console.error("Visitor submission failed:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (saving) return;
+
+    setSaving(false);
+    onCancel();
+  };
+
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 px-4 py-6 backdrop-blur-sm">
-      <div
-        className="
-          relative
-          flex
-          max-h-[90vh]
-          w-full
-          max-w-2xl
-          flex-col
-          overflow-hidden
-          rounded-3xl
-          border
-          border-gray-200
-          bg-white
-          shadow-2xl
-        "
-      >
+      <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-2xl">
         {/* Header */}
-        <div
-          className="
-            flex
-            shrink-0
-            items-center
-            justify-between
-            border-b
-            border-gray-200
-            bg-white
-            px-5
-            py-4
-          "
-        >
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 bg-white px-5 py-4">
           <div className="flex items-center gap-3">
-            <div
-              className="
-                flex
-                h-10
-                w-10
-                shrink-0
-                items-center
-                justify-center
-                rounded-full
-                bg-black
-                text-white
-              "
-            >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-black text-white">
               <FiUsers size={19} />
             </div>
 
@@ -85,36 +74,19 @@ const VisitorSection = ({
           {/* X Button */}
           <button
             type="button"
-            onClick={onCancel}
+            onClick={handleCancel}
             disabled={saving}
             aria-label="Close"
-            className="
-              flex
-              h-9
-              w-9
-              items-center
-              justify-center
-              rounded-full
-              text-gray-500
-              transition
-              hover:bg-gray-100
-              hover:text-gray-900
-              active:scale-95
-              disabled:cursor-not-allowed
-              disabled:opacity-50
-            "
+            className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <FiX size={21} />
           </button>
         </div>
 
         {/* Form */}
-        <form
-          onSubmit={onSubmit}
-          className="flex min-h-0 flex-1 flex-col"
-        >
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto px-5 py-5">
+          <div className={`flex-1 overflow-y-auto px-5 py-5 ${saving ? "pointer-events-none opacity-70" : ""}`}>
             <div className="space-y-5">
               <Input
                 label="Problem Date / प्रॉब्लम डेट"
@@ -174,40 +146,13 @@ const VisitorSection = ({
           </div>
 
           {/* Footer */}
-          <div
-            className="
-              flex
-              shrink-0
-              items-center
-              justify-end
-              gap-3
-              border-t
-              border-gray-200
-              bg-white
-              px-5
-              py-4
-            "
-          >
+          <div className="flex shrink-0 items-center justify-end gap-3 border-t border-gray-200 bg-white px-5 py-4">
             {/* Cancel */}
             <button
               type="button"
-              onClick={onCancel}
+              onClick={handleCancel}
               disabled={saving}
-              className="
-                rounded-xl
-                border
-                border-gray-300
-                px-5
-                py-2.5
-                text-sm
-                font-medium
-                text-gray-700
-                transition
-                hover:bg-gray-100
-                active:scale-95
-                disabled:cursor-not-allowed
-                disabled:opacity-50
-              "
+              className="rounded-xl border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
@@ -216,29 +161,19 @@ const VisitorSection = ({
             <button
               type="submit"
               disabled={saving}
-              className="
-                flex
-                items-center
-                justify-center
-                gap-2
-                rounded-xl
-                bg-gray-950
-                px-5
-                py-2.5
-                text-sm
-                font-semibold
-                text-white
-                shadow-sm
-                transition
-                hover:bg-black
-                active:scale-95
-                disabled:cursor-not-allowed
-                disabled:opacity-60
-                cursor-pointer
-              "
+              className="flex min-w-[105px] items-center justify-center gap-2 rounded-xl bg-gray-950 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-black active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <FiSave size={17} />
-              {saving ? "Saving..." : "Save"}
+              {saving ? (
+                <>
+                  <FiLoader size={17} className="animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <FiSave size={17} />
+                  Save
+                </>
+              )}
             </button>
           </div>
         </form>

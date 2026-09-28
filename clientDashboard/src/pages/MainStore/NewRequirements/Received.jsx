@@ -97,38 +97,59 @@ const Received = () => {
     load();
   }, []);
 
-  // Filtered requirements calculation (Search + Date Filter)
-  const filteredRequirements = useMemo(() => {
-    return (requirements || []).filter((req) => {
-      // 1. Search matching (Requirement Number, District, Kitchen Name)
-      const matchesSearch =
-        !search ||
-        req.requirementNumber?.toLowerCase().includes(search.toLowerCase()) ||
-        req.kitchen?.name?.toLowerCase().includes(search.toLowerCase()) ||
-        req.kitchen?.district?.toLowerCase().includes(search.toLowerCase());
+const filteredRequirements = useMemo(() => {
+  const normalizedSearch = search.trim().toLowerCase();
 
-      if (!matchesSearch) return false;
+  return (requirements || []).filter((req) => {
+    // Requirement-level search
+    const matchesRequirement =
+      !normalizedSearch ||
+      req.requirementNumber?.toLowerCase().includes(normalizedSearch) ||
+      req.kitchen?.name?.toLowerCase().includes(normalizedSearch) ||
+      req.kitchen?.district?.toLowerCase().includes(normalizedSearch);
 
-      // 2. Date filtering
-      if (dateFilter === "All") return true;
-
-      const reqDate = new Date(
-        req.receivedAt || req?.dispatch?.dispatchedAt || req?.createdAt
+    // Item-level search
+    const matchesItem =
+      !normalizedSearch ||
+      req.items?.some((item) =>
+        item?.inventoryId?.name
+          ?.toLowerCase()
+          .includes(normalizedSearch)
       );
-      const today = new Date();
-      const isToday = reqDate.toDateString() === today.toDateString();
 
-      const yesterday = new Date();
-      yesterday.setDate(today.getDate() - 1);
-      const isYesterday = reqDate.toDateString() === yesterday.toDateString();
+    // Search matches either requirement fields OR item name
+    const matchesSearch = matchesRequirement || matchesItem;
 
-      if (dateFilter === "Today") return isToday;
-      if (dateFilter === "Yesterday") return isYesterday;
-      if (dateFilter === "Older") return !isToday && !isYesterday;
+    if (!matchesSearch) return false;
 
-      return true;
-    });
-  }, [requirements, search, dateFilter]);
+    // Date filtering
+    if (dateFilter === "All") return true;
+
+    const reqDate = new Date(
+      req.receivedAt ||
+        req?.dispatch?.dispatchedAt ||
+        req?.createdAt
+    );
+
+    const today = new Date();
+
+    const isToday =
+      reqDate.toDateString() === today.toDateString();
+
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    const isYesterday =
+      reqDate.toDateString() === yesterday.toDateString();
+
+    if (dateFilter === "Today") return isToday;
+    if (dateFilter === "Yesterday") return isYesterday;
+    if (dateFilter === "Older") return !isToday && !isYesterday;
+
+    return true;
+  });
+}, [requirements, search, dateFilter]);
+
 
   return (
     <div>
@@ -346,14 +367,14 @@ const Received = () => {
                         {requirement.requirementNumber}
                       </h2>
 
-                      <span className="mt-1 text-sm text-gray-600 flex gap-1">
-                        <p className="mt-2 text-xs text-gray-500">
+                      <span className="mt-1 text-[10px] text-gray-600 flex gap-1">
+                        <p className="mt-2  text-gray-500">
                           {requirement.kitchen?.district}
                         </p>
-                        <p className="mt-2 text-xs text-gray-500">
+                        <p className="mt-2  text-gray-500">
                           | {requirement.kitchen?.name}
                         </p>
-                        <p className="mt-2 text-xs text-gray-500">
+                        <p className="mt-2  text-gray-500">
                           | {requirement.createdBy?.name}
                         </p>
                       </span>
@@ -372,9 +393,9 @@ const Received = () => {
                     </div>
 
                     <div className="text-right shrink-0">
-                      <span className="inline-block rounded-full px-3 py-1 text-xs font-semibold bg-yellow-100 text-yellow-700">
-                        {requirement.status}
-                      </span>
+                        <span className="inline-block rounded-full px-3 py-1 text-xs font-semibold bg-blue-50 text-blue-400 border border-blue-300 shadow-xs shadow-blue-400">
+                          {requirement.status}
+                        </span>
                       <p className="mt-2 text-xs text-gray-900">
                         {requirement.items?.length || 0} Items
                       </p>

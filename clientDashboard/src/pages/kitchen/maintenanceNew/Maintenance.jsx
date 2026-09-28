@@ -19,8 +19,8 @@ const tabs = [
   },
   {
     path: "visitor",
-    label: "Visitor",
-    hindiLabel: "विजिटर",
+    label: "Visitor/Repair",
+    hindiLabel: "विजिटर/रिपेयर",
     icon: FiUsers,
   },
   {

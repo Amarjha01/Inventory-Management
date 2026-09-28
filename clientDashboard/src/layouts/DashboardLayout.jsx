@@ -58,7 +58,7 @@ const DashboardLayout = ({ children }) => {
       <div className="min-w-0 flex-1 pr-5 sm:pr-8">
         <h3
           className="
-            text-[12px]
+            text-[16px]
             font-bold
             leading-4
             text-[#c92f20]
@@ -70,8 +70,8 @@ const DashboardLayout = ({ children }) => {
         <p
           className="
             mt-0.5
-            text-[9px]
-            leading-3.5
+            text-[16px]
+            leading-5
             text-gray-800
 
             sm:mt-1

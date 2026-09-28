@@ -64,9 +64,29 @@ const partName = [
     hindiName: "कैमरा",
     maintenanceTiming: null,
   },
+ {
+    name: "Co2",
+    hindiName: "सीओ2",
+    maintenanceTiming: null,
+  },
+  {
+    name: "Wifi",
+    hindiName: "वाई-फाई",
+    maintenanceTiming: null,
+  },
   {
     name: "Starter",
     hindiName: "स्टार्टर",
+    maintenanceTiming: null,
+  },
+  {
+    name: "Carboratr",
+    hindiName: "कार्बोरेटर",
+    maintenanceTiming: null,
+  },
+  {
+    name: "Boiler Mobery Status",
+    hindiName: "बॉयलर मशीनरी स्थिति",
     maintenanceTiming: null,
   },
 ];

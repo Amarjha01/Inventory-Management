@@ -14,6 +14,8 @@ import {
 import ServiceCard from "../../../components/mainStore/maintenance/ServiceCard.jsx";
 import MaintenanceDetailModal from "../../../components/mainStore/maintenance/MaintenanceDetailModal.jsx";
 import { getAllServiceForAdmin } from "../../../services/maintainence.service.js";
+import { SlGraph } from "react-icons/sl";
+import Reports from "./Reports.jsx";
 
 /* =========================================================
    HELPERS
@@ -106,6 +108,7 @@ const formatDate = (value) => {
    ========================================================= */
 
 const Service = () => {
+    const [showReports , setShowReports] = useState([]);
   /* -------------------------------------------------------
      DATA
   ------------------------------------------------------- */
@@ -142,6 +145,10 @@ const Service = () => {
 
   const [selectedRecord, setSelectedRecord] = useState(null);
 
+
+    const handleShowVisitorReports = () =>{
+    setShowReports(!showReports);
+  }
   /* =======================================================
      FETCH SERVICE RECORDS
   ======================================================= */
@@ -450,6 +457,34 @@ const Service = () => {
               <FiRefreshCw size={15} />
               <span className="hidden sm:inline">Refresh</span>
             </button>
+                        <button
+                          type="button"
+                          onClick={handleShowVisitorReports}
+                          title="Reports"
+                          className="
+                            inline-flex
+                            h-11
+                            items-center
+                            justify-center
+                            gap-2
+                            rounded-xl
+                            border
+                            border-slate-200
+                            bg-white
+                            px-4
+                            text-xs
+                            font-semibold
+                            text-slate-600
+                            transition
+                            hover:border-slate-300
+                            hover:text-slate-900
+                          "
+                        >
+                          <SlGraph size={15} />
+            
+                          <span className="hidden sm:inline">Report</span>
+                        </button>
+
           </div>
 
           {/* =================================================
@@ -569,10 +604,6 @@ const Service = () => {
 
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-bold text-slate-900">
-              Service Records
-            </h2>
-
             <p className="mt-0.5 text-[11px] text-slate-400">
               {filteredRecords.length}{" "}
               {filteredRecords.length === 1 ? "record" : "records"}
@@ -627,7 +658,7 @@ const Service = () => {
              RECORD GRID
           ================================================= */
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             {filteredRecords.map((record) => (
               <ServiceCard
                 key={record._id || record.id}

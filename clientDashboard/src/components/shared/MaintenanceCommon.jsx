@@ -140,74 +140,24 @@ export const Textarea = ({
    CAPTURE ACTIONS
 ============================================================ */
 
-export const CaptureActions = ({
-  onCamera,
-  onFiles,
-  label = "Add Image",
-  accept = "image/*,.pdf",
-  multiple = false,
-}) => {
+export const CaptureActions = ({ onCamera, onFiles, label = "Add Image", accept = "image/*,.pdf", multiple = false }) => {
   return (
     <div className="grid grid-cols-2 gap-2">
-      <button
-        type="button"
-        onClick={onCamera}
-        className="
-          flex
-          items-center
-          justify-center
-          gap-2
-          rounded-xl
-          border
-          border-(--theme-primary)
-          bg-(--theme-primary)/5
-          px-3
-          py-3
-          text-xs
-          font-medium
-          text-(--theme-primary)
-          transition
-          hover:bg-(--theme-primary)/10
-        "
-      >
+      <button type="button" onClick={onCamera} className="flex items-center justify-center gap-2 rounded-xl border border-(--theme-primary) bg-(--theme-primary)/5 px-3 py-3 text-xs font-medium text-(--theme-primary) transition hover:bg-(--theme-primary)/10">
         <FiCamera size={17} />
         Camera
       </button>
 
-      <label
-        className="
-          flex
-          cursor-pointer
-          items-center
-          justify-center
-          gap-2
-          rounded-xl
-          border
-          border-(--theme-border)
-          bg-(--theme-surface)
-          px-3
-          py-3
-          text-xs
-          font-medium
-          text-(--theme-text)
-          transition
-          hover:bg-(--theme-muted)
-        "
-      >
+      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-(--theme-border) bg-(--theme-surface) px-3 py-3 text-xs font-medium text-(--theme-text) transition hover:bg-(--theme-muted)">
         <FiUpload size={16} />
         Upload
 
-        <input
-          type="file"
-          accept={accept}
-          multiple={multiple}
-          className="hidden"
-          onChange={onFiles}
-        />
+        <input type="file" accept={accept} multiple={multiple} className="hidden" onChange={onFiles} />
       </label>
     </div>
   );
 };
+
 
 
 /* ============================================================

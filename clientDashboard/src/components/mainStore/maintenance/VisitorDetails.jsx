@@ -99,7 +99,7 @@ const Section = ({ title, children }) => {
   );
 };
 
-const VisitorDetails = ({ record, onUpdated, onClose , onDeleteSuccess }) => {
+const VisitorDetails = ({ record, onClose, onUpdated , onDeleteSuccess }) => {
   if (!record) return null;
 
   const [isEditing, setIsEditing] = useState(false);
@@ -119,6 +119,7 @@ const VisitorDetails = ({ record, onUpdated, onClose , onDeleteSuccess }) => {
     phoneNumber: record.phoneNumber || record.phone || "",
     problemDate: record.problemDate ? record.problemDate.split("T")[0] : "",
     reason: record.reason || "",
+    narration: record.narration || "",
     images: Array.isArray(record?.visitor?.otherImages)
       ? record.visitor.otherImages
       : Array.isArray(record?.otherImages)
@@ -313,7 +314,7 @@ const VisitorDetails = ({ record, onUpdated, onClose , onDeleteSuccess }) => {
       setDeleting(true);
       await deleteVisitorRecord(record._id);
       toast.success("Record deleted successfully");
-      onClose
+      onClose()
     } catch (error) {
       console.error("Failed to delete:", error);
       toast.error("Failed to delete visitor record.");
@@ -487,6 +488,27 @@ const VisitorDetails = ({ record, onUpdated, onClose , onDeleteSuccess }) => {
               />
             ) : (
               <p className="whitespace-pre-wrap text-sm leading-6 text-slate-600">{record.reason}</p>
+            )}
+          </div>
+        </Section>
+      )}
+      {/*   NARRATION */}
+      {(record?.narration || isEditing) && (
+        <Section title="Narration">
+          <div className="flex gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+              <FiFileText size={15} />
+            </div>
+            {isEditing ? (
+              <textarea
+                name="narration"
+                value={formData.narration}
+                onChange={handleChange}
+                rows={3}
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none focus:border-teal-500"
+              />
+            ) : (
+              <p className="whitespace-pre-wrap text-sm leading-6 text-slate-600">{record.narration}</p>
             )}
           </div>
         </Section>

@@ -15,6 +15,7 @@ import { ImageSection } from "../../../components/shared/MaintenanceCommon.jsx";
 import { updateServiceRecord, deleteServiceRecord } from "../../../services/maintainence.service.js";
 import { AnimatePresence } from "framer-motion";
 import CameraCapture from "../../kitchen/uploads/CameraCapture.jsx";
+import toast from "react-hot-toast";
 
 const base_url = import.meta.env.VITE_SERVER_BASE_URL;
 
@@ -93,7 +94,7 @@ const Section = ({ title, children }) => {
   );
 };
 
-const ServiceDetails = ({ record, onUpdateSuccess, onDeleteSuccess }) => {
+const ServiceDetails = ({ record, onClose, onUpdateSuccess, onDeleteSuccess }) => {
   if (!record) return null;
 
   const [isEditing, setIsEditing] = useState(false);
@@ -218,7 +219,8 @@ const ServiceDetails = ({ record, onUpdateSuccess, onDeleteSuccess }) => {
       setDeleting(true);
       const serviceId = record._id || record.id;
       await deleteServiceRecord(serviceId);
-
+      toast.success("deleted successfully")
+      onClose()
       if (onDeleteSuccess) {
         onDeleteSuccess(serviceId);
       }

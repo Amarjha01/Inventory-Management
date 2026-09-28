@@ -31,7 +31,7 @@ const userIds = users.map(
     (user) => user._id,
 );
   try {
-    await notificationService.notifyRequirementCreated(
+     notificationService.notifyRequirementCreated(
       userIds,
       requirement,
     );
@@ -149,14 +149,13 @@ console.log(payload);
     );
 
     const users = await userRepository.findByKitchenId(updatedRequirement.kitchen._id);
-    console.log('users at requirement 128' , users);
     
     const userIds = users.map(
     (user) => user._id,
 );
 
  try {
-    await notificationService.notifyRequirementDispatched(
+    notificationService.notifyRequirementDispatched(
       userIds,
       requirement,
     );
@@ -278,13 +277,13 @@ console.log(payload);
     throw new ApiError(400, "Requirement is not out for delivery.");
   }
 
-  if (!files || files.length === 0) {
-    throw new ApiError(400, "At least one gate pass image is required.");
-  }
+  // if (!files || files.length === 0) {
+  //   throw new ApiError(400, "At least one gate pass image is required.");
+  // }
 
-  if (files.length > 2) {
-    throw new ApiError(400, "Maximum 2 gate pass images are allowed.");
-  }
+  // if (files.length > 2) {
+  //   throw new ApiError(400, "Maximum 2 gate pass images are allowed.");
+  // }
 
   if (requirement.dispatch.vehicle) {
     await vehicleRepository.update(
@@ -311,11 +310,11 @@ console.log(payload);
 
       receivedAt: new Date(),
 
-      gatePass: files.map((file) => ({
-        image: file.filename,
-        uploadedBy: userId,
-        uploadedAt: new Date(),
-      })),
+      // gatePass: files.map((file) => ({
+      //   image: file.filename,
+      //   uploadedBy: userId,
+      //   uploadedAt: new Date(),
+      // })),
     },
   );
 }

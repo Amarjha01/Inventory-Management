@@ -11,12 +11,8 @@ import {
 
 const formatDate = (value) => {
   if (!value) return "—";
-
   const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "—";
-  }
+  if (Number.isNaN(date.getTime())) return "—";
 
   return date.toLocaleDateString("en-IN", {
     day: "2-digit",
@@ -27,7 +23,6 @@ const formatDate = (value) => {
 
 const getKitchenName = (record) => {
   if (!record) return "Unknown Kitchen";
-
   if (typeof record.kitchenId === "object") {
     return (
       record.kitchenId?.name ||
@@ -35,25 +30,17 @@ const getKitchenName = (record) => {
       "Unknown Kitchen"
     );
   }
-
   return record.kitchenName || "Unknown Kitchen";
 };
 
-const getVisitor = (record) => {
-  return record?.visitor || record;
-};
+const getVisitor = (record) => record?.visitor || record;
 
 const VisitorCard = ({ record, onClick }) => {
   if (!record) return null;
 
   const visitor = getVisitor(record);
-
-  const isCompleted =
-    visitor.status === "COMPLETED";
-
-  const feedbackCount = Array.isArray(
-    visitor.feedbackTrail
-  )
+  const isCompleted = visitor.status === "COMPLETED";
+  const feedbackCount = Array.isArray(visitor.feedbackTrail)
     ? visitor.feedbackTrail.length
     : 0;
 
@@ -63,10 +50,10 @@ const VisitorCard = ({ record, onClick }) => {
       onClick={() => onClick?.(record)}
       className="
         group w-full
-        rounded-2xl
+        rounded-xl
         border border-slate-200
         bg-white
-        p-5
+        p-3.5
         text-left
         shadow-sm
         transition-all duration-200
@@ -76,161 +63,109 @@ const VisitorCard = ({ record, onClick }) => {
         focus:outline-none
         focus:ring-2
         focus:ring-slate-200
+        flex items-start md:items-center justify-between
+        gap-4
       "
     >
-      {/* Header */}
-
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <div
-            className="
-              flex h-10 w-10 shrink-0
-              items-center justify-center
-              rounded-xl
-              md:bg-slate-100
-              md:text-slate-600
-              transition-colors
-              md:group-hover:bg-black
-              md:group-hover:text-white
-              bg-black
-              text-white
-            "
-          >
-            <FiUser size={18} />
-          </div>
-
-          <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-              Visitor
-            </p>
-
-            <h3 className="mt-0.5 truncate text-sm font-bold text-slate-900">
-              {visitor.visitorName ||
-                visitor.name ||
-                "Visitor Record"}
-            </h3>
-          </div>
-        </div>
-
+      {/* Left Area: Avatar & Main Info */}
+      <div className="flex items-start md:items-center gap-3.5 min-w-0 flex-1">
+        
+        {/* Avatar */}
         <div
           className="
-            flex h-8 w-8 shrink-0
+            flex h-10 w-10 shrink-0
             items-center justify-center
-            rounded-full
-            md:bg-slate-50
-            md:text-slate-400
-            transition-all
-            md:group-hover:bg-black
-            md:group-hover:text-white
-            bg-black
+            rounded-lg
+            bg-slate-900
             text-white
+            mt-0.5 md:mt-0
           "
         >
-          <FiArrowUpRight size={15} />
+          <FiUser size={18} />
+        </div>
+
+        {/* Text Container */}
+        <div className="flex flex-col min-w-0 flex-1">
+          {/* Top Row: Name & Status */}
+          <div className="flex items-center gap-2">
+            <h3 className="truncate text-sm font-bold text-slate-900">
+              {visitor.visitorName || visitor.name || "Visitor Record"}
+            </h3>
+
+            <span
+              className={`
+                inline-flex items-center gap-1
+                rounded-full px-2 py-0.5
+                text-[9px] font-bold tracking-wide shrink-0
+                ${
+                  isCompleted
+                    ? "bg-emerald-50 text-emerald-700"
+                    : "bg-amber-50 text-amber-700"
+                }
+              `}
+            >
+              {isCompleted ? <FiCheckCircle size={10} /> : <FiClock size={10} />}
+              {isCompleted ? "COMPLETED" : "PENDING"}
+            </span>
+          </div>
+
+          {/* Bottom Row: Kitchen & Reason */}
+          <div className="mt-1 flex flex-col md:flex-row md:items-start gap-1 md:gap-2 text-xs">
+            <span className="font-semibold text-slate-500 shrink-0">
+              {getKitchenName(record)}
+            </span>
+            
+            {/* Separator dot visible only on desktop */}
+            <span className="hidden md:flex mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-300"></span>
+
+            {/* Reason - Allows wrapping but capped at 2 lines to keep UI neat */}
+            <span className="text-slate-600 font-medium whitespace-normal break-words line-clamp-2">
+              {visitor.reason || "—"}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Status */}
-
-      <div className="mt-4">
-        <span
-          className={`
-            inline-flex items-center gap-1.5
-            rounded-full px-2.5 py-1
-            text-[10px] font-bold
-            ${
-              isCompleted
-                ? "bg-emerald-50 text-emerald-700"
-                : "bg-amber-50 text-amber-700"
-            }
-          `}
-        >
-          {isCompleted ? (
-            <FiCheckCircle size={12} />
-          ) : (
-            <FiClock size={12} />
-          )}
-
-          {isCompleted
-            ? "COMPLETED"
-            : "PENDING"}
-        </span>
-      </div>
-
-      <div className="my-5 h-px bg-slate-100" />
-
-      {/* Information */}
-
-      <div className="grid grid-cols-2 gap-x-5 gap-y-4">
-        <div className="min-w-0">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-            Kitchen
-          </p>
-
-          <p className="mt-1 truncate text-xs font-semibold text-slate-700">
-            {getKitchenName(record)}
-          </p>
+      {/* Middle Area: Compact Metadata (Desktop Only) */}
+      <div className="hidden lg:flex items-center gap-6 text-xs text-slate-600 shrink-0 px-4">
+        <div className="flex items-center gap-1.5">
+          <FiPhone size={13} className="text-slate-400 shrink-0" />
+          <span className="font-medium text-slate-700">
+            {visitor.phoneNumber || visitor.phone || "—"}
+          </span>
         </div>
 
-        <div className="min-w-0">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-            Phone
-          </p>
-
-          <p className="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold text-slate-700">
-            <FiPhone
-              size={12}
-              className="shrink-0 text-slate-400"
-            />
-
-            {visitor.phoneNumber ||
-              visitor.phone ||
-              "—"}
-          </p>
-        </div>
-
-        <div className="min-w-0">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-            Problem Date
-          </p>
-
-          <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-            <FiCalendar
-              size={12}
-              className="shrink-0 text-slate-400"
-            />
-
+        <div className="flex items-center gap-1.5">
+          <FiCalendar size={13} className="text-slate-400 shrink-0" />
+          <span className="font-medium text-slate-700">
             {formatDate(visitor.problemDate)}
-          </p>
+          </span>
         </div>
 
-        <div className="min-w-0">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-            Feedback
-          </p>
-
-          <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-            <FiMessageSquare
-              size={12}
-              className="shrink-0 text-slate-400"
-            />
-
-            {feedbackCount}{" "}
-            {feedbackCount === 1
-              ? "entry"
-              : "entries"}
-          </p>
+        <div className="flex items-center gap-1.5">
+          <FiMessageSquare size={13} className="text-slate-400 shrink-0" />
+          <span className="font-medium text-slate-700">
+            {feedbackCount} {feedbackCount === 1 ? "entry" : "entries"}
+          </span>
         </div>
       </div>
 
-      <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
-        <span className="text-[10px] text-slate-400">
-          Click to view details
-        </span>
-
-        <span className="text-[10px] font-semibold text-slate-400 transition-colors group-hover:text-slate-900">
-          View details
-        </span>
+      {/* Right Area: Action Arrow */}
+      <div className="flex items-center shrink-0">
+        <div
+          className="
+            flex h-8 w-8 items-center justify-center
+            rounded-full
+            bg-slate-50
+            text-slate-400
+            transition-all duration-200
+            group-hover:bg-slate-900
+            group-hover:text-white
+            group-hover:scale-105
+          "
+        >
+          <FiArrowUpRight size={16} />
+        </div>
       </div>
     </button>
   );

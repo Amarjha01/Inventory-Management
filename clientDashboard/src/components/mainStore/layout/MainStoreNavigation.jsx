@@ -24,7 +24,7 @@ const MainStoreNavbar = () => {
   const location = useLocation();
 
   const user = storage.getUser();
-
+  const activeTab = storage.getActiveTab();
   /*
   |--------------------------------------------------------------------------
   | Menus
@@ -35,7 +35,7 @@ const MainStoreNavbar = () => {
     {
       title: "Requirements",
       icon: MdAssignment,
-      path: "/store/requirements/Submitted",
+      path: `/store/requirements/${activeTab}`,
     },
     {
       title: "Pending",

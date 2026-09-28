@@ -86,6 +86,7 @@ const EMPTY_PURCHASE = {
   purchaseDate: "",
   ReceivedDate: "",
   partName: "",
+  quantity: "",
   partyName: "",
   companyName: "",
   guaranteeWarrantyType: "",
@@ -121,46 +122,143 @@ const Purchase = () => {
     setShowCamera(true);
   };
 
-  const handleCameraCapture = (file, documentType) => {
-    if (!file) return;
+const compressImage = (file, options = {}) => {
+  const { maxWidth = 1600, maxHeight = 1600, quality = 0.78, maxSizeMB = 1.5 } = options;
 
-    if (documentType?.id === "service-image") {
-      setServiceForm((previous) => {
-        if (previous.images.length >= 5) {
+  return new Promise((resolve, reject) => {
+    if (!file?.type?.startsWith("image/")) {
+      resolve(file);
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const img = new Image();
+
+      img.onload = () => {
+        let { width, height } = img;
+
+        const ratio = Math.min(maxWidth / width, maxHeight / height, 1);
+
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+
+        if (!ctx) {
+          reject(new Error("Could not create canvas context"));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const outputType = "image/jpeg";
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Image compression failed"));
+              return;
+            }
+
+            // If still larger than max size, reduce quality further
+            if (blob.size > maxSizeMB * 1024 * 1024) {
+              canvas.toBlob(
+                (smallerBlob) => {
+                  if (!smallerBlob) {
+                    reject(new Error("Image compression failed"));
+                    return;
+                  }
+
+                  const compressedFile = new File(
+                    [smallerBlob],
+                    file.name.replace(/\.[^/.]+$/, ".jpg"),
+                    {
+                      type: outputType,
+                      lastModified: Date.now(),
+                    }
+                  );
+
+                  resolve(compressedFile);
+                },
+                outputType,
+                0.6
+              );
+
+              return;
+            }
+
+            const compressedFile = new File(
+              [blob],
+              file.name.replace(/\.[^/.]+$/, ".jpg"),
+              {
+                type: outputType,
+                lastModified: Date.now(),
+              }
+            );
+
+            resolve(compressedFile);
+          },
+          outputType,
+          quality
+        );
+      };
+
+      img.onerror = () => reject(new Error("Could not load image"));
+      img.src = event.target.result;
+    };
+
+    reader.onerror = () => reject(new Error("Could not read image"));
+    reader.readAsDataURL(file);
+  });
+};
+
+const handleCameraCapture = async (file, documentType) => {
+  if (!file) return;
+
+  try {
+    const compressedFile = await compressImage(file, {
+      maxWidth: 1600,
+      maxHeight: 1600,
+      quality: 0.78,
+      maxSizeMB: 1.5,
+    });
+
+    if (documentType?.id === "guarantee-photo") {
+      setPurchaseForm((previous) => ({
+        ...previous,
+        guaranteePhoto: compressedFile,
+      }));
+
+      return;
+    }
+
+    if (documentType?.id === "purchase-image") {
+      setPurchaseForm((previous) => {
+        if (previous.otherImages.length >= 5) {
           return previous;
         }
 
         return {
           ...previous,
-          images: [...previous.images, file],
+          otherImages: [...previous.otherImages, compressedFile],
         };
       });
-
-      return;
     }
+  } catch (error) {
+    console.error("Image compression failed:", error);
 
-    if (documentType?.id === "visitor-image") {
-      setVisitorForm((previous) => {
-        if (previous.otherImages.length >= 3) {
-          return previous;
-        }
-
-        return {
-          ...previous,
-          otherImages: [...previous.otherImages, file],
-        };
-      });
-
-      return;
-    }
-
+    // Fallback to original image
     if (documentType?.id === "guarantee-photo") {
       setPurchaseForm((previous) => ({
         ...previous,
         guaranteePhoto: file,
       }));
-
-      return;
     }
 
     if (documentType?.id === "purchase-image") {
@@ -175,7 +273,9 @@ const Purchase = () => {
         };
       });
     }
-  };
+  }
+};
+
 
   const handlePurchaseChange = (event) => {
     const { name, value } = event.target;
@@ -187,34 +287,69 @@ const Purchase = () => {
     }));
   };
 
-  const handleGuaranteeFile = (event) => {
-    const file = event.target.files?.[0];
+const handleGuaranteeFile = async (event) => {
+  const file = event.target.files?.[0];
 
-    if (!file) return;
+  if (!file) return;
+
+  try {
+    const compressedFile = await compressImage(file, {
+      maxWidth: 1600,
+      maxHeight: 1600,
+      quality: 0.78,
+      maxSizeMB: 1.5,
+    });
+
+    setPurchaseForm((previous) => ({
+      ...previous,
+      guaranteePhoto: compressedFile,
+    }));
+  } catch (error) {
+    console.error("Image compression failed:", error);
 
     setPurchaseForm((previous) => ({
       ...previous,
       guaranteePhoto: file,
     }));
+  }
 
-    event.target.value = "";
-  };
+  event.target.value = "";
+};
 
-  const handlePurchaseFiles = (event) => {
-    console.log(event.target.files);
 
-    const files = Array.from(event.target.files || []);
+const handlePurchaseFiles = async (event) => {
+  const files = Array.from(event.target.files || []);
 
-    if (!files) return;
+  if (!files.length) return;
+
+  try {
+    const compressedFiles = await Promise.all(
+      files.map((file) =>
+        compressImage(file, {
+          maxWidth: 1600,
+          maxHeight: 1600,
+          quality: 0.78,
+          maxSizeMB: 1.5,
+        })
+      )
+    );
 
     setPurchaseForm((previous) => ({
       ...previous,
+      otherImages: [...previous.otherImages, ...compressedFiles].slice(0, 5),
+    }));
+  } catch (error) {
+    console.error("Image compression failed:", error);
 
+    setPurchaseForm((previous) => ({
+      ...previous,
       otherImages: [...previous.otherImages, ...files].slice(0, 5),
     }));
+  }
 
-    event.target.value = "";
-  };
+  event.target.value = "";
+};
+
 
   const removeGuaranteePhoto = () => {
     setPurchaseForm((previous) => ({
@@ -253,6 +388,7 @@ const Purchase = () => {
 
     formData.append("purchaseDate", purchaseForm.purchaseDate);
     formData.append("partName", purchaseForm.partName);
+    formData.append("quantity", purchaseForm.quantity);
     formData.append("ReceivedDate", purchaseForm.ReceivedDate);
     formData.append("partyName", purchaseForm.partyName);
     formData.append("companyName", purchaseForm.companyName);
@@ -290,13 +426,12 @@ const Purchase = () => {
 
 
     if (validationError) {
-      setError(validationError);
+      toast.error(validationError)
       return;
     }
 
     try {
       setSaving(true);
-
       let formData = buildPurchaseFormData();
       let response;
 
@@ -383,8 +518,6 @@ const Purchase = () => {
       setError("");
 
       const response = await getAllPurchaseForKitchen();
-
-      console.log("PURCHASE RECORDS RESPONSE:", response);
 
       let data = response;
 
@@ -1264,16 +1397,6 @@ const Purchase = () => {
           "
         >
           <div>
-            <h2
-              className="
-                text-sm
-                font-bold
-                text-slate-900
-              "
-            >
-              Purchase Records
-            </h2>
-
             <p
               className="
                 mt-0.5
@@ -1398,7 +1521,6 @@ const Purchase = () => {
               grid
               gap-4
               sm:grid-cols-2
-              xl:grid-cols-3
             "
           >
             {filteredRecords.map((record) => (

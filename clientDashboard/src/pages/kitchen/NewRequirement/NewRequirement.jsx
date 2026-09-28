@@ -74,15 +74,56 @@ const NewRequirement = () => {
     }
   };
   const fetchInventory = async (type) => {
+      const cachedItems = storage.getInventory(type);
+
+  // Show cached data immediately
+  if (cachedItems) {
+    setInventory(cachedItems);
+  }
     try {
-      const items = await getInventory(type);
-      setInventory(items);
+          // Fetch fresh data silently
+    const freshItems = await getInventory(type);
+
+    if (freshItems) {
+      // Update UI with fresh data
+      setInventory(freshItems);
+
+      // Save fresh data to localStorage
+      storage.setInventory(type, freshItems);
+    }
     } catch (error) {
       console.error(error);
+      if (!cachedItems) {
+      setInventory([]);
+    }
     } finally {
       setLoading(false);
     }
   };
+// const fetchInventory = async (type) => {
+
+//   try {
+//     // Fetch fresh data silently
+//     const freshItems = await getInventory(type);
+
+//     if (freshItems) {
+//       // Update UI with fresh data
+//       setInventory(freshItems);
+
+//       // Save fresh data to localStorage
+//       storage.setInventory(type, freshItems);
+//     }
+//   } catch (error) {
+//     console.error("Failed to fetch inventory:", error);
+
+//     // Cached data remains visible if API fails
+//     if (!cachedItems) {
+//       setInventory([]);
+//     }
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 
   const addItem = (item) => {
     if (selectedItems.some((i) => i._id === item._id)) return;

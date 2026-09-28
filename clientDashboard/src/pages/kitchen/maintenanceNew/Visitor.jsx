@@ -111,87 +111,161 @@ const Visitor = () => {
     setShowForm(false)
   }
 
-  const openCamera = (type) => {
-    setCameraType(type);
 
-    setShowCamera(true);
-  };
-
-  const handleCameraCapture = (file, documentType) => {
-    if (!file) return;
-
-    if (documentType?.id === "service-image") {
-      setServiceForm((previous) => {
-        if (previous.images.length >= 5) {
-          return previous;
-        }
-
-        return {
-          ...previous,
-          images: [...previous.images, file],
-        };
-      });
-
+  const compressImage = (file, options = {}) => {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type?.startsWith("image/")) {
+      resolve(file);
       return;
     }
 
-    if (documentType?.id === "visitor-image") {
-      setVisitorForm((previous) => {
-        if (previous.otherImages.length >= 3) {
-          return previous;
-        }
+    const {
+      maxWidth = 1600,
+      maxHeight = 1600,
+      quality = 0.8,
+    } = options;
 
-        return {
-          ...previous,
-          otherImages: [...previous.otherImages, file],
-        };
-      });
+    const reader = new FileReader();
 
-      return;
-    }
+    reader.onload = (event) => {
+      const img = new Image();
 
-    if (documentType?.id === "guarantee-photo") {
-      setPurchaseForm((previous) => ({
+      img.onload = () => {
+        let { width, height } = img;
+
+        const scale = Math.min(
+          1,
+          maxWidth / width,
+          maxHeight / height
+        );
+
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Image compression failed"));
+              return;
+            }
+
+            const compressedFile = new File(
+              [blob],
+              file.name.replace(/\.[^/.]+$/, ".jpg"),
+              {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              }
+            );
+
+            resolve(compressedFile);
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+
+      img.onerror = () => {
+        reject(new Error("Failed to load image"));
+      };
+
+      img.src = event.target.result;
+    };
+
+    reader.onerror = () => {
+      reject(new Error("Failed to read image"));
+    };
+
+    reader.readAsDataURL(file);
+  });
+};
+
+const openCamera = (type) => {
+  setCameraType(type);
+  setShowCamera(true);
+};
+
+const handleCameraCapture = async (file, documentType) => {
+  if (!file) return;
+
+  try {
+    const compressedFile = await compressImage(file, {
+      maxWidth: 1600,
+      maxHeight: 1600,
+      quality: 0.8,
+    });
+
+    setVisitorForm((previous) => {
+      if (previous.otherImages.length >= 3) {
+        return previous;
+      }
+
+      return {
         ...previous,
-        guaranteePhoto: file,
-      }));
+        otherImages: [...previous.otherImages, compressedFile],
+      };
+    });
+  } catch (error) {
+    console.error("Failed to compress camera image:", error);
+  }
+};
 
+const handleVisitorChange = (event) => {
+  const { name, value } = event.target;
+
+  setVisitorForm((previous) => ({
+    ...previous,
+    [name]: value,
+  }));
+};
+
+const handleVisitorFiles = async (event) => {
+  const files = Array.from(event.target.files || []);
+
+  if (!files.length) return;
+
+  try {
+    const remainingSlots = 3 - visitorForm.otherImages.length;
+
+    if (remainingSlots <= 0) {
+      event.target.value = "";
       return;
     }
 
-    if (documentType?.id === "purchase-image") {
-      setPurchaseForm((previous) => {
-        if (previous.otherImages.length >= 5) {
-          return previous;
-        }
+    const selectedFiles = files.slice(0, remainingSlots);
 
-        return {
-          ...previous,
-          otherImages: [...previous.otherImages, file],
-        };
-      });
-    }
-  };
-
-  const handleVisitorChange = (event) => {
-    const { name, value } = event.target;
+    const compressedFiles = await Promise.all(
+      selectedFiles.map((file) =>
+        compressImage(file, {
+          maxWidth: 1600,
+          maxHeight: 1600,
+          quality: 0.8,
+        })
+      )
+    );
 
     setVisitorForm((previous) => ({
       ...previous,
-      [name]: value,
+      otherImages: [
+        ...previous.otherImages,
+        ...compressedFiles,
+      ].slice(0, 3),
     }));
-  };
-
-  const handleVisitorFiles = (event) => {
-    const files = Array.from(event.target.files || []);
-
-    setVisitorForm((previous) => ({
-      ...previous,
-      otherImages: [...previous.otherImages, ...files].slice(0, 3),
-    }));
-
+  } catch (error) {
+    console.error("Failed to compress uploaded images:", error);
+  } finally {
     event.target.value = "";
-  };
+  }
+};
+
 
   const removeVisitorImage = (index) => {
     setVisitorForm((previous) => ({
@@ -1191,16 +1265,6 @@ const Visitor = () => {
           "
         >
           <div>
-            <h2
-              className="
-                text-sm
-                font-bold
-                text-slate-900
-              "
-            >
-              Visitor Records
-            </h2>
-
             <p
               className="
                 mt-0.5
@@ -1324,8 +1388,6 @@ const Visitor = () => {
             className="
               grid
               gap-4
-              sm:grid-cols-2
-              xl:grid-cols-3
             "
           >
             {filteredRecords.map((record) => (

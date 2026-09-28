@@ -14,6 +14,7 @@ import {
   FiPackage,
   FiMapPin,
   FiGitMerge,
+  FiLoader,
 } from "react-icons/fi";
 import { IoMdCloseCircle } from "react-icons/io";
 import {
@@ -26,6 +27,79 @@ import RequirementList from "../../../components/mainStore/pending/RequirementLi
 import ThemeProvider from "../../../components/shared/ui/ThemeProvider.jsx";
 import PageHeader from "../../../components/shared/ui/PageHeader.jsx";
 import { themes } from "../../../components/shared/ui/Theme.js";
+
+const PendingSkeleton = () => {
+  return (
+    <div className="min-h-full bg-slate-50/70 pb-24">
+      <div className="h-24 w-full animate-pulse border-b border-slate-200 bg-white px-6 py-5">
+        <div className="mx-auto flex max-w-[1600px] items-center gap-4">
+          <div className="h-12 w-12 rounded-2xl bg-slate-200" />
+          <div className="space-y-2">
+            <div className="h-5 w-40 rounded-lg bg-slate-200" />
+            <div className="h-3 w-64 rounded-lg bg-slate-100" />
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6">
+        <div className="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-3">
+            <div className="h-7 w-36 animate-pulse rounded-lg bg-slate-200" />
+            <div className="h-4 w-64 animate-pulse rounded-lg bg-slate-100" />
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <div className="h-11 w-36 animate-pulse rounded-xl bg-slate-100" />
+            <div className="h-11 w-28 animate-pulse rounded-xl bg-slate-200" />
+          </div>
+        </div>
+
+        {[1, 2, 3].map((group) => (
+          <div key={group} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 animate-pulse rounded-xl bg-slate-100" />
+                <div className="h-10 w-10 animate-pulse rounded-xl bg-slate-200" />
+                <div className="space-y-2">
+                  <div className="h-4 w-32 animate-pulse rounded bg-slate-200" />
+                  <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
+                </div>
+              </div>
+
+              <div className="h-5 w-20 animate-pulse rounded bg-slate-100" />
+            </div>
+
+            <div className="divide-y divide-slate-100">
+              {[1, 2].map((item) => (
+                <div key={item} className="flex gap-4 px-5 py-5">
+                  <div className="h-5 w-5 shrink-0 animate-pulse rounded-md bg-slate-200" />
+
+                  <div className="min-w-0 flex-1 space-y-4">
+                    <div className="flex flex-wrap gap-3">
+                      <div className="h-5 w-40 animate-pulse rounded bg-slate-200" />
+                      <div className="h-5 w-24 animate-pulse rounded-full bg-slate-100" />
+                    </div>
+
+                    <div className="flex flex-wrap gap-5">
+                      <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
+                      <div className="h-3 w-28 animate-pulse rounded bg-slate-100" />
+                      <div className="h-3 w-32 animate-pulse rounded bg-slate-100" />
+                      <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
+                    </div>
+
+                    <div className="h-20 w-full animate-pulse rounded-xl bg-slate-50" />
+                  </div>
+
+                  <div className="h-9 w-9 shrink-0 animate-pulse rounded-lg bg-slate-100" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const Pending = () => {
   const [pendingData, setPendingData] = useState([]);
@@ -42,23 +116,6 @@ const Pending = () => {
 
   const [showRequirement, setShowRequirement] = useState(false);
 
-
-  // ======================================================
-  // HELPER
-  // ======================================================
-
-  /**
-   * Handles both:
-   *
-   * referenceToOriginalRequirementId: "123"
-   *
-   * OR
-   *
-   * referenceToOriginalRequirementId: {
-   *   _id: "123",
-   *   requirementNumber: "REQ-123"
-   * }
-   */
   const getReferenceValue = (reference) => {
     if (!reference) {
       return "--";
@@ -75,17 +132,11 @@ const Pending = () => {
     return String(reference);
   };
 
-  // ======================================================
-  // FETCH
-  // ======================================================
-
   const fetchPending = async () => {
     try {
       setLoading(true);
 
       const response = await getPendingItems();
-
-      console.log("Pending response:", response);
 
       setPendingData(response?.data || []);
     } catch (error) {
@@ -99,15 +150,12 @@ const Pending = () => {
     fetchPending();
   }, []);
 
-  // ======================================================
-  // FILTER
-  // ======================================================
-
   const filteredData = useMemo(() => {
+    console.log(pendingData);
+
     return pendingData
       .map((pending) => ({
         ...pending,
-
         items:
           pending.items?.filter(
             (item) => item.fulfillmentStatus === statusFilter,
@@ -115,10 +163,6 @@ const Pending = () => {
       }))
       .filter((pending) => pending.items.length > 0);
   }, [pendingData, statusFilter]);
-
-  // ======================================================
-  // SELECT ITEM
-  // ======================================================
 
   const toggleItemSelection = (pendingId, itemId) => {
     const key = `${pendingId}-${itemId}`;
@@ -136,10 +180,6 @@ const Pending = () => {
     return selectedItems.includes(`${pendingId}-${itemId}`);
   };
 
-  // ======================================================
-  // SELECT KITCHEN
-  // ======================================================
-
   const toggleKitchenSelection = (pending) => {
     const keys = pending.items.map((item) => `${pending._id}-${item._id}`);
 
@@ -155,11 +195,7 @@ const Pending = () => {
     }
   };
 
-  // ======================================================
-  // MERGE SELECTED
-  // ======================================================
-
-  const handleMerge = async (requirement) => {          
+  const handleMerge = async (requirement) => {
     const selected = [];
 
     filteredData.forEach((pending) => {
@@ -173,7 +209,7 @@ const Pending = () => {
             unit: item.unit,
             kitchenId: pending.kitchenId?._id,
             referenceToOriginalRequirementId:
-            item.referenceToOriginalRequirementId,
+              item.referenceToOriginalRequirementId,
           });
         }
       });
@@ -185,34 +221,57 @@ const Pending = () => {
 
     console.log("Selected pending items:", selected);
 
-   if(!requirement._id){
-     try {
-      const RequirementList = await getUndispatchedRequirementId(
-        selected[0]?.kitchenId,
-      );
-      setRequirementId(RequirementList.data);
-      setShowRequirement(true);
-      return;
+    if (!requirement._id) {
+      try {
+        const RequirementList = await getUndispatchedRequirementId(
+          selected[0]?.kitchenId,
+        );
+
+        setRequirementId(RequirementList.data);
+        setShowRequirement(true);
+        return;
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    try {
+      const merged = await mergeItem(requirement._id, selected);
+
+      console.log("Merged:", merged);
+
+      setPendingData((previousData) => {
+        return previousData
+          .map((pending) => {
+            const selectedItemIds = selected
+              .filter(
+                (item) => item.pendingFulfillmentId === pending._id,
+              )
+              .map((item) => item.pendingItemId);
+
+            if (!selectedItemIds.length) {
+              return pending;
+            }
+
+            return {
+              ...pending,
+              items: pending.items?.filter(
+                (item) => !selectedItemIds.includes(item._id),
+              ),
+            };
+          })
+          .filter((pending) => pending.items?.length > 0);
+      });
+
+      setSelectedItems([]);
+
+      setShowRequirement(false);
     } catch (error) {
       console.log(error);
     }
-   }
-  
-   try {
-    const merged = await mergeItem(requirement._id , selected)
-    console.log(merged);
-    
-   } catch (error) {
-    console.log(error);
-    
-   }
-   console.log("Selected requirement:", requirement);
 
+    console.log("Selected requirement:", requirement);
   };
-
-  // ======================================================
-  // CANCEL
-  // ======================================================
 
   const handleCancel = async (pendingId, pendingItemId) => {
     try {
@@ -226,10 +285,6 @@ const Pending = () => {
     }
   };
 
-  // ======================================================
-  // TOGGLE KITCHEN
-  // ======================================================
-
   const toggleKitchen = (id) => {
     setExpandedKitchens((previous) => ({
       ...previous,
@@ -237,936 +292,566 @@ const Pending = () => {
     }));
   };
 
-  // ======================================================
-  // LOADING
-  // ======================================================
-
   if (loading) {
-    return (
-      <div
-        className="
-          h-full
-          flex
-          items-center
-          justify-center
-          text-gray-500
-        "
-      >
-        Loading pending items...
-      </div>
-    );
+    return <PendingSkeleton />;
   }
 
-  // ======================================================
-  // UI
-  // ======================================================
-
   return (
-     <ThemeProvider
-      theme={themes.DRIVERS}
-      className="min-h-full pb-24"
-    >
+    <ThemeProvider theme={themes.DRIVERS} className="min-h-full pb-24">
       <PageHeader
-            title="Pending Items"
-            subtitle="Manage all Items waiting for fulfillment"
-            imageUrl={'/ui/DRIVERS.png'}
-          />
-    <div
-      className="
-        w-full
-        min-h-full
-        p-6
-        bg-gray-50/50
-        relative
-      "
-    >
-      {/* ==================================================
-          HEADER
-      ================================================== */}
-            
-      <div
-        className="
-          flex
-          flex-col
-          lg:flex-row
-          lg:items-center
-          lg:justify-between
-          gap-4
-          mb-6
-        "
-      >
-        <div>
-          <h1
-            className="
-              text-2xl
-              font-semibold
-              text-[#181e53]
-            "
-          >
-            Pending
-          </h1>
+        title="Pending Items"
+        subtitle="Manage all Items waiting for fulfillment"
+        imageUrl={"/ui/DRIVERS.png"}
+      />
 
-          <p
-            className="
-              mt-1
-              text-sm
-              text-gray-500
-            "
-          >
-            Items waiting for fulfillment
-          </p>
-        </div>
-
-        <div
-          className="
-            flex
-            flex-wrap
-            items-center
-            gap-3
-          "
-        >
-          {/* STATUS */}
-
-          <div className="relative">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="
-                appearance-none
-                h-10
-                min-w-[140px]
-                pl-4
-                pr-10
-                rounded-lg
-                border
-                border-gray-200
-                bg-white
-                text-sm
-                font-medium
-                text-gray-700
-                outline-none
-                cursor-pointer
-                focus:border-[#181e53]
-              "
-            >
-              <option value="PENDING">Pending</option>
-
-              <option value="FULFILLED">Fulfilled</option>
-
-              <option value="CANCELLED">Cancelled</option>
-            </select>
-
-            <FiChevronDown
-              className="
-                absolute
-                right-3
-                top-1/2
-                -translate-y-1/2
-                pointer-events-none
-                text-gray-500
-              "
-              size={16}
-            />
-          </div>
-
-          {/* MERGE */}
-
-          <motion.button
-            whileHover={{
-              y: -1,
-            }}
-            whileTap={{
-              scale: 0.97,
-            }}
-            onClick={handleMerge}
-            disabled={selectedItems.length === 0}
-            className="
-              h-10
-              px-4
-              flex
-              items-center
-              gap-2
-              rounded-lg
-              bg-[#181e53]
-              text-white
-              text-sm
-              font-medium
-              transition
-              disabled:opacity-40
-              disabled:cursor-not-allowed
-            "
-          >
-            <FiGitMerge size={16} />
-            Merge
-          </motion.button>
-        </div>
-      </div>
-
-      {/* ==================================================
-          EMPTY
-      ================================================== */}
-
-      <AnimatePresence mode="wait">
-        {!filteredData.length && (
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: 10,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            className="
-              min-h-[350px]
-              flex
-              flex-col
-              items-center
-              justify-center
-              rounded-xl
-              border
-              border-dashed
-              border-gray-300
-              bg-white
-            "
-          >
-            <FiPackage size={42} className="text-gray-300 mb-3" />
-
-            <p
-              className="
-                font-medium
-                text-gray-600
-              "
-            >
-              No {statusFilter.toLowerCase()} items
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ==================================================
-          KITCHENS
-      ================================================== */}
-
-      <div className="space-y-4">
-        <AnimatePresence>
-          {filteredData.map((pending) => {
-            const expanded = expandedKitchens[pending._id] ?? false;
-
-            const allSelected =
-              pending.items.length > 0 &&
-              pending.items.every((item) => isSelected(pending._id, item._id));
-
-            return (
-              <motion.div
-                key={pending._id}
-                layout
-                initial={{
-                  opacity: 0,
-                  y: 12,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                exit={{
-                  opacity: 0,
-                  y: -8,
-                }}
-                transition={{
-                  duration: 0.2,
-                }}
-                className="
-                    overflow-visible
-                    rounded-xl
-                    border
-                    border-gray-200
-                    bg-white
-                    shadow-sm
-                  "
-              >
-                {/* ==================================================
-                      KITCHEN HEADER
-                  ================================================== */}
-
-                <div
-                  className="
-                      flex
-                      items-center
-                      justify-between
-                      px-5
-                      py-4
-                      border-b
-                      border-gray-100
-                    "
-                >
-                  <div
-                    className="
-                        flex
-                        items-center
-                        gap-3
-                      "
-                  >
-                    <motion.button
-                      whileTap={{
-                        scale: 0.9,
-                      }}
-                      onClick={() => toggleKitchen(pending._id)}
-                      className="
-                          w-8
-                          h-8
-                          flex
-                          items-center
-                          justify-center
-                          rounded-lg
-                          text-gray-500
-                          hover:bg-gray-100
-                        "
-                    >
-                      {expanded ? (
-                        <FiChevronUp size={18} />
-                      ) : (
-                        <FiChevronDown size={18} />
-                      )}
-                    </motion.button>
-
-                    <div
-                      className="
-                          w-9
-                          h-9
-                          rounded-lg
-                          bg-[#181e53]/10
-                          flex
-                          items-center
-                          justify-center
-                          text-[#181e53]
-                        "
-                    >
-                      <FiMapPin size={17} />
-                    </div>
-
-                    <div>
-                      <h2
-                        className="
-                            font-semibold
-                            text-gray-800
-                          "
-                      >
-                        {pending.kitchenId?.name || "Kitchen"}
-                      </h2>
-
-                      <p
-                        className="
-                            text-xs
-                            text-gray-500
-                            mt-0.5
-                          "
-                      >
-                        {pending.items.length} item
-                        {pending.items.length !== 1 ? "s" : ""}
-                      </p>
-                    </div>
+      <div className="relative min-h-full w-full bg-slate-50/70 p-4 sm:p-6">
+        <div className="mx-auto max-w-[1600px]">
+          <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <div className="mb-2 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-[#181e53]">
+                    <FiPackage size={19} />
                   </div>
 
-                  {/* SELECT ALL */}
+                  <div>
+                    <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+                      Pending
+                    </h1>
 
-                  <motion.button
-                    whileTap={{
-                      scale: 0.96,
-                    }}
-                    onClick={() => toggleKitchenSelection(pending)}
-                    className="
-                        flex
-                        items-center
-                        gap-2
-                        text-sm
-                        font-medium
-                        text-[#181e53]
-                      "
-                  >
-                    <span
-                      className={`
-                          w-5
-                          h-5
-                          rounded
-                          border
-                          flex
-                          items-center
-                          justify-center
-                          transition
-                          ${
-                            allSelected
-                              ? "bg-[#181e53] border-[#181e53]"
-                              : "border-gray-300 bg-white"
-                          }
-                        `}
-                    >
-                      <AnimatePresence>
-                        {allSelected && (
-                          <motion.span
-                            initial={{
-                              scale: 0,
-                              opacity: 0,
-                            }}
-                            animate={{
-                              scale: 1,
-                              opacity: 1,
-                            }}
-                            exit={{
-                              scale: 0,
-                              opacity: 0,
-                            }}
-                          >
-                            <FiCheck size={13} className="text-white" />
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
-                    </span>
-                    Select all
-                  </motion.button>
+                    <p className="mt-0.5 text-sm text-slate-500">
+                      Items waiting for fulfillment
+                    </p>
+                  </div>
                 </div>
 
-                {/* ==================================================
-                      ITEMS
-                  ================================================== */}
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-100">
+                    {filteredData.reduce(
+                      (total, pending) => total + pending.items.length,
+                      0,
+                    )}{" "}
+                    {statusFilter.toLowerCase()} items
+                  </span>
 
-                <AnimatePresence initial={false}>
-                  {expanded && (
-                    <motion.div
-                      initial={{
-                        height: 0,
-                        opacity: 0,
-                      }}
-                      animate={{
-                        height: "auto",
-                        opacity: 1,
-                      }}
-                      exit={{
-                        height: 0,
-                        opacity: 0,
-                      }}
-                      transition={{
-                        duration: 0.22,
-                      }}
-                      className=""
+                  {selectedItems.length > 0 && (
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-[#181e53] ring-1 ring-inset ring-indigo-100"
                     >
-                      <div
-                        className="
-                            divide-y
-                            divide-gray-100
-                          "
+                      {selectedItems.length} selected
+                    </motion.span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="h-11 min-w-[155px] cursor-pointer appearance-none rounded-xl border border-slate-200 bg-slate-50 pl-4 pr-10 text-sm font-semibold text-slate-700 outline-none transition hover:border-slate-300 focus:border-[#181e53] focus:bg-white focus:ring-4 focus:ring-indigo-50"
+                  >
+                    <option value="PENDING">Pending</option>
+                    <option value="FULFILLED">Fulfilled</option>
+                    <option value="CANCELLED">Cancelled</option>
+                  </select>
+
+                  <FiChevronDown
+                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    size={16}
+                  />
+                </div>
+
+                <motion.button
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleMerge}
+                  disabled={selectedItems.length === 0}
+                  className="flex h-11 items-center gap-2 rounded-xl bg-[#181e53] px-5 text-sm font-semibold text-white shadow-sm shadow-indigo-900/20 transition hover:bg-[#11163f] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <FiGitMerge size={16} />
+                  Merge
+                  {selectedItems.length > 0 && (
+                    <span className="rounded-full bg-white/15 px-1.5 py-0.5 text-[11px]">
+                      {selectedItems.length}
+                    </span>
+                  )}
+                </motion.button>
+              </div>
+            </div>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {!filteredData.length && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex min-h-[420px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 text-center shadow-sm"
+              >
+                <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-300">
+                  <FiPackage size={30} />
+                </div>
+
+                <h3 className="text-base font-semibold text-slate-800">
+                  No {statusFilter.toLowerCase()} items
+                </h3>
+
+                <p className="mt-1 max-w-sm text-sm text-slate-500">
+                  There are currently no items matching the selected fulfillment
+                  status.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="space-y-4">
+            <AnimatePresence>
+              {filteredData.map((pending) => {
+                const expanded = expandedKitchens[pending._id] ?? false;
+
+                const allSelected =
+                  pending.items.length > 0 &&
+                  pending.items.every((item) =>
+                    isSelected(pending._id, item._id),
+                  );
+
+                return (
+                  <motion.div
+                    key={pending._id}
+                    layout
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-visible rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                  >
+                    <div className="flex flex-col gap-4 border-b border-slate-100 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <motion.button
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => toggleKitchen(pending._id)}
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+                        >
+                          {expanded ? (
+                            <FiChevronUp size={17} />
+                          ) : (
+                            <FiChevronDown size={17} />
+                          )}
+                        </motion.button>
+
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-[#181e53]">
+                          <FiMapPin size={17} />
+                        </div>
+
+                        <div className="min-w-0">
+                          <h2 className="truncate text-sm font-bold text-slate-800 sm:text-base">
+                            {pending.kitchenId?.name || "Kitchen"}
+                          </h2>
+
+                          <p className="mt-0.5 text-xs text-slate-500">
+                            {pending.items.length} item
+                            {pending.items.length !== 1 ? "s" : ""} awaiting
+                            action
+                          </p>
+                        </div>
+                      </div>
+
+                      <motion.button
+                        whileTap={{ scale: 0.96 }}
+                        onClick={() => toggleKitchenSelection(pending)}
+                        className="flex w-fit items-center gap-2 rounded-lg px-2 py-1 text-sm font-semibold text-[#181e53] transition hover:bg-indigo-50"
                       >
-                        {pending.items.map((item) => {
-                          const selected = isSelected(pending._id, item._id);
-
-                          return (
-                            <motion.div
-                              layout
-                              key={item._id}
-                              whileHover={{
-                                backgroundColor: "rgba(249,250,251,1)",
-                              }}
-                              className={`
-                                    relative
-                                    px-5
-                                    py-4
-                                    ${selected ? "bg-indigo-50/40" : ""}
-                                  `}
-                            >
-                              <div
-                                className="
-                                      flex
-                                      items-start
-                                      gap-4
-                                    "
+                        <span
+                          className={`flex h-5 w-5 items-center justify-center rounded-md border transition ${allSelected ? "border-[#181e53] bg-[#181e53]" : "border-slate-300 bg-white"}`}
+                        >
+                          <AnimatePresence>
+                            {allSelected && (
+                              <motion.span
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0, opacity: 0 }}
                               >
-                                {/* CHECKBOX */}
+                                <FiCheck size={13} className="text-white" />
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
+                        </span>
+                        Select all
+                      </motion.button>
+                    </div>
 
-                                <motion.button
-                                  whileTap={{
-                                    scale: 0.85,
+                    <AnimatePresence initial={false}>
+                      {expanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.22 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="divide-y divide-slate-100">
+                            {pending.items.map((item) => {
+                              const selected = isSelected(
+                                pending._id,
+                                item._id,
+                              );
+
+                              return (
+                                <motion.div
+                                  layout
+                                  key={item._id}
+                                  whileHover={{
+                                    backgroundColor: "rgba(248,250,252,1)",
                                   }}
-                                  onClick={() =>
-                                    toggleItemSelection(pending._id, item._id)
-                                  }
-                                  className={`
-                                        mt-1
-                                        w-5
-                                        h-5
-                                        shrink-0
-                                        rounded
-                                        border
-                                        flex
-                                        items-center
-                                        justify-center
-                                        ${
-                                          selected
-                                            ? "bg-[#181e53] border-[#181e53]"
-                                            : "border-gray-300 bg-white"
-                                        }
-                                      `}
+                                  className={`relative px-4 py-5 sm:px-5 ${selected ? "bg-indigo-50/40" : ""}`}
                                 >
                                   {selected && (
-                                    <motion.span
-                                      initial={{
-                                        scale: 0,
-                                      }}
-                                      animate={{
-                                        scale: 1,
-                                      }}
-                                    >
-                                      <FiCheck
-                                        size={13}
-                                        className="text-white"
-                                      />
-                                    </motion.span>
-                                  )}
-                                </motion.button>
-
-                                {/* ITEM CONTENT */}
-
-                                <div
-                                  className="
-                                        flex-1
-                                        min-w-0
-                                      "
-                                >
-                                  {/* TOP */}
-
-                                  <div
-                                    className="
-                                          flex
-                                          items-center
-                                          gap-3
-                                          flex-wrap
-                                        "
-                                  >
-                                    <div
-                                      className="
-                                            flex
-                                            items-center
-                                            gap-2
-                                            font-medium
-                                            text-gray-800
-                                          "
-                                    >
-                                      <FiPackage
-                                        size={16}
-                                        className="text-[#181e53]"
-                                      />
-
-                                      {item.inventoryId?.name || "Unknown Item"}
-                                    </div>
-
-                                    {/* Requirement Creation date */}
-
-                                    <span
-                                      className={`
-                                            px-2.5
-                                            py-1
-                                            rounded-full
-                                            text-[11px]
-                                            font-semibold
-                                            
-                                          `}
-                                    >
-                                      {new Date(
-                                        item.referenceToOriginalRequirementId?.createdAt,
-                                      ).toLocaleDateString("en-IN", {
-                                        dateStyle: "medium",
-                                      }) || "--"}
-                                    </span>
-                                  </div>
-
-                                  {/* DETAILS */}
-
-                                  <div
-                                    className="
-                                          flex
-                                          flex-wrap
-                                          items-center
-                                          gap-x-6
-                                          gap-y-2
-                                          mt-3
-                                          text-xs
-                                          text-gray-500
-                                        "
-                                  >
-                                    {/* QUANTITY */}
-
-                                    <div
-                                      className="
-                                            flex
-                                            items-center
-                                            gap-1.5
-                                          "
-                                    >
-                                      <FiPackage size={14} />
-
-                                      <span>
-                                        {item.requestedQuantity} {item.unit}
-                                      </span>
-                                    </div>
-
-                                    {/* DATE */}
-
-                                    <div
-                                      className="
-                                            flex
-                                            items-center
-                                            gap-1.5
-                                          "
-                                    >
-                                      <FiCalendar size={14} />
-
-                                      <span>
-                                        {item.createdAt
-                                          ? new Date(
-                                              item.createdAt,
-                                            ).toLocaleDateString("en-IN", {
-                                              dateStyle: "medium",
-                                            })
-                                          : "--"}
-                                      </span>
-                                    </div>
-
-                                    {/* ORIGINAL REQUIREMENT REFERENCE */}
-
-                                    <div className="flex items-center gap-1.5 text-blue-500">
-                                      <FiFileText size={14} />
-
-                                      <a
-                                        href={`/store/requirements/${item?.referenceToOriginalRequirementId?._id}`}
-                                      >
-                                        Ref:{" "}
-                                        {getReferenceValue(
-                                          item.referenceToOriginalRequirementId,
-                                        )}
-                                      </a>
-                                    </div>
-
-                                    {/* CREATED BY */}
-
-                                    <div
-                                      className="
-                                            flex
-                                            items-center
-                                            gap-1.5
-                                          "
-                                    >
-                                      <FiUser size={14} />
-
-                                      <span>
-                                        {item.createdBy?.name || "Unknown"}
-                                      </span>
-                                    </div>
-                                  </div>
-
-                                  {/* DISPATCHED REFERENCE */}
-
-                                 {item.referenceToDispatchedRequirementId && (
                                     <motion.div
-                                        initial={{
-                                        opacity: 0,
-                                        height: 0,
-                                        }}
-                                        animate={{
-                                        opacity: 1,
-                                        height: "auto",
-                                        }}
-                                        className="
-                                        mt-3
-                                        rounded-lg
-                                        border border-amber-200
-                                        bg-amber-50
-                                        p-3
-                                        sm:p-3.5
-                                        "
+                                      layoutId={`selected-${pending._id}-${item._id}`}
+                                      className="absolute bottom-0 left-0 top-0 w-1 bg-[#181e53]"
+                                    />
+                                  )}
+
+                                  <div className="flex items-start gap-3 sm:gap-4">
+                                    <motion.button
+                                      whileTap={{ scale: 0.85 }}
+                                      onClick={() =>
+                                        toggleItemSelection(
+                                          pending._id,
+                                          item._id,
+                                        )
+                                      }
+                                      className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition ${selected ? "border-[#181e53] bg-[#181e53]" : "border-slate-300 bg-white hover:border-slate-400"}`}
                                     >
-                                        {/* Header */}
-                                        <div className="flex items-center gap-2 mb-2.5">
-                                        <div
-                                            className="
-                                            flex
-                                            h-7
-                                            w-7
-                                            shrink-0
-                                            items-center
-                                            justify-center
-                                            rounded-full
-                                            bg-amber-100
-                                            text-amber-600
-                                            "
+                                      {selected && (
+                                        <motion.span
+                                          initial={{ scale: 0 }}
+                                          animate={{ scale: 1 }}
                                         >
-                                            <FiTruck size={14} />
+                                          <FiCheck
+                                            size={13}
+                                            className="text-white"
+                                          />
+                                        </motion.span>
+                                      )}
+                                    </motion.button>
+
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                        <div className="flex items-center gap-2 font-semibold text-slate-800">
+                                          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-[#181e53]">
+                                            <FiPackage size={14} />
+                                          </span>
+
+                                          <span className="break-words">
+                                            {item.inventoryId?.name ||
+                                              "Unknown Item"}
+                                          </span>
                                         </div>
 
-                                        <span className="text-xs font-semibold uppercase tracking-wide text-amber-700">
-                                            Fulfilled
-                                        </span>
-                                        </div>
-
-                                        {/* Details */}
-                                        <div className="
-                                        grid
-                                        grid-cols-1
-                                        gap-2.5
-                                        sm:grid-cols-3
-                                        sm:gap-4
-                                        ">
-                                        {/* Dispatched Reference */}
-                                        <div className="min-w-0">
-                                            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                                            Dispatched Ref
-                                            </p>
-
-                                            <a
-                                            href={`/store/requirements/${item.referenceToDispatchedRequirementId}`}
-                                            className="mt-0.5 block
-                                                truncate
-                                                text-sm
-                                                font-medium
-                                                text-blue-600
-                                                hover:text-blue-800
-                                                hover:underline
-                                            "
-                                            title={getReferenceValue(
-                                                item.referenceToDispatchedRequirementId,
-                                            )}
-                                            >
-                                            {getReferenceValue(
-                                                item.referenceToDispatchedRequirementId,
-                                            )}
-                                            </a>
-                                        </div>
-
-                                        {/* Fulfilled At */}
-                                        <div>
-                                            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                                            Fulfilled At
-                                            </p>
-
-                                            <p className="mt-0.5 text-sm font-medium text-gray-700">
-                                            {new Date(item.fulfilledAt).toLocaleString("en-IN", {
+                                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                                          {item.referenceToOriginalRequirementId?.createdAt
+                                            ? new Date(
+                                                item
+                                                  .referenceToOriginalRequirementId
+                                                  ?.createdAt,
+                                              ).toLocaleDateString("en-IN", {
                                                 dateStyle: "medium",
-                                                timeStyle: "medium",
-                                                timeZone: "Asia/Kolkata",
-                                                })}
-                                            </p>
+                                              })
+                                            : "--"}
+                                        </span>
+                                      </div>
+
+                                      <div className="mt-4 grid grid-cols-1 gap-2.5 text-xs text-slate-500 sm:flex sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2">
+                                        <div className="flex items-center gap-1.5">
+                                          <FiPackage
+                                            size={14}
+                                            className="text-slate-400"
+                                          />
+                                          <span className="font-medium text-slate-600">
+                                            {item.requestedQuantity}{" "}
+                                            {item.unit}
+                                          </span>
                                         </div>
 
-                                        {/* Fulfilled By */}
-                                        <div className="min-w-0">
-                                            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                                            Fulfilled By
-                                            </p>
-
-                                            <p
-                                            className="mt-0.5 truncate text-sm font-medium text-gray-700"
-                                            title={item.fulfilledBy?.name}
-                                            >
-                                            {item.fulfilledBy?.name || "-"}
-                                            </p>
+                                        <div className="flex items-center gap-1.5">
+                                          <FiCalendar
+                                            size={14}
+                                            className="text-slate-400"
+                                          />
+                                          <span>
+                                            {item.createdAt
+                                              ? new Date(
+                                                  item.createdAt,
+                                                ).toLocaleDateString("en-IN", {
+                                                  dateStyle: "medium",
+                                                })
+                                              : "--"}
+                                          </span>
                                         </div>
-                                        </div>
-                                    </motion.div>
-                                    )}
 
+                                        <div className="flex items-center gap-1.5">
+                                          <FiFileText
+                                            size={14}
+                                            className="text-blue-500"
+                                          />
 
-                                 
-                                </div>
-
-                                {/* KEBAB */}
-
-                                <div className="relative">
-                                  <motion.button
-                                    whileTap={{
-                                      scale: 0.85,
-                                    }}
-                                    onClick={() =>
-                                      setOpenMenu(
-                                        openMenu === item._id ? null : item._id,
-                                      )
-                                    }
-                                    className="
-                                          w-9
-                                          h-9
-                                          flex
-                                          items-center
-                                          justify-center
-                                          rounded-lg
-                                          text-gray-500
-                                          hover:bg-gray-100
-                                        "
-                                  >
-                                    <FiMoreVertical size={18} />
-                                  </motion.button>
-
-                                  <AnimatePresence>
-                                    {openMenu === item._id && (
-                                      <motion.div
-                                        initial={{
-                                          opacity: 0,
-                                          scale: 0.95,
-                                          y: -5,
-                                        }}
-                                        animate={{
-                                          opacity: 1,
-                                          scale: 1,
-                                          y: 0,
-                                        }}
-                                        exit={{
-                                          opacity: 0,
-                                          scale: 0.95,
-                                          y: -5,
-                                        }}
-                                        className="
-                                              absolute
-                                              right-0
-                                              top-10
-                                              z-50
-                                              w-48
-                                              rounded-lg
-                                              border
-                                              border-gray-200
-                                              bg-white
-                                              shadow-xl
-                                              py-1
-                                              origin-top-right
-                                            "
-                                      >
-                                        {/* ITEM DETAILS */}
-
-                                        <button
-                                          type="button"
-                                          className="
-                                                w-full
-                                                px-4
-                                                py-2.5
-                                                flex
-                                                items-center
-                                                gap-2
-                                                text-left
-                                                text-sm
-                                                text-gray-700
-                                                hover:bg-gray-50
-                                              "
-                                        >
-                                          <FiFileText size={15} />
-                                          Item Details
-                                        </button>
-
-                                        {/* CANCEL */}
-
-                                        {item.fulfillmentStatus ===
-                                          "PENDING" && (
-                                          <button
-                                            type="button"
-                                            onClick={() =>
-                                              handleCancel(
-                                                pending._id,
-                                                item._id,
-                                              )
-                                            }
-                                            className="
-                                                  w-full
-                                                  px-4
-                                                  py-2.5
-                                                  flex
-                                                  items-center
-                                                  gap-2
-                                                  text-left
-                                                  text-sm
-                                                  text-red-600
-                                                  hover:bg-red-50
-                                                "
+                                          <a
+                                            href={`/store/requirements/${item?.referenceToOriginalRequirementId?._id}`}
+                                            className="font-medium text-blue-600 transition hover:text-blue-800 hover:underline"
                                           >
-                                            <FiX size={15} />
-                                            Cancel
-                                          </button>
+                                            Ref:{" "}
+                                            {getReferenceValue(
+                                              item.referenceToOriginalRequirementId,
+                                            )}
+                                          </a>
+                                        </div>
+
+                                        <div className="flex items-center gap-1.5">
+                                          <FiUser
+                                            size={14}
+                                            className="text-slate-400"
+                                          />
+                                          <span>
+                                            {item.createdBy?.name || "Unknown"}
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      {item.referenceToDispatchedRequirementId && (
+                                        <motion.div
+                                          initial={{
+                                            opacity: 0,
+                                            height: 0,
+                                          }}
+                                          animate={{
+                                            opacity: 1,
+                                            height: "auto",
+                                          }}
+                                          className="mt-4 overflow-hidden rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-3.5 sm:p-4"
+                                        >
+                                          <div className="mb-3 flex items-center gap-2.5">
+                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+                                              <FiTruck size={15} />
+                                            </div>
+
+                                            <div>
+                                              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600">
+                                                Fulfilled
+                                              </p>
+
+                                              <p className="text-xs text-amber-700">
+                                                This item has already been
+                                                fulfilled.
+                                              </p>
+                                            </div>
+                                          </div>
+
+                                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+                                            <div className="min-w-0">
+                                              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                                                Dispatched Ref
+                                              </p>
+
+                                              <a
+                                                href={`/store/requirements/${item.referenceToDispatchedRequirementId}`}
+                                                className="mt-1 block truncate text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+                                                title={getReferenceValue(
+                                                  item.referenceToDispatchedRequirementId,
+                                                )}
+                                              >
+                                                {getReferenceValue(
+                                                  item.referenceToDispatchedRequirementId,
+                                                )}
+                                              </a>
+                                            </div>
+
+                                            <div>
+                                              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                                                Fulfilled At
+                                              </p>
+
+                                              <p className="mt-1 text-sm font-medium text-slate-700">
+                                                {new Date(
+                                                  item.fulfilledAt,
+                                                ).toLocaleString("en-IN", {
+                                                  dateStyle: "medium",
+                                                  timeStyle: "medium",
+                                                  timeZone: "Asia/Kolkata",
+                                                })}
+                                              </p>
+                                            </div>
+
+                                            <div className="min-w-0">
+                                              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                                                Fulfilled By
+                                              </p>
+
+                                              <p
+                                                className="mt-1 truncate text-sm font-medium text-slate-700"
+                                                title={item.fulfilledBy?.name}
+                                              >
+                                                {item.fulfilledBy?.name || "-"}
+                                              </p>
+                                            </div>
+                                          </div>
+                                        </motion.div>
+                                      )}
+                                    </div>
+
+                                    <div className="relative shrink-0">
+                                      <motion.button
+                                        whileTap={{ scale: 0.85 }}
+                                        onClick={() =>
+                                          setOpenMenu(
+                                            openMenu === item._id
+                                              ? null
+                                              : item._id,
+                                          )
+                                        }
+                                        className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                                      >
+                                        <FiMoreVertical size={18} />
+                                      </motion.button>
+
+                                      <AnimatePresence>
+                                        {openMenu === item._id && (
+                                          <motion.div
+                                            initial={{
+                                              opacity: 0,
+                                              scale: 0.95,
+                                              y: -5,
+                                            }}
+                                            animate={{
+                                              opacity: 1,
+                                              scale: 1,
+                                              y: 0,
+                                            }}
+                                            exit={{
+                                              opacity: 0,
+                                              scale: 0.95,
+                                              y: -5,
+                                            }}
+                                            className="absolute right-0 top-10 z-50 w-48 origin-top-right overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl shadow-slate-900/10"
+                                          >
+                                            <button
+                                              type="button"
+                                              className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-50"
+                                            >
+                                              <FiFileText size={15} />
+                                              Item Details
+                                            </button>
+
+                                            {item.fulfillmentStatus ===
+                                              "PENDING" && (
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  handleCancel(
+                                                    pending._id,
+                                                    item._id,
+                                                  )
+                                                }
+                                                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 transition hover:bg-red-50"
+                                              >
+                                                <FiX size={15} />
+                                                Cancel
+                                              </button>
+                                            )}
+                                          </motion.div>
                                         )}
-                                      </motion.div>
-                                    )}
-                                  </AnimatePresence>
-                                </div>
-                              </div>
-                            </motion.div>
-                          );
-                        })}
+                                      </AnimatePresence>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                );
+              })}
+
+              {showRequirement && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-x-0 top-5 z-50 px-3 sm:px-4"
+                >
+                  <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20">
+                    <div className="flex items-center justify-between bg-gradient-to-r from-[#181e53] to-[#252b68] px-4 py-4 sm:px-5">
+                      <div>
+                        <div className="mb-1 flex items-center gap-2">
+                          <span className="rounded-full bg-white/10 px-2 py-1 text-[9px] font-bold uppercase tracking-widest text-white/70">
+                            Pending Requirements
+                          </span>
+                        </div>
+
+                        <h2 className="text-base font-bold text-white sm:text-lg">
+                          {requirementId?.[0]?.kitchen || "Kitchen"} Kitchen
+                        </h2>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
-        {showRequirement && (
-  <div className="absolute inset-x-0 top-5 z-50 px-3 sm:px-4">
-    <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl">
 
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-100 bg-gradient-to-r from-[#181e53] to-[#252b68] px-4 py-3">
-        <div>
-          <p className="text-[10px] font-medium uppercase tracking-widest text-white/60">
-            Pending Requirements
-          </p>
+                      <button
+                        type="button"
+                        onClick={() => setShowRequirement(false)}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl text-white/70 transition hover:bg-white/10 hover:text-white"
+                        aria-label="Close"
+                      >
+                        <IoMdCloseCircle size={23} />
+                      </button>
+                    </div>
 
-          <h2 className="mt-0.5 text-base font-bold text-white sm:text-lg">
-            {requirementId?.[0]?.kitchen || "Kitchen"} Kitchen
-          </h2>
-        </div>
+                    <div className="max-h-[55vh] overflow-y-auto bg-slate-50/80 p-3 sm:p-4">
+                      {requirementId?.length > 0 ? (
+                        <RequirementList
+                          requirements={requirementId}
+                          onSelect={(requirement) => {
+                            handleMerge(requirement);
+                          }}
+                          onClose={() => {
+                            setShowRequirement(false);
+                          }}
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                            <FiFileText size={20} />
+                          </div>
 
-        <button
-          type="button"
-          onClick={() => setShowRequirement(false)}
-          className="flex h-8 w-8 items-center justify-center rounded-full
-                     text-white/70 transition hover:bg-white/10 hover:text-white"
-          aria-label="Close"
-        >
-          <IoMdCloseCircle size={22} />
-        </button>
-      </div>
+                          <p className="text-sm font-medium text-slate-700">
+                            No pending requirements found.
+                          </p>
+                        </div>
+                      )}
+                    </div>
 
-      {/* Content */}
-      <div className="max-h-[55vh] overflow-y-auto bg-gray-50/70 p-3 sm:p-4">
-        {requirementId?.length > 0 ? (
-          <RequirementList
-            requirements={requirementId}
-            onSelect={(requirement) => {
-              handleMerge(requirement)
-            }}
-          />
-        ) : (
-          <div className="py-10 text-center text-sm text-gray-500">
-            No pending requirements found.
+                    <div className="flex items-center justify-between border-t border-slate-100 bg-white px-4 py-3">
+                      <span className="text-xs font-medium text-slate-500">
+                        {requirementId?.length || 0} requirement
+                        {requirementId?.length === 1 ? "" : "s"}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowRequirement(false)}
+                        className="rounded-lg bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-200"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        )}
+        </div>
       </div>
-
-      {/* Footer */}
-      <div className="flex items-center justify-between border-t border-gray-100 bg-white px-4 py-2.5">
-        <span className="text-xs text-gray-500">
-          {requirementId?.length || 0} requirement
-          {requirementId?.length === 1 ? "" : "s"}
-        </span>
-
-        <button
-          type="button"
-          onClick={() => setShowRequirement(false)}
-          className="rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-medium
-                     text-gray-600 transition hover:bg-gray-200"
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-
-        </AnimatePresence>
-      </div>
-    </div>
     </ThemeProvider>
   );
 };
