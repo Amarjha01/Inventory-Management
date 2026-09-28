@@ -115,11 +115,12 @@ const ImagePreview = ({ src, alt }) => {
   );
 };
 
-const PurchaseDetails = ({ record, onUpdated, onDeleteSuccess }) => {
+const PurchaseDetails = ({ record, onClose , onUpdated, onDeleteSuccess }) => {
+  
   if (!record) return null;
 
   const purchase = record.purchaseRecord || {};
-
+  
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -281,6 +282,7 @@ const PurchaseDetails = ({ record, onUpdated, onDeleteSuccess }) => {
       setDeleting(true);
       await deletePurchaseRecord(record._id);
       toast.success("Record deleted successfully");
+      onClose()
       onDeleteSuccess?.(record._id);
     } catch (error) {
       console.error("Failed to delete record:", error);

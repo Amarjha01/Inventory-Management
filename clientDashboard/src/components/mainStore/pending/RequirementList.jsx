@@ -12,7 +12,10 @@ const RequirementList = ({
   requirements = [],
   selectedRequirement,
   onSelect,
+  onClose
 }) => {
+  console.log(onClose);
+  
   if (!requirements.length) {
     return (
       <div className="py-6 text-center">
@@ -37,7 +40,7 @@ const RequirementList = ({
             key={requirement._id}
             type="button"
             whileTap={{ scale: 0.99 }}
-            onClick={() => onSelect(requirement)}
+            onClick={() => {onSelect(requirement) , onClose()}}
             className={`w-full rounded-lg border px-3 py-2.5 text-left transition-all ${
               isSelected
                 ? "border-[#181e53] bg-[#181e53]/5 ring-1 ring-[#181e53]/10"

@@ -157,6 +157,12 @@ const purchaseRecordSchema = new Schema(
       required: true,
       trim: true,
     },
+    
+    quantity: {
+      type: Number,
+      required: true,
+      trim: true,
+    },
 
     partyName: {
       type: String,

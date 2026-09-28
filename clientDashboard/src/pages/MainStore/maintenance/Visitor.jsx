@@ -18,6 +18,8 @@ import {
 import VisitorCard from "../../../components/mainStore/maintenance/VisitorCard.jsx";
 import MaintenanceDetailModal from "../../../components/mainStore/maintenance/MaintenanceDetailModal.jsx";
 import { getAllVisitorForAdmin } from "../../../services/maintainence.service.js";
+import { SlGraph } from "react-icons/sl";
+import Reports from "./Reports.jsx";
 
 
 /* =========================================================
@@ -106,27 +108,24 @@ const normalizeVisitorRecord = (record) => {
 ========================================================= */
 
 const Visitor = () => {
-
+  const [showReports , setShowReports] = useState([]);
   /* -------------------------------------------------------
      DATA
   ------------------------------------------------------- */
 
   const [records, setRecords] = useState([]);
 
-  const [loading, setLoading] =
-    useState(true);
 
-  const [error, setError] =
-    useState("");
+  const [loading, setLoading] = useState(true);
+
+  const [error, setError] = useState("");
 
 
   /* -------------------------------------------------------
      SEARCH
   ------------------------------------------------------- */
 
-  const [search, setSearch] =
-    useState("");
-
+  const [search, setSearch] = useState("");
 
   /* -------------------------------------------------------
      FILTERS
@@ -155,7 +154,9 @@ const Visitor = () => {
   const [selectedRecord, setSelectedRecord] =
     useState(null);
 
-
+    const handleShowVisitorReports = () =>{
+    setShowReports(!showReports);
+  }
   /* =======================================================
      FETCH VISITOR RECORDS
   ======================================================= */
@@ -225,7 +226,6 @@ const Visitor = () => {
     },
     []
   );
-
 
   /* =======================================================
      INITIAL FETCH
@@ -513,6 +513,8 @@ const Visitor = () => {
   const handleRecordClick = (
     record
   ) => {
+    console.log(record);
+    
     setSelectedRecord(record);
   };
 
@@ -911,9 +913,35 @@ const Visitor = () => {
 
             </button>
 
+                        <button
+                          type="button"
+                          onClick={handleShowVisitorReports}
+                          title="Reports"
+                          className="
+                            inline-flex
+                            h-11
+                            items-center
+                            justify-center
+                            gap-2
+                            rounded-xl
+                            border
+                            border-slate-200
+                            bg-white
+                            px-4
+                            text-xs
+                            font-semibold
+                            text-slate-600
+                            transition
+                            hover:border-slate-300
+                            hover:text-slate-900
+                          "
+                        >
+                          <SlGraph size={15} />
+            
+                          <span className="hidden sm:inline">Report</span>
+                        </button>
+
           </div>
-
-
           {/* =================================================
               FILTER PANEL
           ================================================= */}
@@ -1297,18 +1325,6 @@ const Visitor = () => {
         >
 
           <div>
-
-            <h2
-              className="
-                text-sm
-                font-bold
-                text-slate-900
-              "
-            >
-              Visitor Records
-            </h2>
-
-
             <p
               className="
                 mt-0.5
@@ -1457,8 +1473,6 @@ const Visitor = () => {
             className="
               grid
               gap-4
-              sm:grid-cols-2
-              xl:grid-cols-3
             "
           >
 

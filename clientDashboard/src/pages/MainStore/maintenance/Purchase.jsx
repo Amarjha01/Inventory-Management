@@ -9,12 +9,13 @@ import {
   FiSearch,
   FiX,
 } from "react-icons/fi";
-
+import { SlGraph } from "react-icons/sl";
 
 import MaintenanceDetailModal from "../../../components/mainStore/maintenance/MaintenanceDetailModal.jsx";
 
 import { getAllPurchaseForAdmin } from "../../../services/maintainence.service.js";
 import PurchaseCard from "../../../components/mainStore/maintenance/PurchaseCard.jsx";
+import Reports from "./Reports.jsx";
 
 /* =========================================================
    HELPERS
@@ -84,6 +85,8 @@ console.log(record);
 ========================================================= */
 
 const Purchase = () => {
+    const [showReports , setShowReports] = useState([]);
+  
   /* =======================================================
      DATA
   ======================================================= */
@@ -128,6 +131,9 @@ const Purchase = () => {
 
   const [selectedRecord, setSelectedRecord] = useState(null);
 
+    const handleShowVisitorReports = () =>{
+    setShowReports(!showReports);
+  }
   /* =======================================================
      FETCH PURCHASE RECORDS
   ======================================================= */
@@ -697,6 +703,35 @@ const Purchase = () => {
 
               <span className="hidden sm:inline">Refresh</span>
             </button>
+
+                        <button
+                          type="button"
+                          onClick={handleShowVisitorReports}
+                          title="Reports"
+                          className="
+                            inline-flex
+                            h-11
+                            items-center
+                            justify-center
+                            gap-2
+                            rounded-xl
+                            border
+                            border-slate-200
+                            bg-white
+                            px-4
+                            text-xs
+                            font-semibold
+                            text-slate-600
+                            transition
+                            hover:border-slate-300
+                            hover:text-slate-900
+                          "
+                        >
+                          <SlGraph size={15} />
+            
+                          <span className="hidden sm:inline">Report</span>
+                        </button>
+
           </div>
 
           {/* =================================================
@@ -1007,15 +1042,6 @@ const Purchase = () => {
           "
         >
           <div>
-            <h2
-              className="
-                text-sm
-                font-bold
-                text-slate-900
-              "
-            >
-              Purchase Records
-            </h2>
 
             <p
               className="
@@ -1141,7 +1167,6 @@ const Purchase = () => {
               grid
               gap-4
               sm:grid-cols-2
-              xl:grid-cols-3
             "
           >
             {filteredRecords.map((record) => (

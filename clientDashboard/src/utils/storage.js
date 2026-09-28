@@ -37,6 +37,63 @@ getStats:()=>
   localStorage.setItem("activeTab", JSON.stringify(tab)),
 getActiveTab:()=>
       JSON.parse(localStorage.getItem("activeTab") || "null"),
+
+
+// Inventory
+  setInventory: (type, items) => {
+    try {
+      const existingInventory = JSON.parse(
+        localStorage.getItem(type) || "{}"
+      );
+
+      existingInventory[type] = items;
+
+      localStorage.setItem(
+        type,
+        JSON.stringify(existingInventory)
+      );
+    } catch (error) {
+      console.error("Failed to save inventory:", error);
+    }
+  },
+
+  getInventory: (type) => {
+    try {
+      const inventory = JSON.parse(
+        localStorage.getItem(type) || "{}"
+      );
+
+      return inventory[type] || null;
+    } catch (error) {
+      console.error("Failed to get inventory:", error);
+      return null;
+    }
+  },
+
+  clearInventory: (type) => {
+    try {
+      const inventory = JSON.parse(
+        localStorage.getItem(type) || "{}"
+      );
+
+      if (type) {
+        delete inventory[type];
+      } else {
+        Object.keys(inventory).forEach((key) => {
+          delete inventory[key];
+        });
+      }
+
+      localStorage.setItem(
+        type,
+        JSON.stringify(inventory)
+      );
+    } catch (error) {
+      console.error("Failed to clear inventory:", error);
+    }
+  },
+
+
   // Notifications
   setNotificationSettings: (settings) =>
     localStorage.setItem(

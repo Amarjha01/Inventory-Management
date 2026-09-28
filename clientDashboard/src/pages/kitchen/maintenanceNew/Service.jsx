@@ -12,7 +12,10 @@ import {
 
 import ServiceCard from "../../../components/mainStore/maintenance/ServiceCard.jsx";
 import MaintenanceDetailModal from "../../../components/mainStore/maintenance/MaintenanceDetailModal.jsx";
-import { createServiceRecord, getAllServiceForKitchen } from "../../../services/maintainence.service.js";
+import {
+  createServiceRecord,
+  getAllServiceForKitchen,
+} from "../../../services/maintainence.service.js";
 import { AnimatePresence } from "framer-motion";
 import CameraCapture from "../../../components/kitchen/uploads/CameraCapture.jsx";
 import ServiceSection from "./ServiceSection.jsx";
@@ -130,33 +133,139 @@ const Service = () => {
 
   const [serviceForm, setServiceForm] = useState(EMPTY_SERVICE);
 
-  function closeForm(){
-    setShowForm(false)
+  function closeForm() {
+    setShowForm(false);
   }
 
-    const openCamera = (type) => {
-    setCameraType(type);
+  const compressImage = (file, options = {}) => {
+    const {
+      maxWidth = 1600,
+      maxHeight = 1600,
+      quality = 0.78,
+      maxSizeMB = 1.5,
+    } = options;
 
+    return new Promise((resolve, reject) => {
+      if (!file?.type?.startsWith("image/")) {
+        resolve(file);
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        const img = new Image();
+
+        img.onload = () => {
+          let { width, height } = img;
+
+          const ratio = Math.min(maxWidth / width, maxHeight / height, 1);
+
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+
+          if (!ctx) {
+            reject(new Error("Could not create canvas context"));
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const outputType = "image/jpeg";
+
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                reject(new Error("Image compression failed"));
+                return;
+              }
+
+              // If still larger than max size, reduce quality further
+              if (blob.size > maxSizeMB * 1024 * 1024) {
+                canvas.toBlob(
+                  (smallerBlob) => {
+                    if (!smallerBlob) {
+                      reject(new Error("Image compression failed"));
+                      return;
+                    }
+
+                    const compressedFile = new File(
+                      [smallerBlob],
+                      file.name.replace(/\.[^/.]+$/, ".jpg"),
+                      {
+                        type: outputType,
+                        lastModified: Date.now(),
+                      },
+                    );
+
+                    resolve(compressedFile);
+                  },
+                  outputType,
+                  0.6,
+                );
+
+                return;
+              }
+
+              const compressedFile = new File(
+                [blob],
+                file.name.replace(/\.[^/.]+$/, ".jpg"),
+                {
+                  type: outputType,
+                  lastModified: Date.now(),
+                },
+              );
+
+              resolve(compressedFile);
+            },
+            outputType,
+            quality,
+          );
+        };
+
+        img.onerror = () => reject(new Error("Could not load image"));
+        img.src = event.target.result;
+      };
+
+      reader.onerror = () => reject(new Error("Could not read image"));
+      reader.readAsDataURL(file);
+    });
+  };
+  const openCamera = (type) => {
+    setCameraType(type);
     setShowCamera(true);
   };
 
-const handleCameraCapture = (file, documentType) => {
-  if (!file) return;
+  const handleCameraCapture = async (file, documentType) => {
+    if (!file) return;
 
- 
-    setServiceForm((previous) => {
-      if (previous.images.length >= 5) {
-        return previous;
-      }
+    try {
+      const compressedFile = await compressImage(file, {
+        maxWidth: 1600,
+        maxHeight: 1600,
+        quality: 0.8,
+      });
 
-      return {
-        ...previous,
-        images: [...previous.images, file],
-      };
-    });
+      setServiceForm((previous) => {
+        if (previous.images.length >= 5) {
+          return previous;
+        }
 
-    return;
-};
+        return {
+          ...previous,
+          images: [...previous.images, compressedFile],
+        };
+      });
+    } catch (error) {
+      console.error("Failed to compress service camera image:", error);
+    }
+  };
 
   const handleServiceChange = (event) => {
     const { name, value } = event.target;
@@ -167,20 +276,42 @@ const handleCameraCapture = (file, documentType) => {
     }));
   };
 
-    const handleServiceFiles = (event) => {
-    console.log(event.target.files);
+  const handleServiceFiles = async (event) => {
     const files = Array.from(event.target.files || []);
 
-    setServiceForm((previous) => ({
-      ...previous,
+    if (!files.length) return;
 
-      images: [...previous.images, ...files].slice(0, 5),
-    }));
+    try {
+      const remainingSlots = 5 - serviceForm.images.length;
 
-    event.target.value = "";
+      if (remainingSlots <= 0) {
+        event.target.value = "";
+        return;
+      }
+
+      const selectedFiles = files.slice(0, remainingSlots);
+
+      const compressedFiles = await Promise.all(
+        selectedFiles.map((file) =>
+          compressImage(file, {
+            maxWidth: 1600,
+            maxHeight: 1600,
+            quality: 0.8,
+          }),
+        ),
+      );
+
+      setServiceForm((previous) => ({
+        ...previous,
+        images: [...previous.images, ...compressedFiles].slice(0, 5),
+      }));
+    } catch (error) {
+      console.error("Failed to compress service images:", error);
+    } finally {
+      event.target.value = "";
+    }
   };
 
-  
   const removeServiceImage = (index) => {
     setServiceForm((previous) => ({
       ...previous,
@@ -189,7 +320,7 @@ const handleCameraCapture = (file, documentType) => {
     }));
   };
 
-    const validateService = () => {
+  const validateService = () => {
     if (!serviceForm.partName.trim()) {
       return "Part name is required.";
     }
@@ -216,7 +347,7 @@ const handleCameraCapture = (file, documentType) => {
     return "";
   };
 
-    const buildServiceFormData = () => {
+  const buildServiceFormData = () => {
     const formData = new FormData();
 
     formData.append("partName", serviceForm.partName);
@@ -240,51 +371,49 @@ const handleCameraCapture = (file, documentType) => {
     return formData;
   };
 
-    const handleSubmit = async (event) => {
-      event.preventDefault();
-  
-      setError("");
-      setSuccess("");
-  
-      let validationError = validateService();
-  
-      if (validationError) {
-        setError(validationError);
-        return;
-      }
-  
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    setError("");
+    setSuccess("");
+
+    let validationError = validateService();
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      let formData = buildServiceFormData();
+
+      let response;
+
       try {
-        setSaving(true);
-  
-        let formData = buildServiceFormData();
-
-        let response;
-  
-  
-          try {
-            response = await createServiceRecord(formData)
-            toast.success("New Service Created")
-          } catch (error) {
-            toast.error(error)
-            console.log(error);
-          }
-  
-        closeForm();
+        response = await createServiceRecord(formData);
+        toast.success("New Service Created");
       } catch (error) {
-        toast.error(error)
-        console.error(error);
-      } finally {
-        setSaving(false);
+        toast.error(error);
+        console.log(error);
       }
-    };
 
-      const cameraDocument = useMemo(() => {
-          return {
-            id: "service-image",
-            title: "Service Image",
-          };
-    
-      }, [cameraType]);
+      closeForm();
+    } catch (error) {
+      toast.error(error);
+      console.error(error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const cameraDocument = useMemo(() => {
+    return {
+      id: "service-image",
+      title: "Service Image",
+    };
+  }, [cameraType]);
 
   /* -------------------------------------------------------
      DATA
@@ -542,7 +671,7 @@ const handleCameraCapture = (file, documentType) => {
         </div>
 
         {/* Cards skeleton */}
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 ">
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
@@ -651,7 +780,10 @@ const handleCameraCapture = (file, documentType) => {
               <FiRefreshCw size={15} />
               <span className="hidden sm:inline">Refresh</span>
             </button>
-            <button onClick={()=>setShowForm(true)} className="hidden md:block px-3 py-1 bg-black cursor-pointer text-white ">
+            <button
+              onClick={() => setShowForm(true)}
+              className="hidden md:block px-3 py-1 bg-black cursor-pointer text-white "
+            >
               Create New Service +
             </button>
           </div>
@@ -795,7 +927,10 @@ const handleCameraCapture = (file, documentType) => {
           )}
         </div>
 
-        <button onClick={()=>setShowForm(true)} className=" w-full md:hidden px-3 py-1 mb-3 bg-black cursor-pointer text-white ">
+        <button
+          onClick={() => setShowForm(true)}
+          className=" w-full md:hidden px-3 py-1 mb-3 bg-black cursor-pointer text-white "
+        >
           Create New Service +
         </button>
 
@@ -805,9 +940,6 @@ const handleCameraCapture = (file, documentType) => {
 
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-bold text-slate-900">
-              Service Records
-            </h2>
 
             <p className="mt-0.5 text-[11px] text-slate-400">
               {filteredRecords.length}{" "}
@@ -863,7 +995,7 @@ const handleCameraCapture = (file, documentType) => {
              RECORD GRID
           ================================================= */
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             {filteredRecords.map((record) => (
               <ServiceCard
                 key={record._id || record.id}
@@ -888,26 +1020,26 @@ const handleCameraCapture = (file, documentType) => {
       )}
 
       {showForm && (
-          <ServiceSection
-                      form={serviceForm}
-                      onChange={handleServiceChange}
-                      onCamera={() => openCamera("service-image")}
-                      onFiles={handleServiceFiles}
-                      onRemoveImage={removeServiceImage}
-                        onCancel={closeForm}
-  onSubmit={handleSubmit}
-                    />
+        <ServiceSection
+          form={serviceForm}
+          onChange={handleServiceChange}
+          onCamera={() => openCamera("service-image")}
+          onFiles={handleServiceFiles}
+          onRemoveImage={removeServiceImage}
+          onCancel={closeForm}
+          onSubmit={handleSubmit}
+        />
       )}
 
-              <AnimatePresence>
-          {showCamera && (
-            <CameraCapture
-              documentType={cameraDocument}
-              onCapture={handleCameraCapture}
-              onClose={() => setShowCamera(false)}
-            />
-          )}
-        </AnimatePresence>
+      <AnimatePresence>
+        {showCamera && (
+          <CameraCapture
+            documentType={cameraDocument}
+            onCapture={handleCameraCapture}
+            onClose={() => setShowCamera(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };

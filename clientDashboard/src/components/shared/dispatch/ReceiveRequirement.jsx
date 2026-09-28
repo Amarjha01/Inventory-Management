@@ -42,13 +42,13 @@ const ReceiveRequirement = ({ loading = false, onReceive , user}) => {
         Receive Requirement
       </h2>
 
-      <p className="text-sm text-gray-500 mt-2 mb-6">
+      {/* <p className="text-sm text-gray-500 mt-2 mb-6">
         Upload gate pass before marking this requirement as received.
-      </p>
+      </p> */}
         </>
       )}
 
-      <input
+      {/* <input
         ref={fileInputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp"
@@ -114,12 +114,13 @@ const ReceiveRequirement = ({ loading = false, onReceive , user}) => {
             </Button>
           )}
         </div>
-      )}
+      )} */}
 
       {user?.role !== "district coordinator"&&(
         <Button
-        className="w-full mt-6"
-        disabled={gatePass.length === 0 || loading}
+        className="w-full mt-6 cursor-pointer"
+        // disabled={gatePass.length === 0 || loading}
+        disabled={ loading}
         onClick={() => onReceive(gatePass)}
       >
         {loading ? "Uploading..." : "Mark as Received ( सामान प्राप्त हुआ )"}

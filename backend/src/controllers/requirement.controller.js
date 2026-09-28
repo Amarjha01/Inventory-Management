@@ -155,7 +155,7 @@ export const dispatchRequirement = asyncHandler(async (req, res) => {
 
     );
     } catch (error) {
-      console.error(error);
+      throw new ApiError(409 , error)
     }
 
 });

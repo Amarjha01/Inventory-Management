@@ -84,13 +84,13 @@ const MaintenanceDetailModal = ({ record, type, onClose }) => {
   const renderDetails = () => {
     switch (type) {
       case "service":
-        return <ServiceDetails record={record} onUpdateSuccess={updatedRecord} />;
+        return <ServiceDetails record={record} onClose={onClose} onUpdateSuccess={updatedRecord}  />;
 
       case "visitor":
         return <VisitorDetails record={record} onClose={onClose}/>;
 
       case "purchase":
-        return <PurchaseDetails record={record} />;
+        return <PurchaseDetails record={record} onClose={onClose}/>;
 
       default:
         return null;
