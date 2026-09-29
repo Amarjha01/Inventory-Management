@@ -84,11 +84,17 @@ const partName = [
     hindiName: "कार्बोरेटर",
     maintenanceTiming: null,
   },
-  {
-    name: "Boiler Mobery Status",
-    hindiName: "बॉयलर मशीनरी स्थिति",
-    maintenanceTiming: null,
-  },
+{
+  name: "Boiler Machinery Status Direct",
+  hindiName: "बॉयलर मशीनरी की स्थिति डायरेक्ट",
+  maintenanceTiming: null,
+},
+{
+  name: "Boiler Machinery Status Manual",
+  hindiName: "बॉयलर मशीनरी की स्थिति मैनुअल",
+  maintenanceTiming: null,
+},
+
 ];
 
 export default partName;
