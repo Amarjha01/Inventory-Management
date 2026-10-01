@@ -85,15 +85,16 @@ const partName = [
     maintenanceTiming: null,
   },
 {
-  name: "Boiler Machinery Status Direct",
-  hindiName: "बॉयलर मशीनरी की स्थिति डायरेक्ट",
+  name: "Boiler Mobrey Status Direct",
+  hindiName: "बॉयलर मोब्रे स्थिति डायरेक्ट",
   maintenanceTiming: null,
 },
 {
-  name: "Boiler Machinery Status Manual",
-  hindiName: "बॉयलर मशीनरी की स्थिति मैनुअल",
+  name: "Boiler Mobrey Status Manual",
+  hindiName: "बॉयलर मोब्रे स्थिति मैनुअल",
   maintenanceTiming: null,
 },
+
 
 ];
 
