@@ -42,6 +42,13 @@ const destinations = [
     longitude: 85.412319,
     accuracy:109
   },
+  {
+    _id: "6a742efc3f54294f6e35d46b",
+    name: "Begusarai",
+    latitude: 25.447730,
+    longitude: 86.139905,
+    accuracy:109
+  },
 ];
 
 export default destinations;

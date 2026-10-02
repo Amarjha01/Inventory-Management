@@ -435,10 +435,10 @@ async getRequirementReport(query) {
       filter,
     );
 
-  console.log(
-    "Requirements found:",
-    requirements.length,
-  );
+  // console.log(
+  //   "Requirements found:",
+  //   requirements.length,
+  // );
 
   /**
    * ========================================================
@@ -465,15 +465,15 @@ async getRequirementReport(query) {
       selectedItems,
     );
 
-  console.log(
-    "Selected items:",
-    selectedItems,
-  );
+  // console.log(
+  //   "Selected items:",
+  //   selectedItems,
+  // );
 
-  console.log(
-    "Filtered requirements:",
-    filteredRequirements.length,
-  );
+  // console.log(
+  //   "Filtered requirements:",
+  //   filteredRequirements.length,
+  // );
 
   /**
    * ========================================================

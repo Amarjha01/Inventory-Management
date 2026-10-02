@@ -15,24 +15,19 @@ const Trip = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-   const fetchActiveTrip = async () => {
-  try {
-    const response = await getMyTrips();
-
-    const trips = response?.items || [];
-
-    const active = trips.find(
-      (trip) => trip.status === "READY"
-    );
-
-    setActiveTrip(active || null);
-  } catch (error) {
-    console.error("Failed to fetch active trip:", error);
-    setActiveTrip(null);
-  } finally {
-    setLoading(false);
-  }
-};
+    const fetchActiveTrip = async () => {
+      try {
+        const response = await getMyTrips();
+        const trips = response?.items || [];
+        const active = trips.find((trip) => trip.status === "READY");
+        setActiveTrip(active || null);
+      } catch (error) {
+        console.error("Failed to fetch active trip:", error);
+        setActiveTrip(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchActiveTrip();
   }, []);
@@ -109,11 +104,7 @@ const Trip = () => {
     <div className="mx-auto w-full max-w-5xl space-y-5">
       {/* HEADER */}
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="pt-1"
-      >
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="pt-1">
         <p className="text-sm font-medium text-gray-500">Driver Dashboard</p>
 
         <h1 className="mt-1 text-2xl font-bold text-[#1f225f]">Your Trips</h1>
@@ -126,11 +117,7 @@ const Trip = () => {
       {/* ACTIVE TRIP */}
 
       {loading ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm"
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
           <div className="animate-pulse">
             <div className="mx-auto h-16 w-16 rounded-2xl bg-gray-200" />
 
@@ -142,18 +129,7 @@ const Trip = () => {
           </div>
         </motion.div>
       ) : activeTrip ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="
-            overflow-hidden
-            rounded-3xl
-            border
-            border-gray-100
-            bg-white
-            shadow-sm
-          "
-        >
+        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
           <div className="p-5">
             {/* Trip Header */}
 
@@ -168,18 +144,7 @@ const Trip = () => {
                 </h2>
               </div>
 
-              <span
-                className="
-                  shrink-0
-                  rounded-full
-                  bg-green-50
-                  px-3
-                  py-1
-                  text-xs
-                  font-semibold
-                  text-green-700
-                "
-              >
+              <span className="shrink-0 rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
                 {activeTrip.status === "READY"
                   ? "Ready"
                   : activeTrip.status === "IN_PROGRESS"
@@ -192,19 +157,7 @@ const Trip = () => {
 
             {currentDestination && (
               <div className="mt-5 flex items-center gap-3">
-                <div
-                  className="
-                    flex
-                    h-10
-                    w-10
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-xl
-                    bg-[#1f225f]/10
-                    text-[#1f225f]
-                  "
-                >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1f225f]/10 text-[#1f225f]">
                   <MdLocationOn size={22} />
                 </div>
 
@@ -272,22 +225,8 @@ const Trip = () => {
             {/* Continue */}
 
             <Link
-              to={`/trip/active${activeTrip._id ? `?tripId=${activeTrip._id}` : ""}`}
-              className="
-                mt-5
-                flex
-                h-12
-                items-center
-                justify-center
-                gap-2
-                rounded-2xl
-                bg-[#1f225f]
-                text-sm
-                font-semibold
-                text-white
-                transition
-                hover:bg-[#171a4d]
-              "
+              to={`/trip/active?tripId=${activeTrip._id}`}
+              className="mt-5 flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#1f225f] text-sm font-semibold text-white transition hover:bg-[#171a4d]"
             >
               Continue Trip
               <MdArrowForward size={19} />
@@ -297,31 +236,8 @@ const Trip = () => {
       ) : (
         /* NO ACTIVE TRIP */
 
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="
-            rounded-3xl
-            border
-            border-gray-100
-            bg-white
-            p-6
-            shadow-sm
-          "
-        >
-          <div
-            className="
-              mx-auto
-              flex
-              h-16
-              w-16
-              items-center
-              justify-center
-              rounded-2xl
-              bg-[#1f225f]/10
-              text-[#1f225f]
-            "
-          >
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1f225f]/10 text-[#1f225f]">
             <FaRoute size={28} />
           </div>
 
@@ -336,23 +252,7 @@ const Trip = () => {
 
           <Link
             to="/trip/create"
-            className="
-              mx-auto
-              mt-5
-              flex
-              h-12
-              max-w-sm
-              items-center
-              justify-center
-              gap-2
-              rounded-2xl
-              bg-[#1f225f]
-              text-sm
-              font-semibold
-              text-white
-              transition
-              hover:bg-[#171a4d]
-            "
+            className="mx-auto mt-5 flex h-12 max-w-sm items-center justify-center gap-2 rounded-2xl bg-[#1f225f] text-sm font-semibold text-white transition hover:bg-[#171a4d]"
           >
             <MdAddRoad size={20} />
             Start New Trip
@@ -360,112 +260,11 @@ const Trip = () => {
         </motion.div>
       )}
 
-      {/* QUICK ACTIONS */}
-
-      <div className="grid grid-cols-2 gap-3">
-        <Link to="/trip/create">
-          <motion.div
-            whileTap={{ scale: 0.97 }}
-            className="
-              h-full
-              rounded-2xl
-              border
-              border-gray-100
-              bg-white
-              p-4
-              shadow-sm
-              transition
-              hover:shadow-md
-            "
-          >
-            <div
-              className="
-                flex
-                h-10
-                w-10
-                items-center
-                justify-center
-                rounded-xl
-                bg-blue-50
-                text-blue-600
-              "
-            >
-              <MdAddRoad size={21} />
-            </div>
-
-            <h3 className="mt-3 text-sm font-bold text-gray-900">New Trip</h3>
-
-            <p className="mt-1 text-xs text-gray-500">Create a new journey</p>
-          </motion.div>
-        </Link>
-
-        <Link to="/trip/history">
-          <motion.div
-            whileTap={{ scale: 0.97 }}
-            className="
-              h-full
-              rounded-2xl
-              border
-              border-gray-100
-              bg-white
-              p-4
-              shadow-sm
-              transition
-              hover:shadow-md
-            "
-          >
-            <div
-              className="
-                flex
-                h-10
-                w-10
-                items-center
-                justify-center
-                rounded-xl
-                bg-purple-50
-                text-purple-600
-              "
-            >
-              <MdHistory size={21} />
-            </div>
-
-            <h3 className="mt-3 text-sm font-bold text-gray-900">
-              Trip History
-            </h3>
-
-            <p className="mt-1 text-xs text-gray-500">View previous trips</p>
-          </motion.div>
-        </Link>
-      </div>
-
       {/* VEHICLE INFO */}
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="
-          rounded-2xl
-          border
-          border-gray-100
-          bg-white
-          p-4
-          shadow-sm
-        "
-      >
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
         <div className="flex items-center gap-3">
-          <div
-            className="
-              flex
-              h-11
-              w-11
-              items-center
-              justify-center
-              rounded-xl
-              bg-gray-100
-              text-gray-600
-            "
-          >
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-gray-600">
             <FaTruckMoving size={21} />
           </div>
 

@@ -1,5 +1,60 @@
 import mongoose from "mongoose";
 
+
+const destinationSchema = new mongoose.Schema(
+  {
+    sequence: Number,
+    name: String,
+    address: String,
+    latitude: Number,
+    longitude: Number,
+
+    status: {
+      type: String,
+      enum: ["PENDING", "CURRENT", "ARRIVED", "COMPLETED", "SKIPPED"],
+      default: "PENDING",
+    },
+
+    arrival: {
+      latitude: Number,
+      longitude: Number,
+      accuracy: Number,
+      capturedAt: Date,
+    },
+
+    distance: Number,
+
+    selfie: {
+      imageUrl: String,
+      capturedAt: Date,
+    },
+
+    meter: {
+      reading: Number,
+      imageUrl: String,
+      capturedAt: Date,
+    },
+
+    fuelEntries: [
+      {
+        litres: Number,
+        totalAmount: Number,
+        slipImageUrl: String,
+        latitude: Number,
+        longitude: Number,
+        capturedAt: Date,
+      },
+    ],
+
+    completedAt: Date,
+  },
+  {
+    _id: true,
+    timestamps: true,
+  }
+);
+
+
 const tripSchema = new mongoose.Schema(
   {
     driver: {
@@ -16,19 +71,13 @@ const tripSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: [
-        "DRAFT",
-        "READY",
-        "IN_PROGRESS",
-        "COMPLETED",
-        "CANCELLED",
-      ],
+      enum: ["DRAFT", "READY", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
       default: "DRAFT",
     },
 
     startLocation: {
       address: String,
-      name:String,  
+      name: String,
       latitude: {
         type: Number,
         required: true,
@@ -52,69 +101,8 @@ const tripSchema = new mongoose.Schema(
       capturedAt: Date,
     },
 
-    destinations: [
-      {
-        sequence: Number,
-
-        name: String,
-
-        address: String,
-
-        latitude: Number,
-
-        longitude: Number,
-
-        status: {
-          type: String,
-          enum: [
-            "PENDING",
-            "CURRENT",
-            "ARRIVED",
-            "COMPLETED",
-            "SKIPPED",
-          ],
-          default: "PENDING",
-        },
-
-        arrival: {
-          latitude: Number,
-          longitude: Number,
-          accuracy: Number,
-          capturedAt: Date,
-        },
-
-        distance: Number,
-
-        selfie: {
-          imageUrl: String,
-          capturedAt: Date,
-        },
-
-        meter: {
-          reading: Number,
-          imageUrl: String,
-          capturedAt: Date,
-        },
-
-        fuelEntries: [
-          {
-            litres: Number,
-
-            totalAmount: Number,
-
-            slipImageUrl: String,
-
-            latitude: Number,
-
-            longitude: Number,
-
-            capturedAt: Date,
-          },
-        ],
-
-        completedAt: Date,
-      },
-    ],
+    // Embed the schema here
+    destinations: [destinationSchema],
 
     finalMeter: {
       reading: Number,
@@ -133,4 +121,4 @@ const tripSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("tripmodel" , tripSchema);
+export default mongoose.model("Trip", tripSchema);
