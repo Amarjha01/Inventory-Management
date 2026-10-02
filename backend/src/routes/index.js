@@ -12,6 +12,8 @@ import trackingRoutes from '../modules/tracking/tracking.routes.js'
 import pendingFullfillment from "../modules/pendingFulfillment/pendingFulfillment.route.js"
 import maintenance from "../modules/maintenance/maintenance.routes.js"
 import trip from "../modules/trip/trip.routes.js"
+  import DGMonitoringRoutes from "../modules/DGMonitoring/DGMonitoring.routes.js";
+
 const router = Router();
 
 router.get("/health", (req, res) => {
@@ -48,6 +50,10 @@ router.use("/pending", pendingFullfillment);
 
 router.use("/maintenance", maintenance);
 
-router.use("/trips" , trip)
+router.use("/trips" , trip);
+
+router.use("/dg-monitoring", DGMonitoringRoutes);
+
+
 
 export default router;

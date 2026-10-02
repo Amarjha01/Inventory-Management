@@ -201,9 +201,14 @@ const [showReport, setShowReport] = useState(false);
           ? Number(
               item.dispatchedQuantity || 0,
             )
-          : Number(
+          : filters.status === "requested" && item?.updated ? 
+          Number(
+              item.updated?.quantity || 0,
+            ) 
+            : Number(
               item.quantity || 0,
             );
+
 
       quantities[itemId] = quantity;
     });

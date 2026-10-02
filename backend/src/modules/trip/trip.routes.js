@@ -82,7 +82,5 @@ router.post(
 
 router.post("/:tripId/cancel", cancelTrip);
 
-// router.post('/trips/:tripId/location'
-  
-// )
+// router.post('/trips/:tripId/location' )
 export default router;

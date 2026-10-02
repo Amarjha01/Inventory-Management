@@ -18,6 +18,7 @@ import { VscVmPending } from "react-icons/vsc";
 import { RiImageDownloadFill } from "react-icons/ri";
 
 import { storage } from "../../../utils/storage";
+import { SlGraph } from "react-icons/sl";
 
 const MainStoreNavbar = () => {
   const [moreOpen, setMoreOpen] = useState(false);
@@ -48,13 +49,18 @@ const MainStoreNavbar = () => {
       path: "/store/inventory",
     },
     {
-      title: "Users",
-      icon: FaUsers,
-      path: "/store/users",
+      title: "Maintenance",
+      icon: FaTools,
+      path: "/store/maintenance",
     },
   ];
 
   const moreMenus = [
+    {
+      title: "Users",
+      icon: FaUsers,
+      path: "/store/users",
+    },
     {
       title: "Vehicles",
       icon: FaTruckMoving,
@@ -75,16 +81,16 @@ const MainStoreNavbar = () => {
       icon: MdAssessment,
       path: "/store/reports",
     },
+    {
+      title: "DGMonetoring",
+      icon: SlGraph,
+      path: "/store/dgmonetoring",
+    },
     // {
     //   title: "Downloads",
     //   icon: RiImageDownloadFill,
     //   path: "/store/downloads",
     // },
-    {
-      title: "Maintenance",
-      icon: FaTools,
-      path: "/store/maintenance",
-    },
     {
       title: "Settings",
       icon: MdSettings,

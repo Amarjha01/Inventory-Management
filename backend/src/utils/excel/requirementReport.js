@@ -93,6 +93,10 @@ export default async function createRequirementWorkbook(
       return item.dispatchedQuantity ?? 0;
     }
 
+    if(item?.updated){
+      return item.updated.quantity ?? 0;
+    }
+
     /**
      * requested OR all status
      */
