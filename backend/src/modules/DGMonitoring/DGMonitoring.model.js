@@ -8,14 +8,13 @@ const DGSchema = new Schema(
       required: true,
     },
 
-    DGNumber: {
+    DGID: {
       type: Number,
-      required: true,
+      required: true
     },
 
     DGModel: {
       type: String,
-      required: true,
     },
 
     voltage: {
@@ -24,7 +23,6 @@ const DGSchema = new Schema(
 
     SRNO: {
       type: String,
-      required: true,
     },
 
     KVA: {
@@ -79,7 +77,4 @@ const DGMonitoringSchema = new Schema(
 );
 
 export const DG = mongoose.model("DG", DGSchema);
-export const DGMonitoring = mongoose.model(
-  "DGMonitoring",
-  DGMonitoringSchema
-);
+export const DGMonitoring = mongoose.model("DGMonitoring", DGMonitoringSchema);

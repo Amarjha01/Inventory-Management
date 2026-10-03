@@ -1,13 +1,36 @@
 // DGMonitoring.repository.js
-import {DGMonitoring} from "./DGMonitoring.model.js";
+import {DG, DGMonitoring} from "./DGMonitoring.model.js";
+
+const createDG = async (data) => {
+    return await DG.create(data);
+};
+
+const getAllDG = async (kitchenId) => {
+
+    return await DG.find().sort({
+        DGID: 1,
+    });
+};
+
+const findDGByKitchenAndId = async (kitchenId, DGID) => {
+    return await DG.findOne({
+        kitchenId,
+        DGID,
+    });
+};
 
 const createMonitoring = async (data) => {
     return await DGMonitoring.create(data);
 };
+const findDGByDGID = async (DGID) => {
+    return await DG.findOne({
+        DGID: Number(DGID),
+    });
+};
 
 const findActiveByDGId = async (DGID) => {
     return await DGMonitoring.findOne({
-        DGID,
+        DGID: Number(DGID),
         status: "RUNNING",
         stop: null,
     });
@@ -43,6 +66,11 @@ const getLatest = async (DGID) => {
 };
 
 export default {
+    createDG,
+    getAllDG,
+    findDGByKitchenAndId,
+    findDGByDGID,
+
     createMonitoring,
     findActiveByDGId,
     findById,

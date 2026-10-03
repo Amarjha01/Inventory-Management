@@ -1,10 +1,47 @@
 // DGMonitoring.service.js
 import DGMonitoringRepository from "./DGMonitoring.repository.js";
 
+
+const addDG = async (data) => {
+
+    const existingDG =
+        await DGMonitoringRepository.findDGByKitchenAndId(
+            data.kitchenId,
+            data.DGID
+        );
+
+
+    if (existingDG) {
+        throw new Error(
+            "DG with this DGID already exists in this kitchen"
+        );
+    }
+
+
+    const dg =
+        await DGMonitoringRepository.createDG(data);
+
+
+    return dg;
+};
+
+const getAllDG = async () => {
+
+    return await DGMonitoringRepository.getAllDG();
+};
+
+
 const startDG = async (DGID) => {
 
+    const dg =
+        await DGMonitoringRepository.findDGByDGID(DGID);
+
+    if (!dg) {
+        throw new Error(`DG ${DGID} not found`);
+    }
+
     const existingSession =
-        await DGMonitoringRepository.findActiveByDGId(DGID);
+        await DGMonitoringRepository.findActiveByDGId(dg._id);
 
     if (existingSession) {
         throw new Error("DG is already running");
@@ -12,7 +49,7 @@ const startDG = async (DGID) => {
 
     const monitoring =
         await DGMonitoringRepository.createMonitoring({
-            DGID,
+            DGID: dg._id,
             start: new Date(),
             stop: null,
             status: "RUNNING",
@@ -21,6 +58,7 @@ const startDG = async (DGID) => {
 
     return monitoring;
 };
+
 
 
 const stopDG = async (DGID) => {
@@ -75,6 +113,8 @@ const getLatestDGSession = async (DGID) => {
 
 
 export default {
+    addDG,
+    getAllDG,
     startDG,
     stopDG,
     getActiveDG,
