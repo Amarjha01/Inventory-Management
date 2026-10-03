@@ -249,7 +249,7 @@ const DGMonetoring = () => {
             SUMMARY CARDS
         ======================== */}
 
-<div className="grid grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 sticky top-[8%]">
+<div className="grid grid-cols-4 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-4 sticky top-[8%]">
   {/* Total DG */}
   <div className="rounded-xl lg:rounded-2xl border border-gray-200 p-3 sm:p-4 lg:p-5 shadow-sm backdrop-blur-xs">
     <div className="flex items-center justify-between">
@@ -302,7 +302,7 @@ const DGMonetoring = () => {
   </div>
 
   {/* Running Capacity */}
-  <div className="rounded-xl lg:rounded-2xl border border-blue-200 p-3 sm:p-4 lg:p-5 shadow-sm backdrop-blur-xs">
+  {/* <div className="rounded-xl lg:rounded-2xl border border-blue-200 p-3 sm:p-4 lg:p-5 shadow-sm backdrop-blur-xs">
     <div className="flex items-center justify-between">
       <div>
         <p className="text-[10px] sm:text-sm text-gray-500">Running Capacity</p>
@@ -319,7 +319,7 @@ const DGMonetoring = () => {
         ⚙
       </div>
     </div>
-  </div>
+  </div> */}
 </div>
 
 
