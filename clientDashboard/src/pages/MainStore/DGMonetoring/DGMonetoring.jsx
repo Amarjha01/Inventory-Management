@@ -244,7 +244,7 @@ const DGMonetoring = () => {
         imageUrl="/ui/DGMONITORING.png"
       />
 
-      <div className="px-4 md:px-6 lg:px-8 space-y-6 ">
+      <div className=" space-y-6 ">
         {/* =======================
             SUMMARY CARDS
         ======================== */}
