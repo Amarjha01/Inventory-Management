@@ -2,9 +2,27 @@ import React, { useMemo, useState } from "react";
 import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
 import { themes } from "../../../components/shared/ui/Theme";
 import PageHeader from "../../../components/shared/ui/PageHeader";
+import { addDG, getAllDG } from "../../../services/dgmonetoring.service";
+import { useEffect } from "react";
 
 const DGMonetoring = () => {
   const [selectedDG, setSelectedDG] = useState(null);
+
+  const [dgs, setDgs] = useState([]);
+
+  useEffect(() => {
+    const fetchDGs = async () => {
+      try {
+        const response = await getAllDG();
+        console.log(response);
+        
+        setDgs(response.data || []);
+      } catch (error) {
+        console.error("Failed to fetch DGs:", error);
+      }
+    };
+    fetchDGs()
+  },[]);
 
   // Temporary mock data.
   // Later this will come from your API.
@@ -20,175 +38,6 @@ const DGMonetoring = () => {
       phase: "3 Phase",
       status: "START",
       start: "2026-09-30T08:32:00",
-      stop: null,
-    },
-    {
-      id: "DG-002",
-      dgNumber: 2,
-      model: "Kirloskar KG1-250",
-      srNo: "KIR-2024-002",
-      voltage: 415,
-      current: 0,
-      kva: 250,
-      phase: "3 Phase",
-      status: "STOP",
-      start: null,
-      stop: "2026-09-30T06:15:00",
-    },
-    {
-      id: "DG-003",
-      dgNumber: 3,
-      model: "Mahindra Powerol",
-      srNo: "MHP-2024-003",
-      voltage: 415,
-      current: 182,
-      kva: 200,
-      phase: "3 Phase",
-      status: "START",
-      start: "2026-09-30T10:05:00",
-      stop: null,
-    },
-    {
-      id: "DG-003",
-      dgNumber: 3,
-      model: "Mahindra Powerol",
-      srNo: "MHP-2024-003",
-      voltage: 415,
-      current: 182,
-      kva: 200,
-      phase: "3 Phase",
-      status: "START",
-      start: "2026-09-30T10:05:00",
-      stop: null,
-    },
-    {
-      id: "DG-003",
-      dgNumber: 3,
-      model: "Mahindra Powerol",
-      srNo: "MHP-2024-003",
-      voltage: 415,
-      current: 182,
-      kva: 200,
-      phase: "3 Phase",
-      status: "START",
-      start: "2026-09-30T10:05:00",
-      stop: null,
-    },
-    {
-      id: "DG-003",
-      dgNumber: 3,
-      model: "Mahindra Powerol",
-      srNo: "MHP-2024-003",
-      voltage: 415,
-      current: 182,
-      kva: 200,
-      phase: "3 Phase",
-      status: "START",
-      start: "2026-09-30T10:05:00",
-      stop: null,
-    },
-    {
-      id: "DG-003",
-      dgNumber: 3,
-      model: "Mahindra Powerol",
-      srNo: "MHP-2024-003",
-      voltage: 415,
-      current: 182,
-      kva: 200,
-      phase: "3 Phase",
-      status: "START",
-      start: "2026-09-30T10:05:00",
-      stop: null,
-    },
-    {
-      id: "DG-003",
-      dgNumber: 3,
-      model: "Mahindra Powerol",
-      srNo: "MHP-2024-003",
-      voltage: 415,
-      current: 182,
-      kva: 200,
-      phase: "3 Phase",
-      status: "START",
-      start: "2026-09-30T10:05:00",
-      stop: null,
-    },
-    {
-      id: "DG-003",
-      dgNumber: 3,
-      model: "Mahindra Powerol",
-      srNo: "MHP-2024-003",
-      voltage: 415,
-      current: 182,
-      kva: 200,
-      phase: "3 Phase",
-      status: "START",
-      start: "2026-09-30T10:05:00",
-      stop: null,
-    },
-    {
-      id: "DG-003",
-      dgNumber: 3,
-      model: "Mahindra Powerol",
-      srNo: "MHP-2024-003",
-      voltage: 415,
-      current: 182,
-      kva: 200,
-      phase: "3 Phase",
-      status: "START",
-      start: "2026-09-30T10:05:00",
-      stop: null,
-    },
-    {
-      id: "DG-003",
-      dgNumber: 3,
-      model: "Mahindra Powerol",
-      srNo: "MHP-2024-003",
-      voltage: 415,
-      current: 182,
-      kva: 200,
-      phase: "3 Phase",
-      status: "START",
-      start: "2026-09-30T10:05:00",
-      stop: null,
-    },
-    {
-      id: "DG-003",
-      dgNumber: 3,
-      model: "Mahindra Powerol",
-      srNo: "MHP-2024-003",
-      voltage: 415,
-      current: 182,
-      kva: 200,
-      phase: "3 Phase",
-      status: "START",
-      start: "2026-09-30T10:05:00",
-      stop: null,
-    },
-    {
-      id: "DG-003",
-      dgNumber: 3,
-      model: "Mahindra Powerol",
-      srNo: "MHP-2024-003",
-      voltage: 415,
-      current: 182,
-      kva: 200,
-      phase: "3 Phase",
-      status: "START",
-      start: "2026-09-30T10:05:00",
-      stop: null,
-    },
-    {
-      id: "DG-003",
-      dgNumber: 3,
-      model: "Mahindra Powerol",
-      srNo: "MHP-2024-003",
-      voltage: 415,
-      current: 182,
-      kva: 200,
-      phase: "3 Phase",
-      status: "START",
-      start: "2026-09-30T10:05:00",
       stop: null,
     },
   ];
@@ -249,79 +98,80 @@ const DGMonetoring = () => {
             SUMMARY CARDS
         ======================== */}
 
-<div className="grid grid-cols-4 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-4 sticky top-[8%]">
-  {/* Total DG */}
-  <div className="rounded-xl lg:rounded-2xl border border-gray-200 p-3 sm:p-4 lg:p-5 shadow-sm backdrop-blur-xs">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-[10px] sm:text-sm text-gray-500">Total DG</p>
+        <div className="grid grid-cols-4 gap-2 sm:gap-3 lg:gap-4 sticky top-[8%]">
+          {/* Total DG */}
+          <div className="rounded-xl lg:rounded-2xl border border-gray-200 p-3 sm:p-4 lg:p-5 shadow-sm backdrop-blur-xs">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] sm:text-sm text-gray-500">Total DG</p>
 
-        <h2 className="text-xs sm:text-2xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">
-          {statistics.total}
-        </h2>
-      </div>
+                <h2 className="text-xs sm:text-2xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">
+                  {statistics.total}
+                </h2>
+              </div>
 
-      <div className="w-5 h-5 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-gray-100 flex items-center justify-center text-sm sm:text-lg lg:text-xl">
-        ⚡
-      </div>
-    </div>
-  </div>
+              <div className="w-5 h-5 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-gray-100 flex items-center justify-center text-sm sm:text-lg lg:text-xl">
+                ⚡
+              </div>
+            </div>
+          </div>
 
-  {/* Running */}
-  <div className="rounded-xl lg:rounded-2xl border border-green-200 p-3 sm:p-4 lg:p-5 shadow-sm backdrop-blur-xs">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-[10px] sm:text-sm text-gray-500">Running</p>
+          {/* Running */}
+          <div className="rounded-xl lg:rounded-2xl border border-green-200 p-3 sm:p-4 lg:p-5 shadow-sm backdrop-blur-xs">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] sm:text-sm text-gray-500">Running</p>
 
-        <h2 className="text-xs sm:text-2xl lg:text-3xl font-bold text-green-600 mt-1 sm:mt-2">
-          {statistics.running}
-        </h2>
-      </div>
+                <h2 className="text-xs sm:text-2xl lg:text-3xl font-bold text-green-600 mt-1 sm:mt-2">
+                  {statistics.running}
+                </h2>
+              </div>
 
-      <div className="w-5 h-5 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-green-50 flex items-center justify-center">
-        <span className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse" />
-      </div>
-    </div>
-  </div>
+              <div className="w-5 h-5 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-green-50 flex items-center justify-center">
+                <span className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse" />
+              </div>
+            </div>
+          </div>
 
-  {/* Stopped */}
-  <div className="rounded-xl lg:rounded-2xl border border-red-200 p-3 sm:p-4 lg:p-5 shadow-sm backdrop-blur-xs">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-[10px] sm:text-sm text-gray-500">Stopped</p>
+          {/* Stopped */}
+          <div className="rounded-xl lg:rounded-2xl border border-red-200 p-3 sm:p-4 lg:p-5 shadow-sm backdrop-blur-xs">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] sm:text-sm text-gray-500">Stopped</p>
 
-        <h2 className="text-xs sm:text-2xl lg:text-3xl font-bold text-red-500 mt-1 sm:mt-2">
-          {statistics.stopped}
-        </h2>
-      </div>
+                <h2 className="text-xs sm:text-2xl lg:text-3xl font-bold text-red-500 mt-1 sm:mt-2">
+                  {statistics.stopped}
+                </h2>
+              </div>
 
-      <div className="w-5 h-5 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-red-50 flex items-center justify-center text-red-500 text-sm sm:text-lg">
-        ■
-      </div>
-    </div>
-  </div>
+              <div className="w-5 h-5 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-red-50 flex items-center justify-center text-red-500 text-sm sm:text-lg">
+                ■
+              </div>
+            </div>
+          </div>
+          {/* add dg*/}
+          {/* Add New DG */}
+          <button
+            type="button"
+            onClick={() => setIsAddDGOpen(true)}
+            className="group rounded-xl lg:rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/40 p-3 sm:p-4 lg:p-5 shadow-sm transition-all duration-200 hover:border-blue-400 hover:bg-blue-50 hover:shadow-md active:scale-[0.98] cursor-pointer"
+          >
+            <div className="flex items-center justify-between h-full">
+              <div className="text-left">
+                <p className="text-[10px] sm:text-sm text-gray-500">
+                  Generator
+                </p>
+                <h2 className="text-[10px] sm:text-lg lg:text-xl font-bold text-blue-600 mt-1 sm:mt-2 whitespace-nowrap">
+                  Add New DG
+                </h2>
+              </div>
 
-  {/* Running Capacity */}
-  {/* <div className="rounded-xl lg:rounded-2xl border border-blue-200 p-3 sm:p-4 lg:p-5 shadow-sm backdrop-blur-xs">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-[10px] sm:text-sm text-gray-500">Running Capacity</p>
-
-        <h2 className="text-[10px] sm:text-2xl lg:text-3xl font-bold text-blue-600 mt-1 sm:mt-2">
-          {statistics.totalKVA}
-          <span className="text-xs sm:text-xs lg:text-sm font-medium ml-1">
-            KVA
-          </span>
-        </h2>
-      </div>
-
-      <div className="w-5 h-5 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 text-sm sm:text-lg">
-        ⚙
-      </div>
-    </div>
-  </div> */}
-</div>
-
+              <div className="w-5 h-5 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 text-sm sm:text-lg lg:text-xl font-bold transition-transform group-hover:scale-110">
+                +
+              </div>
+            </div>
+          </button>
+        </div>
 
         {/* =======================
             LIVE DG MONITORING
@@ -372,30 +222,30 @@ const DGMonetoring = () => {
               </thead>
 
               <tbody className="divide-y divide-gray-100">
-                {dgData.map((dg) => (
-                  <tr key={dg.id} className="hover:bg-gray-50 transition">
+                {dgs.map((dg) => (
+                  <tr key={dg._id} className="hover:bg-gray-50 transition">
                     {/* DG */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center font-semibold">
-                          {dg.dgNumber}
+                          {dg?.DGID}
                         </div>
 
                         <div>
                           <p className="font-semibold text-gray-900">
-                            DG-{String(dg.dgNumber).padStart(2, "0")}
+                            DG-{String(dg?.DGID).padStart(2, "0")}
                           </p>
 
-                          <p className="text-xs text-gray-500">{dg.srNo}</p>
+                          <p className="text-xs text-gray-500">{dg?.SRNO}</p>
                         </div>
                       </div>
                     </td>
 
                     {/* Model */}
                     <td className="px-5 py-4">
-                      <p className="font-medium text-gray-800">{dg.model}</p>
+                      <p className="font-medium text-gray-800">{dg.DGModel}</p>
 
-                      <p className="text-xs text-gray-500">{dg.phase}</p>
+                      <p className="text-xs text-gray-500">{dg.phase} Phase</p>
                     </td>
 
                     {/* Status */}
@@ -434,7 +284,7 @@ const DGMonetoring = () => {
                     {/* KVA */}
                     <td className="px-5 py-4">
                       <span className="font-semibold text-gray-900">
-                        {dg.kva}
+                        {dg.KVA}
                       </span>
 
                       <span className="text-xs text-gray-500 ml-1">KVA</span>
@@ -478,10 +328,10 @@ const DGMonetoring = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-lg font-semibold">
-                  DG-{String(selectedDG.dgNumber).padStart(2, "0")} Details
+                  DG-{String(selectedDG.DGID).padStart(2, "0")} Details
                 </h2>
 
-                <p className="text-sm text-gray-500">{selectedDG.model}</p>
+                <p className="text-sm text-gray-500">{selectedDG.DGModel}</p>
               </div>
 
               <button
@@ -496,7 +346,7 @@ const DGMonetoring = () => {
               <div className="p-4 rounded-xl bg-gray-50">
                 <p className="text-xs text-gray-500">Serial Number</p>
 
-                <p className="font-semibold mt-1">{selectedDG.srNo}</p>
+                <p className="font-semibold mt-1">{selectedDG.SRNO}</p>
               </div>
 
               <div className="p-4 rounded-xl bg-gray-50">
@@ -514,7 +364,7 @@ const DGMonetoring = () => {
               <div className="p-4 rounded-xl bg-gray-50">
                 <p className="text-xs text-gray-500">Capacity</p>
 
-                <p className="font-semibold mt-1">{selectedDG.kva} KVA</p>
+                <p className="font-semibold mt-1">{selectedDG.KVA} KVA</p>
               </div>
             </div>
           </div>

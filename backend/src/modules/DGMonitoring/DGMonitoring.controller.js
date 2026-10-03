@@ -2,6 +2,92 @@
 import DGMonitoringService from "./DGMonitoring.service.js";
 
 
+
+
+const addDG = async (req, res) => {
+
+    try {
+
+        const {
+            kitchenId,
+            DGID,
+            DGModel,
+            voltage,
+            SRNO,
+            KVA,
+            phase,
+            current,
+            fuelConsumptionHr,
+        } = req.body;
+
+
+        if (!kitchenId) {
+            return res.status(400).json({
+                success: false,
+                message: "kitchenId is required",
+            });
+        }
+
+
+        if (!DGID) {
+            return res.status(400).json({
+                success: false,
+                message: "DGID is required",
+            });
+        }
+
+
+        const dg =
+            await DGMonitoringService.addDG({
+                kitchenId,
+                DGID,
+                DGModel,
+                voltage,
+                SRNO,
+                KVA,
+                phase,
+                current,
+                fuelConsumptionHr,
+            });
+
+
+        return res.status(201).json({
+            success: true,
+            message: "DG added successfully",
+            data: dg,
+        });
+
+    } catch (error) {
+
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+const getAllDG = async (req, res) => {
+
+    try {
+
+        const dgs =
+            await DGMonitoringService.getAllDG();
+
+        return res.status(200).json({
+            success: true,
+            count: dgs.length,
+            data: dgs,
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
 const startDG = async (req, res) => {
 
     try {
@@ -149,6 +235,8 @@ const getLatestDGSession = async (req, res) => {
 
 
 export {
+    addDG,
+    getAllDG,
     startDG,
     stopDG,
     getActiveDG,

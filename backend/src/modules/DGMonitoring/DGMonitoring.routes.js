@@ -7,18 +7,22 @@ import {
     getActiveDG,
     getDGHistory,
     getLatestDGSession,
+    addDG,
+    getAllDG,
 } from "./DGMonitoring.controller.js";
 
 const router = express.Router();
 
-router.post("/voltage", async (req, res) => {
-    console.log("Device data:", req.body);
+// Add New DG
+router.post(
+    "/add",
+    addDG
+);
 
-    res.json({
-        success: true,
-        received: true
-    });
-});
+router.get(
+    "/all",
+    getAllDG
+);
 
 
 // Start DG
