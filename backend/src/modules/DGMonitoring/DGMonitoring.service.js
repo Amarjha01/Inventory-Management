@@ -63,8 +63,15 @@ const startDG = async (DGID) => {
 
 const stopDG = async (DGID) => {
 
+    const dg =
+        await DGMonitoringRepository.findDGByDGID(DGID);
+
+    if (!dg) {
+        throw new Error(`DG ${DGID} not found`);
+    }
+
     const activeSession =
-        await DGMonitoringRepository.findActiveByDGId(DGID);
+        await DGMonitoringRepository.findActiveByDGId(dg._id);
 
     if (!activeSession) {
         throw new Error("No active DG session found");
@@ -88,6 +95,7 @@ const stopDG = async (DGID) => {
 
     return monitoring;
 };
+
 
 
 const getActiveDG = async (DGID) => {
