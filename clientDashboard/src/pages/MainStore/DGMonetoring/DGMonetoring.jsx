@@ -249,76 +249,79 @@ const DGMonetoring = () => {
             SUMMARY CARDS
         ======================== */}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sticky top-[8%]">
-          {/* Total DG */}
-          <div className="rounded-2xl  border border-gray-200 p-5 shadow-sm backdrop-blur-xs">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Total DG</p>
+<div className="grid grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 sticky top-[8%]">
+  {/* Total DG */}
+  <div className="rounded-xl lg:rounded-2xl border border-gray-200 p-3 sm:p-4 lg:p-5 shadow-sm backdrop-blur-xs">
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-[10px] sm:text-sm text-gray-500">Total DG</p>
 
-                <h2 className="text-3xl font-bold text-gray-900 mt-2">
-                  {statistics.total}
-                </h2>
-              </div>
+        <h2 className="text-xs sm:text-2xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">
+          {statistics.total}
+        </h2>
+      </div>
 
-              <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-xl">
-                ⚡
-              </div>
-            </div>
-          </div>
+      <div className="w-5 h-5 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-gray-100 flex items-center justify-center text-sm sm:text-lg lg:text-xl">
+        ⚡
+      </div>
+    </div>
+  </div>
 
-          {/* Running */}
-          <div className="rounded-2xl  border border-green-200 p-5 shadow-sm backdrop-blur-xs">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Running</p>
+  {/* Running */}
+  <div className="rounded-xl lg:rounded-2xl border border-green-200 p-3 sm:p-4 lg:p-5 shadow-sm backdrop-blur-xs">
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-[10px] sm:text-sm text-gray-500">Running</p>
 
-                <h2 className="text-3xl font-bold text-green-600 mt-2">
-                  {statistics.running}
-                </h2>
-              </div>
+        <h2 className="text-xs sm:text-2xl lg:text-3xl font-bold text-green-600 mt-1 sm:mt-2">
+          {statistics.running}
+        </h2>
+      </div>
 
-              <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center ">
-                <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-              </div>
-            </div>
-          </div>
+      <div className="w-5 h-5 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-green-50 flex items-center justify-center">
+        <span className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse" />
+      </div>
+    </div>
+  </div>
 
-          {/* Stopped */}
-          <div className="rounded-2xl  border border-red-200 p-5 shadow-sm backdrop-blur-xs">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Stopped</p>
+  {/* Stopped */}
+  <div className="rounded-xl lg:rounded-2xl border border-red-200 p-3 sm:p-4 lg:p-5 shadow-sm backdrop-blur-xs">
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-[10px] sm:text-sm text-gray-500">Stopped</p>
 
-                <h2 className="text-3xl font-bold text-red-500 mt-2">
-                  {statistics.stopped}
-                </h2>
-              </div>
+        <h2 className="text-xs sm:text-2xl lg:text-3xl font-bold text-red-500 mt-1 sm:mt-2">
+          {statistics.stopped}
+        </h2>
+      </div>
 
-              <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-500">
-                ■
-              </div>
-            </div>
-          </div>
+      <div className="w-5 h-5 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-red-50 flex items-center justify-center text-red-500 text-sm sm:text-lg">
+        ■
+      </div>
+    </div>
+  </div>
 
-          {/* Available KVA */}
-          <div className="rounded-2xl  border border-blue-200 p-5 shadow-sm backdrop-blur-xs">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">Running Capacity</p>
+  {/* Running Capacity */}
+  <div className="rounded-xl lg:rounded-2xl border border-blue-200 p-3 sm:p-4 lg:p-5 shadow-sm backdrop-blur-xs">
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-[10px] sm:text-sm text-gray-500">Running Capacity</p>
 
-                <h2 className="text-3xl font-bold text-blue-600 mt-2">
-                  {statistics.totalKVA}
-                  <span className="text-sm font-medium ml-1">KVA</span>
-                </h2>
-              </div>
+        <h2 className="text-[10px] sm:text-2xl lg:text-3xl font-bold text-blue-600 mt-1 sm:mt-2">
+          {statistics.totalKVA}
+          <span className="text-xs sm:text-xs lg:text-sm font-medium ml-1">
+            KVA
+          </span>
+        </h2>
+      </div>
 
-              <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-                ⚙
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="w-5 h-5 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 text-sm sm:text-lg">
+        ⚙
+      </div>
+    </div>
+  </div>
+</div>
+
 
         {/* =======================
             LIVE DG MONITORING
@@ -346,7 +349,7 @@ const DGMonetoring = () => {
               TABLE
           ======================== */}
 
-          <div className="overflow-x-auto overflow-y-scroll bg-amber-400">
+          <div className="overflow-x-auto bg-amber-400">
             <table className="w-full min-w-250">
               <thead className="bg-gray-50 border-b border-gray-200 ">
                 <tr className="text-left text-xs font-semibold text-gray-500 uppercase">
