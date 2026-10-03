@@ -6,9 +6,7 @@ const createDG = async (data) => {
 
 
 const getAllDG = async (kitchenId) => {
-    return await DG.find({
-        kitchenId,
-    }).sort({
+    return await DG.find().sort({
         DGID: 1,
     });
 };
@@ -88,6 +86,150 @@ const getLatest = async (DGObjectId) => {
         .sort({ start: -1 });
 };
 
+const getDailyRuntime = async (startDate, endDate) => {
+
+    return await DGMonitoring.aggregate([
+        {
+            $match: {
+                start: {
+                    $lt: endDate,
+                },
+                $or: [
+                    {
+                        stop: {
+                            $gt: startDate,
+                        },
+                    },
+                    {
+                        stop: null,
+                    },
+                ],
+            },
+        },
+
+        {
+            $project: {
+                DGID: 1,
+                start: 1,
+                stop: {
+                    $ifNull: [
+                        "$stop",
+                        new Date(),
+                    ],
+                },
+            },
+        },
+
+        {
+            $project: {
+                DGID: 1,
+
+                effectiveStart: {
+                    $cond: [
+                        {
+                            $lt: ["$start", startDate],
+                        },
+                        startDate,
+                        "$start",
+                    ],
+                },
+
+                effectiveStop: {
+                    $cond: [
+                        {
+                            $gt: ["$stop", endDate],
+                        },
+                        endDate,
+                        "$stop",
+                    ],
+                },
+            },
+        },
+
+        {
+            $project: {
+                DGID: 1,
+
+                runtimeSeconds: {
+                    $divide: [
+                        {
+                            $subtract: [
+                                "$effectiveStop",
+                                "$effectiveStart",
+                            ],
+                        },
+                        1000,
+                    ],
+                },
+            },
+        },
+
+        {
+            $group: {
+                _id: "$DGID",
+                runtimeSeconds: {
+                    $sum: "$runtimeSeconds",
+                },
+            },
+        },
+
+        {
+            $lookup: {
+                from: "dgs",
+                localField: "_id",
+                foreignField: "_id",
+                as: "dg",
+            },
+        },
+
+        {
+            $unwind: "$dg",
+        },
+
+        {
+            $project: {
+                _id: 0,
+                DGID: "$dg.DGID",
+
+                runtimeSeconds: {
+                    $round: ["$runtimeSeconds", 0],
+                },
+
+                runtimeMinutes: {
+                    $round: [
+                        {
+                            $divide: [
+                                "$runtimeSeconds",
+                                60,
+                            ],
+                        },
+                        2,
+                    ],
+                },
+
+                runtimeHours: {
+                    $round: [
+                        {
+                            $divide: [
+                                "$runtimeSeconds",
+                                3600,
+                            ],
+                        },
+                        2,
+                    ],
+                },
+            },
+        },
+
+        {
+            $sort: {
+                DGID: 1,
+            },
+        },
+    ]);
+};
+
+
 
 export default {
     createDG,
@@ -101,4 +243,5 @@ export default {
     stopMonitoring,
     getHistoryByDGId,
     getLatest,
+    getDailyRuntime
 };

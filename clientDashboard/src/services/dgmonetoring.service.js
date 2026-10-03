@@ -41,3 +41,49 @@ export const getAllDG = async (kitchenId) => {
         throw error;
     }
 };
+
+
+export const getDailyRuntime = async (date) => {
+    try {
+
+        const response = await api.get(
+            "/dg-monitoring/daily-runtime",
+            {
+                params: {
+                    date,
+                },
+            }
+        );
+
+        return response.data;
+
+    } catch (error) {
+
+        console.error(
+            "Get Daily DG Runtime Error:",
+            error.response?.data || error.message
+        );
+
+        throw error;
+    }
+};
+
+export const getLatestDGSession = async (DGID) => {
+    try {
+
+        const response = await api.get(
+            `/dg-monitoring/${DGID}/latest`
+        );
+
+        return response.data;
+
+    } catch (error) {
+
+        console.error(
+            "Get Latest DG Session Error:",
+            error.response?.data || error.message
+        );
+
+        throw error;
+    }
+};

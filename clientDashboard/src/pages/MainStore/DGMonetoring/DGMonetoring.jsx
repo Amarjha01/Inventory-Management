@@ -2,13 +2,13 @@ import React, { useMemo, useState } from "react";
 import ThemeProvider from "../../../components/shared/ui/ThemeProvider";
 import { themes } from "../../../components/shared/ui/Theme";
 import PageHeader from "../../../components/shared/ui/PageHeader";
-import { addDG, getAllDG } from "../../../services/dgmonetoring.service";
+import { addDG, getAllDG, getDailyRuntime, getLatestDGSession } from "../../../services/dgmonetoring.service";
 import { useEffect } from "react";
 
 const DGMonetoring = () => {
   const [selectedDG, setSelectedDG] = useState(null);
-
   const [dgs, setDgs] = useState([]);
+  const [latestSession, setLatestSession] = useState(null);
 
   useEffect(() => {
     const fetchDGs = async () => {
@@ -24,6 +24,54 @@ const DGMonetoring = () => {
     fetchDGs()
   },[]);
 
+const [dailyRuntime, setDailyRuntime] = useState([]);
+
+useEffect(() => {
+
+    const fetchDailyRuntime = async () => {
+
+        try {
+          const today = new Date().toISOString().split("T")[0];
+            const response = await getDailyRuntime(today);
+
+            setDailyRuntime(response.data || []);
+
+        } catch (error) {
+
+            console.error(error);
+
+        }
+    };
+
+    fetchDailyRuntime();
+
+}, []);
+
+useEffect(() => {
+
+    const fetchLatestSession = async () => {
+
+        try {
+
+            const response = await getLatestDGSession("6ac0c6adcde799bc04f9fda3");
+
+            console.log("Latest DG Session:", response);
+
+            setLatestSession(response.data);
+
+        } catch (error) {
+
+            console.error(
+                "Failed to fetch latest DG session:",
+                error
+            );
+
+        }
+    };
+
+    fetchLatestSession();
+
+}, []);
   // Temporary mock data.
   // Later this will come from your API.
   const dgData = [
@@ -250,7 +298,7 @@ const DGMonetoring = () => {
 
                     {/* Status */}
                     <td className="px-5 py-4">
-                      {dg.status === "START" ? (
+                      {latestSession.status === "RUNNING" ? (
                         <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-semibold">
                           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                           RUNNING
@@ -293,13 +341,13 @@ const DGMonetoring = () => {
                     {/* Runtime */}
                     <td className="px-5 py-4">
                       <p className="font-medium text-gray-800">
-                        {dg.status === "START" ? getRuntime(dg.start) : "--"}
+                        {dailyRuntime[0].runtimeMinutes} min
                       </p>
 
                       <p className="text-xs text-gray-500">
-                        {dg.status === "START"
-                          ? `Started ${formatDateTime(dg.start)}`
-                          : `Stopped ${formatDateTime(dg.stop)}`}
+                        {latestSession.status === "RUNNING"
+                          ? `Started ${formatDateTime(latestSession.start)}`
+                          : `Stopped ${formatDateTime(latestSession.stop)}`}
                       </p>
                     </td>
 
