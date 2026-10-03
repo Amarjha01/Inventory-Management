@@ -22,10 +22,15 @@ const findDGByKitchenAndId = async (kitchenId, DGID) => {
 const createMonitoring = async (data) => {
     return await DGMonitoring.create(data);
 };
+const findDGByDGID = async (DGID) => {
+    return await DG.findOne({
+        DGID: Number(DGID),
+    });
+};
 
 const findActiveByDGId = async (DGID) => {
     return await DGMonitoring.findOne({
-        DGID,
+        DGID: Number(DGID),
         status: "RUNNING",
         stop: null,
     });
@@ -64,6 +69,7 @@ export default {
     createDG,
     getAllDG,
     findDGByKitchenAndId,
+    findDGByDGID,
 
     createMonitoring,
     findActiveByDGId,
