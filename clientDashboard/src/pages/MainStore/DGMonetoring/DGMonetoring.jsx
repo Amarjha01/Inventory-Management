@@ -341,7 +341,7 @@ useEffect(() => {
                     {/* Runtime */}
                     <td className="px-5 py-4">
                       <p className="font-medium text-gray-800">
-                        {dailyRuntime[0].runtimeMinutes} min
+                        {dailyRuntime && dailyRuntime[0]?.runtimeMinutes} min
                       </p>
 
                       <p className="text-xs text-gray-500">
