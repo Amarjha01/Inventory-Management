@@ -298,7 +298,7 @@ useEffect(() => {
 
                     {/* Status */}
                     <td className="px-5 py-4">
-                      {latestSession.status === "RUNNING" ? (
+                      {latestSession && latestSession.status === "RUNNING" ? (
                         <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-semibold">
                           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                           RUNNING
@@ -345,9 +345,9 @@ useEffect(() => {
                       </p>
 
                       <p className="text-xs text-gray-500">
-                        {latestSession.status === "RUNNING"
-                          ? `Started ${formatDateTime(latestSession.start)}`
-                          : `Stopped ${formatDateTime(latestSession.stop)}`}
+                        {latestSession && latestSession?.status === "RUNNING"
+                          ? `Started ${formatDateTime(latestSession?.start)}`
+                          : `Stopped ${formatDateTime(latestSession?.stop)}`}
                       </p>
                     </td>
 
