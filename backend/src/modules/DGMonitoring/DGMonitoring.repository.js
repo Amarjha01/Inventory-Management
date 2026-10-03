@@ -1,44 +1,55 @@
-// DGMonitoring.repository.js
-import {DG, DGMonitoring} from "./DGMonitoring.model.js";
+import { DG, DGMonitoring } from "./DGMonitoring.model.js";
 
 const createDG = async (data) => {
     return await DG.create(data);
 };
 
-const getAllDG = async (kitchenId) => {
 
-    return await DG.find().sort({
+const getAllDG = async (kitchenId) => {
+    return await DG.find({
+        kitchenId,
+    }).sort({
         DGID: 1,
     });
 };
 
+
 const findDGByKitchenAndId = async (kitchenId, DGID) => {
     return await DG.findOne({
         kitchenId,
-        DGID,
+        DGID: Number(DGID),
     });
 };
 
-const createMonitoring = async (data) => {
-    return await DGMonitoring.create(data);
-};
+
+// Find DG master record using numeric DGID
 const findDGByDGID = async (DGID) => {
     return await DG.findOne({
         DGID: Number(DGID),
     });
 };
 
-const findActiveByDGId = async (DGID) => {
+
+// Create monitoring record
+const createMonitoring = async (data) => {
+    return await DGMonitoring.create(data);
+};
+
+
+// DGMonitoring.DGID is ObjectId
+const findActiveByDGId = async (DGObjectId) => {
     return await DGMonitoring.findOne({
-        DGID: Number(DGID),
+        DGID: DGObjectId,
         status: "RUNNING",
         stop: null,
     });
 };
 
+
 const findById = async (id) => {
     return await DGMonitoring.findById(id);
 };
+
 
 const stopMonitoring = async (id, data) => {
     return await DGMonitoring.findByIdAndUpdate(
@@ -53,17 +64,30 @@ const stopMonitoring = async (id, data) => {
     );
 };
 
-const getHistoryByDGId = async (DGID, limit = 50, skip = 0) => {
-    return await DGMonitoring.find({ DGID })
+
+const getHistoryByDGId = async (
+    DGObjectId,
+    limit = 50,
+    skip = 0
+) => {
+
+    return await DGMonitoring.find({
+        DGID: DGObjectId,
+    })
         .sort({ start: -1 })
         .skip(skip)
         .limit(limit);
 };
 
-const getLatest = async (DGID) => {
-    return await DGMonitoring.findOne({ DGID })
+
+const getLatest = async (DGObjectId) => {
+
+    return await DGMonitoring.findOne({
+        DGID: DGObjectId,
+    })
         .sort({ start: -1 });
 };
+
 
 export default {
     createDG,
