@@ -9,6 +9,7 @@ import {
     getLatestDGSession,
     addDG,
     getAllDG,
+    getDailyRuntime,
 } from "./DGMonitoring.controller.js";
 
 const router = express.Router();
@@ -24,6 +25,10 @@ router.get(
     getAllDG
 );
 
+router.get(
+    "/daily-runtime",
+    getDailyRuntime
+);
 
 // Start DG
 router.post(
