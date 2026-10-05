@@ -20,16 +20,9 @@ const getAllDG = async () => {
   return await DGMonitoringRepository.getAllDG();
 };
 
-const getDailyRuntime = async (date) => {
+const getDailyRuntime = async () => {
 
-    const startDate = new Date(`${date}T00:00:00.000Z`);
-
-    const endDate = new Date(`${date}T23:59:59.999Z`);
-
-    return await DGMonitoringRepository.getDailyRuntime(
-        startDate,
-        endDate
-    );
+    return await DGMonitoringRepository.getDailyRuntime();
 };
 
 const startDG = async (DGID) => {

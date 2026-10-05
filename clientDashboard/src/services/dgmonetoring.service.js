@@ -43,17 +43,11 @@ export const getAllDG = async (kitchenId) => {
 };
 
 
-export const getDailyRuntime = async (date) => {
+export const getDailyRuntime = async () => {
     try {
 
         const response = await api.get(
-            "/dg-monitoring/daily-runtime",
-            {
-                params: {
-                    date,
-                },
-            }
-        );
+            "/dg-monitoring/daily-runtime");
 
         return response.data;
 

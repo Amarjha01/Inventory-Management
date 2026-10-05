@@ -86,25 +86,17 @@ const getLatest = async (DGObjectId) => {
         .sort({ start: -1 });
 };
 
-const getDailyRuntime = async (startDate, endDate) => {
+const getDailyRuntime = async (DGObjectId = null) => {
+    const match = {};
+
+    // Optional: get runtime for one DG only
+    if (DGObjectId) {
+        match.DGID = DGObjectId;
+    }
 
     return await DGMonitoring.aggregate([
         {
-            $match: {
-                start: {
-                    $lt: endDate,
-                },
-                $or: [
-                    {
-                        stop: {
-                            $gt: startDate,
-                        },
-                    },
-                    {
-                        stop: null,
-                    },
-                ],
-            },
+            $match: match,
         },
 
         {
@@ -112,71 +104,185 @@ const getDailyRuntime = async (startDate, endDate) => {
                 DGID: 1,
                 start: 1,
                 stop: {
-                    $ifNull: [
-                        "$stop",
-                        new Date(),
-                    ],
+                    $ifNull: ["$stop", new Date()],
                 },
             },
         },
 
+        /*
+         * Find the first and last day of each
+         * monitoring session.
+         */
         {
             $project: {
                 DGID: 1,
+                start: 1,
+                stop: 1,
 
-                effectiveStart: {
-                    $cond: [
-                        {
-                            $lt: ["$start", startDate],
-                        },
-                        startDate,
-                        "$start",
-                    ],
+                startDay: {
+                    $dateTrunc: {
+                        date: "$start",
+                        unit: "day",
+                    },
                 },
 
-                effectiveStop: {
-                    $cond: [
-                        {
-                            $gt: ["$stop", endDate],
-                        },
-                        endDate,
-                        "$stop",
-                    ],
+                stopDay: {
+                    $dateTrunc: {
+                        date: "$stop",
+                        unit: "day",
+                    },
                 },
             },
         },
 
+        /*
+         * Generate every day touched by
+         * this monitoring session.
+         */
         {
             $project: {
                 DGID: 1,
+                start: 1,
+                stop: 1,
 
-                runtimeSeconds: {
-                    $divide: [
-                        {
-                            $subtract: [
-                                "$effectiveStop",
-                                "$effectiveStart",
+                days: {
+                    $map: {
+                        input: {
+                            $range: [
+                                0,
+                                {
+                                    $add: [
+                                        {
+                                            $dateDiff: {
+                                                startDate: "$startDay",
+                                                endDate: "$stopDay",
+                                                unit: "day",
+                                            },
+                                        },
+                                        1,
+                                    ],
+                                },
                             ],
                         },
-                        1000,
-                    ],
+
+                        as: "dayOffset",
+
+                        in: {
+                            $dateAdd: {
+                                startDate: "$startDay",
+                                unit: "day",
+                                amount: "$$dayOffset",
+                            },
+                        },
+                    },
                 },
             },
         },
 
         {
+            $unwind: "$days",
+        },
+
+        /*
+         * Calculate the actual start/end time
+         * inside each individual day.
+         */
+        {
+            $project: {
+                DGID: 1,
+
+                day: "$days",
+
+                dayStart: {
+                    $cond: [
+                        {
+                            $gt: ["$start", "$days"],
+                        },
+                        "$start",
+                        "$days",
+                    ],
+                },
+
+                dayEnd: {
+                    $cond: [
+                        {
+                            $lt: [
+                                "$stop",
+                                {
+                                    $dateAdd: {
+                                        startDate: "$days",
+                                        unit: "day",
+                                        amount: 1,
+                                    },
+                                },
+                            ],
+                        },
+                        "$stop",
+                        {
+                            $dateAdd: {
+                                startDate: "$days",
+                                unit: "day",
+                                amount: 1,
+                            },
+                        },
+                    ],
+                },
+            },
+        },
+
+        /*
+         * Runtime for this particular day.
+         */
+        {
+            $project: {
+                DGID: 1,
+                day: 1,
+
+                runtimeSeconds: {
+                    $max: [
+                        0,
+                        {
+                            $divide: [
+                                {
+                                    $subtract: [
+                                        "$dayEnd",
+                                        "$dayStart",
+                                    ],
+                                },
+                                1000,
+                            ],
+                        },
+                    ],
+                },
+            },
+        },
+
+        /*
+         * Multiple START/STOP sessions can exist
+         * on the same day.
+         *
+         * Add them together.
+         */
+        {
             $group: {
-                _id: "$DGID",
+                _id: {
+                    DGID: "$DGID",
+                    day: "$day",
+                },
+
                 runtimeSeconds: {
                     $sum: "$runtimeSeconds",
                 },
             },
         },
 
+        /*
+         * Get DG master information.
+         */
         {
             $lookup: {
                 from: "dgs",
-                localField: "_id",
+                localField: "_id.DGID",
                 foreignField: "_id",
                 as: "dg",
             },
@@ -186,13 +292,24 @@ const getDailyRuntime = async (startDate, endDate) => {
             $unwind: "$dg",
         },
 
+        /*
+         * Final response.
+         */
         {
             $project: {
                 _id: 0,
+
+                DGObjectId: "$_id.DGID",
+
                 DGID: "$dg.DGID",
 
+                date: "$_id.day",
+
                 runtimeSeconds: {
-                    $round: ["$runtimeSeconds", 0],
+                    $round: [
+                        "$runtimeSeconds",
+                        0,
+                    ],
                 },
 
                 runtimeMinutes: {
@@ -224,10 +341,12 @@ const getDailyRuntime = async (startDate, endDate) => {
         {
             $sort: {
                 DGID: 1,
+                date: 1,
             },
         },
     ]);
 };
+
 
 
 
