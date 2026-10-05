@@ -92,29 +92,11 @@ const getDailyRuntime = async (req, res) => {
 
     try {
 
-        const { date } = req.query;
-
-        if (!date) {
-            return res.status(400).json({
-                success: false,
-                message: "date is required. Format: YYYY-MM-DD",
-            });
-        }
-
-        // Validate date format
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid date format. Use YYYY-MM-DD",
-            });
-        }
-
         const runtime =
-            await DGMonitoringService.getDailyRuntime(date);
+            await DGMonitoringService.getDailyRuntime();
 
         return res.status(200).json({
             success: true,
-            date,
             data: runtime,
         });
 
