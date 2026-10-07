@@ -720,20 +720,14 @@ const Visitor = () => {
         ================================================= */}
 
         <div className="mb-5">
-
-          <div
-            className="
-              flex
-              gap-3
-            "
-          >
-
             {/* SEARCH */}
 
             <div
               className="
                 relative
                 flex-1
+                md:hidden
+                mb-2
               "
             >
 
@@ -759,7 +753,82 @@ const Visitor = () => {
                   )
                 }
                 placeholder="
-                  Search visitor records...
+                  Search Complain/Repair records...
+                "
+                className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"/>
+
+              {search && (
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSearch("")
+                  }
+                  className="
+                    absolute
+                    right-3
+                    top-1/2
+                    -translate-y-1/2
+                    rounded-full
+                    p-1
+                    text-slate-400
+                    hover:bg-slate-100
+                    hover:text-slate-700
+                  "
+                >
+
+                  <FiX
+                    size={15}
+                  />
+
+                </button>
+
+              )}
+
+            </div>
+
+
+          <div
+            className="
+              flex
+              gap-3
+            "
+          >
+
+            {/* SEARCH */}
+
+            <div
+              className="
+                relative
+                flex-1
+                hidden
+                md:block
+              "
+            >
+
+              <FiSearch
+                size={17}
+                className="
+                  pointer-events-none
+                  absolute
+                  left-4
+                  top-1/2
+                  -translate-y-1/2
+                  text-slate-400
+                "
+              />
+
+
+              <input
+                type="text"
+                value={search}
+                onChange={(event) =>
+                  setSearch(
+                    event.target.value
+                  )
+                }
+                placeholder="
+                  Search Complain/Repair records...
                 "
                 className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"/>
 

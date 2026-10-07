@@ -18,8 +18,8 @@ const tabs = [
   },
   {
     path: "visitor",
-    label: "Visitor",
-    hindiLabel: "विजिटर",
+    label: "Complain/Repair",
+    hindiLabel: "शिकायत/रिपेयर",
     icon: FiUsers,
   },
   {
