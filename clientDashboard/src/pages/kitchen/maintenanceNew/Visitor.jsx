@@ -949,7 +949,7 @@ const handleVisitorFiles = async (event) => {
               <span className="hidden sm:inline">Refresh</span>
             </button>
               <button onClick={()=>setShowForm(true)} className="hidden md:block px-3 py-1 bg-black cursor-pointer text-white ">
-              Create New Visitor +
+              Create New Complain/Repair +
             </button>
           </div>
 
@@ -1250,7 +1250,7 @@ const handleVisitorFiles = async (event) => {
         </div>
 
         <button onClick={()=>setShowForm(true)} className=" w-full md:hidden px-3 py-1 mb-3 bg-black cursor-pointer text-white ">
-          Create New Visitor +
+          Create New Complain/Repair +
         </button>
         {/* =================================================
             RESULT HEADER
