@@ -40,20 +40,15 @@ const getUserRole = (user) => user?.role?.toString?.() || "";
 /* -------------------------------------------------------------------------- */
 
 const assertTripOwner = (trip, user) => {
-  console.log("user" , user);
   
   const userId = getUserId(user);
-
-  console.log(userId);
-  console.log("trip.driver?._id?.toString?.()", trip.driver?._id?.toString?.());
   
   if (!userId) {
     throw new ApiError(401, "User could not be identified.");
   }
 
   if (trip.driver?._id?.toString?.() !== userId) {
-    console.log();
-    
+ 
     throw new ApiError(403, "You are not authorized to access this trip.");
   }
 };
@@ -63,6 +58,8 @@ const assertTripOwner = (trip, user) => {
 /* -------------------------------------------------------------------------- */
 
 const normalizeLocation = (location, fallbackSource = "GPS") => {
+  console.log("location normalized" , location);
+  
   if (!location) {
     throw new ApiError(400, "Location is required.");
   }
@@ -486,7 +483,7 @@ class TripService {
   /* Start Trip                                                               */
   /* ------------------------------------------------------------------------ */
 
-  async startTrip(tripId, payload, user) {
+  async startTrip(tripId, user) {
     const trip = await tripRepository.findById(tripId, {
       populate: false,
     });
@@ -504,56 +501,56 @@ class TripService {
       );
     }
 
-    const location = normalizeLocation(payload.location);
+    // const location = normalizeLocation(payload.location);
 
-    if (!payload.meterImageUrl) {
-      throw new ApiError(400, "Initial meter image is required.");
-    }
+    // if (!payload.meterImageUrl) {
+    //   throw new ApiError(400, "Initial meter image is required.");
+    // }
 
-    const meter = normalizeMeter(
-      {
-        reading: payload.meterReading,
+    // const meter = normalizeMeter(
+    //   {
+    //     reading: payload.meterReading,
 
-        capturedAt: payload.meterCapturedAt,
-      },
-      payload.meterImageUrl,
-    );
+    //     capturedAt: payload.meterCapturedAt,
+    //   },
+    //   payload.meterImageUrl,
+    // );
 
-    trip.startLocation = location;
+    // trip.startLocation = location;
 
-    trip.startMeter = meter;
+    // trip.startMeter = meter;
 
     trip.status = "IN_PROGRESS";
 
     trip.startedAt = new Date();
 
-    activateFirstDestination(trip);
+    // activateFirstDestination(trip);
 
-    trip.currentLocation = {
-      latitude: location.latitude,
+    // trip.currentLocation = {
+    //   latitude: location.latitude,
 
-      longitude: location.longitude,
+    //   longitude: location.longitude,
 
-      accuracy: location.accuracy,
+    //   accuracy: location.accuracy,
 
-      capturedAt: location.capturedAt,
-    };
+    //   capturedAt: location.capturedAt,
+    // };
 
-    trip.auditLog.push({
-      action: "TRIP_STARTED",
+    // trip.auditLog.push({
+    //   action: "TRIP_STARTED",
 
-      actor: getUserId(user),
+    //   actor: getUserId(user),
 
-      role: getUserRole(user),
+    //   role: getUserRole(user),
 
-      metadata: {
-        latitude: location.latitude,
+    //   metadata: {
+    //     latitude: location.latitude,
 
-        longitude: location.longitude,
+    //     longitude: location.longitude,
 
-        meterReading: meter.reading,
-      },
-    });
+    //     meterReading: meter.reading,
+    //   },
+    // });
 
     await tripRepository.save(trip);
 
@@ -578,8 +575,9 @@ class TripService {
     if (trip.status !== "IN_PROGRESS") {
       throw new ApiError(409, "Trip is not in progress.");
     }
+console.log("location at service" , payload);
 
-    const location = normalizeLocation(payload.location);
+    const location = normalizeLocation(payload);
 
     trip.currentLocation = {
       latitude: location.latitude,

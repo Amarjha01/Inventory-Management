@@ -19,8 +19,12 @@ import {
   updateTripLocation,
   completeDestination,
   completeTrip,
+  startTrip,
 } from "../../services/trip.service";
 
+import TripMap from "../../components/trip/map/TripMap";
+import GoogleMapProvider from "../../components/trip/map/GoogleMapProvider";
+import toast from "react-hot-toast";
 /* -------------------------------------------------------------------------- */
 /* Sub-component: EvidenceCard                                                */
 /* -------------------------------------------------------------------------- */
@@ -63,6 +67,143 @@ const ActiveTrip = () => {
 
   const [submitting, setSubmitting] = useState(false);
 
+
+  /* ------------------------------------------------------------------------ */
+  /* Live GPS Tracking                                                        */
+  /* ------------------------------------------------------------------------ */
+
+  useEffect(() => {
+    /*
+     * Browser does not support geolocation.
+     */
+    if (!("geolocation" in navigator)) {
+      setGpsError("Geolocation is not supported by this browser.");
+      return undefined;
+    }
+
+    const handlePosition = (position) => {
+      const { latitude, longitude, accuracy } = position.coords;
+
+      const location = {
+        latitude,
+        longitude,
+        accuracy,
+        capturedAt: new Date(position.timestamp).toISOString(),
+      };
+
+      setCurrentLocation(location);
+    };
+
+    const handleError = (geoError) => {
+      console.error("GPS error:", geoError);
+
+      let message = "Unable to get your current location.";
+
+      switch (geoError.code) {
+        case geoError.PERMISSION_DENIED:
+          message = "Location permission was denied.";
+          break;
+
+        case geoError.POSITION_UNAVAILABLE:
+          message = "Current location is unavailable.";
+          break;
+
+        case geoError.TIMEOUT:
+          message = "Getting current location timed out.";
+          break;
+
+        default:
+          message = "Unable to get your current location.";
+      }
+
+     
+    };
+
+    /*
+     * Get the location immediately.
+     */
+    navigator.geolocation.getCurrentPosition(handlePosition, handleError, {
+      enableHighAccuracy: true,
+      maximumAge: 5000,
+      timeout: 15000,
+    });
+
+    /*
+     * Continue watching the location.
+     */
+    const watchId = navigator.geolocation.watchPosition(
+      handlePosition,
+      handleError,
+      {
+        enableHighAccuracy: true,
+        maximumAge: 5000,
+        timeout: 15000,
+      },
+    );
+
+    /*
+     * IMPORTANT:
+     *
+     * Clear the watcher when this component unmounts.
+     * Otherwise the browser keeps tracking the location
+     * and every remount can create another watcher.
+     */
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, []);
+
+  /* ------------------------------------------------------------------------ */
+  /* Map Data                                                                 */
+  /* ------------------------------------------------------------------------ */
+
+  const destinations = useMemo(() => {
+    if (!trip?.destinations) {
+      return [];
+    }
+
+    return trip.destinations.map((destination) => ({
+      ...destination,
+      latitude: Number(destination.latitude),
+      longitude: Number(destination.longitude),
+    }));
+  }, [trip]);
+
+  const routeCoordinates = useMemo(() => {
+    /*
+     * TripMap expects:
+     *
+     * [
+     *   [longitude, latitude],
+     *   [longitude, latitude],
+     *   ...
+     * ]
+     */
+    return trip?.route?.geometry?.coordinates || trip?.route?.coordinates || [];
+  }, [trip]);
+
+  /*
+   * Use live browser GPS location first.
+   *
+   * If browser GPS is not available yet, fall back to the
+   * location saved in the trip returned by the backend.
+   */
+  const mapCurrentLocation = useMemo(() => {
+    if (currentLocation) {
+      return currentLocation;
+    }
+
+    if (!trip?.currentLocation) {
+      return null;
+    }
+
+    return {
+      latitude: trip.currentLocation.latitude,
+      longitude: trip.currentLocation.longitude,
+      accuracy: trip.currentLocation.accuracy,
+      capturedAt: trip.currentLocation.capturedAt,
+    };
+  }, [currentLocation, trip]);
   /* Load trip data */
   useEffect(() => {
     if (!tripId) return;
@@ -298,6 +439,14 @@ const ActiveTrip = () => {
   const allDestinationsCompleted =
     destinationCount > 0 && completedCount === destinationCount;
 
+    const handleStart = async() =>{
+      try {
+        const started = await startTrip(tripId);
+        toast.success(started?.message || "Trip started")
+      } catch (error) {
+        toast.error(error?.message || "something went wrong") 
+      }
+    }
   return (
     <div className="mx-auto w-full max-w-5xl pb-6">
       {/* HEADER */}
@@ -311,9 +460,11 @@ const ActiveTrip = () => {
           Trip
         </button>
 
-        <div className="rounded-full bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700">
-          In Progress
-        </div>
+          {trip.status.toLowerCase() === "ready" ? (
+            <button onClick={()=>{handleStart()}}>
+              Start
+            </button>
+          ):<p>{trip.status}</p>}
       </div>
 
       {/* MAP */}
@@ -323,17 +474,20 @@ const ActiveTrip = () => {
         className="relative overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm"
       >
         <div className="relative h-[320px] bg-gray-100">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <FaRoute className="mx-auto text-gray-300" size={40} />
-              <p className="mt-2 text-sm font-semibold text-gray-500">
-                Live Route Map
-              </p>
-              <p className="mt-1 text-xs text-gray-400">
-                Map component will be connected here.
-              </p>
-            </div>
-          </div>
+                <GoogleMapProvider>
+          <TripMap
+            driver={trip.driver.name}
+            currentLocation={mapCurrentLocation}
+            destinations={destinations}
+            route={routeCoordinates}
+            activeDestinationId={
+              trip.destinations?.find(
+                (destination) => destination.status === "CURRENT",
+              )?._id
+            }
+            height="480px"
+          />
+        </GoogleMapProvider>
 
           <button
             type="button"
@@ -345,7 +499,7 @@ const ActiveTrip = () => {
           </button>
 
           {currentDestination && (
-            <div className="absolute left-4 top-4 max-w-[75%] rounded-2xl bg-white/95 px-4 py-3 shadow-lg backdrop-blur">
+            <div className="absolute left-4 bottom-4 max-w-[75%] rounded-2xl bg-white/95 px-4 py-3 shadow-lg backdrop-blur">
               <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
                 Current Destination
               </p>
@@ -605,4 +759,4 @@ const ActiveTrip = () => {
   );
 };
 
-export default ActiveTrip;
+export default ActiveTrip; 

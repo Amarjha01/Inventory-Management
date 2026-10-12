@@ -19,11 +19,6 @@ const TripNavigation = () => {
       path: "/trip",
     },
     {
-      title: "New Trip",
-      icon: MdAddRoad,
-      path: "/trip/create",
-    },
-    {
       title: "History",
       icon: MdHistory,
       path: "/trip/history",

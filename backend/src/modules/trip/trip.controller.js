@@ -136,16 +136,8 @@ export const updateTrip = asyncHandler(async (req, res) => {
 });
 
 export const startTrip = asyncHandler(async (req, res) => {
-  const payload = {
-    ...req.body,
-    meterImageUrl:
-      req.body.meterImageUrl ||
-      getFileUrl(req.files, "meterImage"),
-  };
-
   const trip = await tripService.startTrip(
     req.params.tripId,
-    payload,
     req.user
   );
 
@@ -158,9 +150,12 @@ export const startTrip = asyncHandler(async (req, res) => {
 
 export const updateCurrentLocation = asyncHandler(
   async (req, res) => {
+    const location = req.body
+    console.log("location" , location);
+    
     const trip = await tripService.updateCurrentLocation(
       req.params.tripId,
-      req.body,
+      location,
       req.user
     );
 

@@ -25,7 +25,7 @@ export default async function createRequirementWorkbook(
       value === null ||
       value === ""
     ) {
-      return 0;
+      return "N/A";
     }
 
     return value;
@@ -93,7 +93,7 @@ export default async function createRequirementWorkbook(
       return item.dispatchedQuantity ?? 0;
     }
 
-    if(item?.updated){
+    if(item.updated.quantity){
       return item.updated.quantity ?? 0;
     }
 

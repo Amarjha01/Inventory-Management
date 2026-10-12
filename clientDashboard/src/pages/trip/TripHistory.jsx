@@ -28,34 +28,32 @@ const TripHistory = () => {
     |--------------------------------------------------------------------------
     */
 
-useEffect(() => {
-  const loadTrips = async () => {
-    try {
-      setLoading(true);
+  useEffect(() => {
+    const loadTrips = async () => {
+      try {
+        setLoading(true);
 
-      const response = await getTrips();
+        const response = await getTrips();
 
-      console.log("getTrips response:", response);
+        console.log("getTrips response:", response);
 
-      const items = response?.items ?? [];
-      console.log("items", items);
-      
-      setTrips(Array.isArray(items) ? items : []);
-    } catch (error) {
-      console.error("Failed to load trips:", error);
+        const items = response?.items ?? [];
+        console.log("items", items);
 
-      setTrips([]);
+        setTrips(Array.isArray(items) ? items : []);
+      } catch (error) {
+        console.error("Failed to load trips:", error);
 
-      alert(
-        error?.response?.data?.message || "Unable to load trip history."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+        setTrips([]);
 
-  loadTrips();
-}, []);
+        alert(error?.response?.data?.message || "Unable to load trip history.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTrips();
+  }, []);
 
   /*
     |--------------------------------------------------------------------------
@@ -80,8 +78,8 @@ useEffect(() => {
     });
   }, [trips, search, status]);
 
-  console.log("filteredTrip" , filteredTrips);
-  
+  console.log("filteredTrip", filteredTrips);
+
   return (
     <div className="mx-auto w-full max-w-4xl pb-6">
       {/* HEADER */}

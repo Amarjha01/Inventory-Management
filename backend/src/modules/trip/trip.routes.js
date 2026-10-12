@@ -32,13 +32,12 @@ router.get("/:tripId", getTripById);
 
 router.patch("/:tripId", updateTrip);
 
-router.post(
+router.patch(
   "/:tripId/start",
-  uploadTripStart.single("meterImage"),
   startTrip
 );
 
-router.post(
+router.patch(
   "/:tripId/location",
   updateCurrentLocation
 );
@@ -69,7 +68,7 @@ router.post(
   addFuel
 );
 
-router.post(
+router.patch(
   "/:tripId/destinations/:destinationId/complete",
   completeDestination
 );
