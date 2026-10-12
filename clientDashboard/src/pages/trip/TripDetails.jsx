@@ -680,17 +680,17 @@ const TripDetails = () => {
       <Section title="Trip Route" icon={FaRoute}>
         <GoogleMapProvider>
           <TripMap
-          driver={trip.driver.name}
-          currentLocation={mapCurrentLocation}
-          destinations={destinations}
-          route={routeCoordinates}
-          activeDestinationId={
-            trip.destinations?.find(
-              (destination) => destination.status === "CURRENT",
-            )?._id
-          }
-          height="480px"
-        />
+            driver={trip.driver.name}
+            currentLocation={mapCurrentLocation}
+            destinations={destinations}
+            route={routeCoordinates}
+            activeDestinationId={
+              trip.destinations?.find(
+                (destination) => destination.status === "CURRENT",
+              )?._id
+            }
+            height="480px"
+          />
         </GoogleMapProvider>
 
         <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-gray-500">

@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 const destinationSchema = new mongoose.Schema(
   {
     sequence: Number,
@@ -54,6 +53,32 @@ const destinationSchema = new mongoose.Schema(
   }
 );
 
+// GPS trail point
+const gpsTrailSchema = new mongoose.Schema(
+  {
+    latitude: {
+      type: Number,
+      required: true,
+    },
+
+    longitude: {
+      type: Number,
+      required: true,
+    },
+
+    accuracy: {
+      type: Number,
+    },
+
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  {
+    _id: false,
+  }
+);
 
 const tripSchema = new mongoose.Schema(
   {
@@ -78,19 +103,23 @@ const tripSchema = new mongoose.Schema(
     startLocation: {
       address: String,
       name: String,
+
       latitude: {
         type: Number,
         required: true,
       },
+
       longitude: {
         type: Number,
         required: true,
       },
+
       source: {
         type: String,
         enum: ["GPS", "MANUAL"],
         required: true,
       },
+
       accuracy: Number,
       capturedAt: Date,
     },
@@ -101,8 +130,10 @@ const tripSchema = new mongoose.Schema(
       capturedAt: Date,
     },
 
-    // Embed the schema here
     destinations: [destinationSchema],
+
+    // GPS tracking history
+    gpsTrail: [gpsTrailSchema],
 
     finalMeter: {
       reading: Number,

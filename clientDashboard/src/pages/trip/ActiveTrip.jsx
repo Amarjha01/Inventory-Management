@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import {
   MdArrowBack,
   MdCheck,
-  MdLocationOn,
   MdMyLocation,
   MdOutlineSpeed,
   MdCameraAlt,
@@ -19,22 +18,31 @@ import {
   updateTripLocation,
   completeDestination,
   completeTrip,
+  startTrip,
+  createGpsTrail,
 } from "../../services/trip.service";
+
+import TripMap from "../../components/trip/map/TripMap";
+import GoogleMapProvider from "../../components/trip/map/GoogleMapProvider";
+import toast from "react-hot-toast";
 
 /* -------------------------------------------------------------------------- */
 /* Sub-component: EvidenceCard                                                */
 /* -------------------------------------------------------------------------- */
+
 const EvidenceCard = ({ icon, title, description, children }) => (
   <div className="mb-4 rounded-2xl border border-gray-100 bg-gray-50/50 p-4">
     <div className="mb-3 flex items-center gap-3">
       <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-[#1f225f] shadow-sm">
         {icon}
       </div>
+
       <div>
         <h3 className="text-sm font-bold text-gray-900">{title}</h3>
         <p className="text-xs text-gray-500">{description}</p>
       </div>
     </div>
+
     {children}
   </div>
 );
@@ -42,6 +50,7 @@ const EvidenceCard = ({ icon, title, description, children }) => (
 /* -------------------------------------------------------------------------- */
 /* Main Component: ActiveTrip                                                 */
 /* -------------------------------------------------------------------------- */
+
 const ActiveTrip = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -51,6 +60,7 @@ const ActiveTrip = () => {
   const [loading, setLoading] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [gpsError, setGpsError] = useState("");
 
   const [meterReading, setMeterReading] = useState("");
   const [selfie, setSelfie] = useState(null);
@@ -62,46 +72,262 @@ const ActiveTrip = () => {
   const [fuelSlip, setFuelSlip] = useState(null);
 
   const [submitting, setSubmitting] = useState(false);
+  const [startingTrip, setStartingTrip] = useState(false);
 
-  /* Load trip data */
+  // Prevent overlapping GPS requests.
+  const gpsRequestInFlight = useRef(false);
+
+  // Prevent state updates after the component unmounts.
+  const mountedRef = useRef(false);
+
+  /* ------------------------------------------------------------------------ */
+  /* Load Trip                                                                */
+  /* ------------------------------------------------------------------------ */
+
   useEffect(() => {
-    if (!tripId) return;
+    mountedRef.current = true;
+
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!tripId) {
+      setTrip(null);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
 
     const loadTrip = async () => {
       try {
         setLoading(true);
+
         const response = await getTripById(tripId);
-        setTrip(response);
+
+        if (!cancelled) {
+          setTrip(response);
+        }
       } catch (error) {
         console.error("getTripById failed:", error);
+
+        if (!cancelled) {
+          toast.error(error?.response?.data?.message || "Unable to load trip.");
+          setTrip(null);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     loadTrip();
+
+    return () => {
+      cancelled = true;
+    };
   }, [tripId]);
 
-  /* Current destination memo */
+  /* ------------------------------------------------------------------------ */
+  /* Derived Map Data                                                         */
+  /* ------------------------------------------------------------------------ */
+
+  const destinations = useMemo(() => {
+    if (!trip?.destinations) {
+      return [];
+    }
+
+    return trip.destinations.map((destination) => ({
+      ...destination,
+      latitude: Number(destination.latitude),
+      longitude: Number(destination.longitude),
+    }));
+  }, [trip?.destinations]);
+
+  const routeCoordinates = useMemo(() => {
+    return trip?.route?.geometry?.coordinates || trip?.route?.coordinates || [];
+  }, [trip?.route]);
+
+  const mapCurrentLocation = useMemo(() => {
+    if (currentLocation) {
+      return currentLocation;
+    }
+
+    if (!trip?.currentLocation) {
+      return null;
+    }
+
+    return {
+      latitude: trip.currentLocation.latitude,
+      longitude: trip.currentLocation.longitude,
+      accuracy: trip.currentLocation.accuracy,
+      capturedAt: trip.currentLocation.capturedAt,
+    };
+  }, [currentLocation, trip?.currentLocation]);
+
   const currentDestination = useMemo(() => {
-    if (!trip?.destinations) return null;
+    if (!trip?.destinations) {
+      return null;
+    }
 
     return (
       trip.destinations.find(
         (destination) => destination.status === "CURRENT",
       ) ||
-      trip.destinations.find((destination) => destination.status === "PENDING")
+      trip.destinations.find(
+        (destination) => destination.status === "PENDING",
+      ) ||
+      null
     );
-  }, [trip]);
+  }, [trip?.destinations]);
 
-  /* GPS Capture */
-  const captureLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by this browser.");
+  const completedCount =
+    trip?.destinations?.filter(
+      (destination) => destination.status === "COMPLETED",
+    ).length || 0;
+
+  const destinationCount = trip?.destinations?.length || 0;
+
+  const allDestinationsCompleted = completedCount === destinationCount;
+console.log("completedCount" , completedCount ,"destinationCount" , destinationCount  , allDestinationsCompleted);
+
+  /* ------------------------------------------------------------------------ */
+  /* GPS Error Handler                                                        */
+  /* ------------------------------------------------------------------------ */
+
+  const handleGpsError = useCallback((error) => {
+    console.error("GPS error:", error);
+
+    let message = "Unable to get your current location.";
+
+    switch (error?.code) {
+      case 1:
+        message = "Location permission was denied.";
+        break;
+      case 2:
+        message = "Current location is unavailable.";
+        break;
+      case 3:
+        message = "Getting current location timed out.";
+        break;
+      default:
+        message = "Unable to get your current location.";
+    }
+
+    if (mountedRef.current) {
+      setGpsError(message);
+    }
+  }, []);
+
+  /* ------------------------------------------------------------------------ */
+  /* Live GPS Tracking                                                        */
+  /*                                                                        */
+  /* Track only when trip.status === IN_PROGRESS.                            */
+  /* Capture immediately, then request another position every 3 seconds.     */
+  /* Each successful position is sent to the backend.                         */
+  /* ------------------------------------------------------------------------ */
+
+  useEffect(() => {
+    if (trip?.status !== "IN_PROGRESS" || !tripId) {
+      setGpsError("");
+      return undefined;
+    }
+
+    if (!("geolocation" in navigator)) {
+      const message = "Geolocation is not supported by this browser.";
+      setGpsError(message);
+      toast.error(message);
+      return undefined;
+    }
+
+    let cancelled = false;
+    let requestInFlight = false;
+
+    const updateLocation = () => {
+      // Avoid overlapping browser GPS requests.
+      if (cancelled || requestInFlight) {
+        return;
+      }
+
+      requestInFlight = true;
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          if (cancelled) {
+            requestInFlight = false;
+            return;
+          }
+
+          const location = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+            capturedAt: new Date(position.timestamp).toISOString(),
+          };
+
+          // Update the map immediately, without waiting for the API.
+          setCurrentLocation(location);
+          setGpsError("");
+
+          try {
+            // Persist the latest position on the backend.
+            await createGpsTrail(tripId, location);
+          } catch (error) {
+            console.error("Automatic location update failed:", error);
+
+            if (!cancelled) {
+              setGpsError("GPS captured, but server update failed.");
+            }
+          } finally {
+            requestInFlight = false;
+          }
+        },
+        (error) => {
+          requestInFlight = false;
+
+          if (!cancelled) {
+            handleGpsError(error);
+          }
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        },
+      );
+    };
+
+    // Capture and send the first location immediately.
+    updateLocation();
+
+    // Continue tracking every 3 seconds.
+    const intervalId = setInterval(updateLocation, 3000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [trip?.status, tripId, handleGpsError]);
+
+  /* ------------------------------------------------------------------------ */
+  /* Manual GPS Capture                                                       */
+  /* ------------------------------------------------------------------------ */
+
+  const captureLocation = useCallback(() => {
+    if (!("geolocation" in navigator)) {
+      toast.error("Geolocation is not supported by this browser.");
+      return;
+    }
+
+    if (locationLoading) {
       return;
     }
 
     setLocationLoading(true);
+    setGpsError("");
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
@@ -109,33 +335,98 @@ const ActiveTrip = () => {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
           accuracy: position.coords.accuracy,
+          capturedAt: new Date(position.timestamp).toISOString(),
         };
 
-        setCurrentLocation(location);
+        if (mountedRef.current) {
+          setCurrentLocation(location);
+        }
 
         try {
-          // FIXED: replaced 'id' with 'tripId'
           await updateTripLocation(tripId, location);
+
+          if (mountedRef.current) {
+            toast.success("GPS location captured.");
+          }
         } catch (error) {
-          console.error("Location update error:", error);
+          console.error("Manual location update failed:", error);
+
+          if (mountedRef.current) {
+            toast.error(
+              error?.response?.data?.message ||
+                "Location captured, but server update failed.",
+            );
+          }
         } finally {
-          setLocationLoading(false);
+          if (mountedRef.current) {
+            setLocationLoading(false);
+          }
         }
       },
       (error) => {
-        console.error(error);
-        setLocationLoading(false);
-        alert("Unable to get your current location.");
+        handleGpsError(error);
+        toast.error("Unable to get your current location.");
+
+        if (mountedRef.current) {
+          setLocationLoading(false);
+        }
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 15000,
         maximumAge: 0,
       },
     );
+  }, [tripId, locationLoading, handleGpsError]);
+
+  /* ------------------------------------------------------------------------ */
+  /* Start Trip                                                               */
+  /* ------------------------------------------------------------------------ */
+
+  const handleStart = async () => {
+    if (!tripId || startingTrip) {
+      return;
+    }
+
+    try {
+      setStartingTrip(true);
+
+      const response = await startTrip(tripId);
+
+      // Support APIs returning either a status directly or a trip object.
+      const newStatus =
+        response?.trip?.status || response?.status || "IN_PROGRESS";
+
+      setTrip((previous) => {
+        if (!previous) {
+          return previous;
+        }
+
+        return {
+          ...previous,
+          ...(response?.trip || {}),
+          status: newStatus,
+        };
+      });
+
+      toast.success(response?.message || "Trip started.");
+    } catch (error) {
+      console.error("Start trip failed:", error);
+
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Unable to start trip.",
+      );
+    } finally {
+      setStartingTrip(false);
+    }
   };
 
-  /* File Handlers */
+  /* ------------------------------------------------------------------------ */
+  /* File Handlers                                                            */
+  /* ------------------------------------------------------------------------ */
+
   const handleSelfie = (event) => {
     const file = event.target.files?.[0];
     if (file) setSelfie(file);
@@ -151,23 +442,32 @@ const ActiveTrip = () => {
     if (file) setFuelSlip(file);
   };
 
-  /* Fuel logic */
+  /* ------------------------------------------------------------------------ */
+  /* Fuel Entries                                                             */
+  /* ------------------------------------------------------------------------ */
+
   const addFuelEntry = () => {
+    const litres = Number(fuelLitres);
+    const amount = Number(fuelAmount);
+
     if (
-      !fuelLitres ||
-      Number(fuelLitres) <= 0 ||
-      !fuelAmount ||
-      Number(fuelAmount) < 0
+      fuelLitres.trim() === "" ||
+      !Number.isFinite(litres) ||
+      litres <= 0 ||
+      fuelAmount.trim() === "" ||
+      !Number.isFinite(amount) ||
+      amount < 0
     ) {
+      toast.error("Enter valid fuel litres and amount.");
       return;
     }
 
-    setFuelEntries((prev) => [
-      ...prev,
+    setFuelEntries((previous) => [
+      ...previous,
       {
         id: crypto.randomUUID(),
-        litres: Number(fuelLitres),
-        totalAmount: Number(fuelAmount),
+        litres,
+        totalAmount: amount,
         slip: fuelSlip,
       },
     ]);
@@ -177,27 +477,32 @@ const ActiveTrip = () => {
     setFuelSlip(null);
   };
 
-  /* Complete Destination Handler */
-  const handleCompleteDestination = async () => {
-    if (!currentDestination) return;
+  /* ------------------------------------------------------------------------ */
+  /* Complete Destination                                                     */
+  /* ------------------------------------------------------------------------ */
 
-    if (!currentLocation) {
-      alert("Please capture your current GPS location first.");
+  const handleCompleteDestination = async () => {
+    if (submitting || !currentDestination) {
       return;
     }
 
-    if (!meterReading) {
-      alert("Please enter the meter reading.");
+    if (!currentLocation) {
+      toast.error("Please capture your current GPS location first.");
+      return;
+    }
+
+    if (!Number.isFinite(Number(meterReading)) || meterReading.trim() === "") {
+      toast.error("Please enter a valid meter reading.");
       return;
     }
 
     if (!meterImage) {
-      alert("Please upload the meter image.");
+      toast.error("Please upload the meter image.");
       return;
     }
 
     if (!selfie) {
-      alert("Please take a geo-selfie.");
+      toast.error("Please take a geo-selfie.");
       return;
     }
 
@@ -205,9 +510,10 @@ const ActiveTrip = () => {
       setSubmitting(true);
 
       const formData = new FormData();
-      formData.append("latitude", currentLocation.latitude);
-      formData.append("longitude", currentLocation.longitude);
-      formData.append("accuracy", currentLocation.accuracy);
+
+      formData.append("latitude", String(currentLocation.latitude));
+      formData.append("longitude", String(currentLocation.longitude));
+      formData.append("accuracy", String(currentLocation.accuracy ?? ""));
       formData.append("meterReading", meterReading);
       formData.append("meterImage", meterImage);
       formData.append("selfie", selfie);
@@ -223,7 +529,6 @@ const ActiveTrip = () => {
         }
       });
 
-      // FIXED: replaced 'id' with 'tripId'
       const updatedTrip = await completeDestination(
         tripId,
         currentDestination._id,
@@ -231,45 +536,79 @@ const ActiveTrip = () => {
       );
 
       setTrip(updatedTrip);
+
       setMeterReading("");
       setMeterImage(null);
       setSelfie(null);
       setFuelEntries([]);
+      setFuelLitres("");
+      setFuelAmount("");
+      setFuelSlip(null);
 
-      alert("Destination completed successfully.");
+      toast.success("Destination completed successfully.");
     } catch (error) {
-      console.error(error);
-      alert(
-        error?.response?.data?.message || "Unable to complete destination.",
+      console.error("Complete destination failed:", error);
+
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Unable to complete destination.",
       );
     } finally {
       setSubmitting(false);
     }
   };
 
-  /* Complete Trip Handler */
+  /* ------------------------------------------------------------------------ */
+  /* Complete Trip                                                            */
+  /* ------------------------------------------------------------------------ */
+
   const handleCompleteTrip = async () => {
-    if (!trip) return;
+    if (submitting || !trip) {
+      return;
+    }
+
+    if (!allDestinationsCompleted) {
+      toast.error("Complete all destinations before finishing the trip.");
+      return;
+    }
+
+    if (!currentLocation) {
+      toast.error("Current GPS location is required to complete the trip.");
+      return;
+    }
 
     try {
       setSubmitting(true);
 
-      // FIXED: replaced 'id' with 'tripId'
       const updatedTrip = await completeTrip(tripId, {
-        latitude: currentLocation?.latitude,
-        longitude: currentLocation?.longitude,
-        meterReading,
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+        accuracy: currentLocation.accuracy,
+        meterReading:
+          meterReading.trim() === "" ? undefined : Number(meterReading),
       });
 
       setTrip(updatedTrip);
+
+      toast.success("Trip completed successfully.");
       navigate("/trip");
     } catch (error) {
-      console.error(error);
-      alert(error?.response?.data?.message || "Unable to complete trip.");
+      console.error("Complete trip failed:", error);
+
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Unable to complete trip.",
+      );
     } finally {
       setSubmitting(false);
     }
   };
+
+  /* ------------------------------------------------------------------------ */
+  /* Render States                                                            */
+  /* ------------------------------------------------------------------------ */
 
   if (loading) {
     return (
@@ -283,20 +622,16 @@ const ActiveTrip = () => {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center">
         <MdWarning size={40} className="text-gray-300" />
-        <p className="mt-3 text-sm text-gray-500">Trip not found.</p>
+        <p className="mt-3 text-sm text-gray-500">
+          {tripId ? "Trip not found." : "Trip ID is missing."}
+        </p>
       </div>
     );
   }
 
-  const completedCount =
-    trip.destinations?.filter(
-      (destination) => destination.status === "COMPLETED",
-    ).length || 0;
-
-  const destinationCount = trip.destinations?.length || 0;
-
-  const allDestinationsCompleted =
-    destinationCount > 0 && completedCount === destinationCount;
+  /* ------------------------------------------------------------------------ */
+  /* UI                                                                       */
+  /* ------------------------------------------------------------------------ */
 
   return (
     <div className="mx-auto w-full max-w-5xl pb-6">
@@ -311,9 +646,18 @@ const ActiveTrip = () => {
           Trip
         </button>
 
-        <div className="rounded-full bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700">
-          In Progress
-        </div>
+        {trip.status?.toLowerCase() === "ready" ? (
+          <button
+            type="button"
+            disabled={startingTrip}
+            onClick={handleStart}
+            className="my-3 rounded-2xl bg-[#1f225f] px-5 py-2 text-center text-xl font-medium text-white shadow shadow-black/50 transition hover:bg-[#171a4d] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {startingTrip ? "Starting..." : "Start"}
+          </button>
+        ) : (
+          <p className="text-sm font-semibold text-gray-600">{trip.status}</p>
+        )}
       </div>
 
       {/* MAP */}
@@ -323,32 +667,37 @@ const ActiveTrip = () => {
         className="relative overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm"
       >
         <div className="relative h-[320px] bg-gray-100">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <FaRoute className="mx-auto text-gray-300" size={40} />
-              <p className="mt-2 text-sm font-semibold text-gray-500">
-                Live Route Map
-              </p>
-              <p className="mt-1 text-xs text-gray-400">
-                Map component will be connected here.
-              </p>
-            </div>
-          </div>
+          <GoogleMapProvider>
+            <TripMap
+              driver={trip.driver?.name || "Driver"}
+              currentLocation={mapCurrentLocation}
+              destinations={destinations}
+              route={routeCoordinates}
+              activeDestinationId={
+                trip.destinations?.find(
+                  (destination) => destination.status === "CURRENT",
+                )?._id
+              }
+              height="320px"
+            />
+          </GoogleMapProvider>
 
           <button
             type="button"
             onClick={captureLocation}
             disabled={locationLoading}
+            aria-label="Capture current location"
             className="absolute bottom-4 right-4 flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#1f225f] shadow-lg disabled:opacity-50"
           >
             <MdMyLocation size={21} />
           </button>
 
           {currentDestination && (
-            <div className="absolute left-4 top-4 max-w-[75%] rounded-2xl bg-white/95 px-4 py-3 shadow-lg backdrop-blur">
+            <div className="absolute bottom-4 left-4 max-w-[75%] rounded-2xl bg-white/95 px-4 py-3 shadow-lg backdrop-blur">
               <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
                 Current Destination
               </p>
+
               <p className="mt-1 text-sm font-bold text-gray-900">
                 {currentDestination.name}
               </p>
@@ -356,6 +705,13 @@ const ActiveTrip = () => {
           )}
         </div>
       </motion.section>
+
+      {/* GPS STATUS */}
+      {gpsError && (
+        <div className="mt-3 rounded-xl bg-amber-50 px-4 py-3 text-xs text-amber-800">
+          {gpsError}
+        </div>
+      )}
 
       {/* PROGRESS */}
       <div className="mt-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
@@ -377,9 +733,7 @@ const ActiveTrip = () => {
             initial={{ width: 0 }}
             animate={{
               width: `${
-                destinationCount
-                  ? (completedCount / destinationCount) * 100
-                  : 0
+                destinationCount ? (completedCount / destinationCount) * 100 : 0
               }%`,
             }}
             className="h-full rounded-full bg-[#1f225f]"
@@ -387,7 +741,7 @@ const ActiveTrip = () => {
         </div>
       </div>
 
-      {/* CURRENT DESTINATION HEADER & LOCATION */}
+      {/* CURRENT DESTINATION */}
       {!allDestinationsCompleted && currentDestination && (
         <motion.section
           initial={{ opacity: 0, y: 10 }}
@@ -403,9 +757,11 @@ const ActiveTrip = () => {
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
                 Destination {currentDestination.sequence}
               </p>
+
               <h2 className="mt-1 text-lg font-bold text-gray-900">
                 {currentDestination.name}
               </h2>
+
               <p className="mt-1 text-xs text-gray-500">
                 {currentDestination.address}
               </p>
@@ -430,6 +786,13 @@ const ActiveTrip = () => {
                 <MdCheck size={18} />
                 <span className="font-semibold">GPS location captured</span>
               </div>
+
+              <p className="mt-1">
+                Accuracy:{" "}
+                {Number.isFinite(currentLocation.accuracy)
+                  ? `${Math.round(currentLocation.accuracy)} metres`
+                  : "Unknown"}
+              </p>
             </div>
           )}
         </motion.section>
@@ -446,6 +809,7 @@ const ActiveTrip = () => {
             <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
               Destination Verification
             </p>
+
             <h2 className="mt-1 text-lg font-bold text-gray-900">
               Complete Stop
             </h2>
@@ -459,7 +823,10 @@ const ActiveTrip = () => {
           >
             <label className="flex h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 text-xs font-semibold text-gray-600">
               <MdCameraAlt size={18} />
-              {selfie ? selfie.name : "Take Selfie"}
+              <span className="max-w-[80%] truncate">
+                {selfie ? selfie.name : "Take Selfie"}
+              </span>
+
               <input
                 type="file"
                 accept="image/*"
@@ -480,14 +847,18 @@ const ActiveTrip = () => {
               <input
                 type="number"
                 min="0"
+                step="any"
                 value={meterReading}
                 onChange={(event) => setMeterReading(event.target.value)}
                 placeholder="Meter reading"
-                className="h-11 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm outline-none"
+                className="h-11 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm outline-none focus:border-[#1f225f]"
               />
 
-              <label className="flex h-11 cursor-pointer items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 text-xs font-semibold text-gray-600">
-                {meterImage ? meterImage.name : "Meter Image"}
+              <label className="flex h-11 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed border-gray-300 bg-gray-50 px-3 text-xs font-semibold text-gray-600">
+                <span className="truncate">
+                  {meterImage ? meterImage.name : "Meter Image"}
+                </span>
+
                 <input
                   type="file"
                   accept="image/*"
@@ -513,7 +884,7 @@ const ActiveTrip = () => {
                 value={fuelLitres}
                 onChange={(event) => setFuelLitres(event.target.value)}
                 placeholder="Litres"
-                className="h-11 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm outline-none"
+                className="h-11 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm outline-none focus:border-[#1f225f]"
               />
 
               <input
@@ -523,11 +894,14 @@ const ActiveTrip = () => {
                 value={fuelAmount}
                 onChange={(event) => setFuelAmount(event.target.value)}
                 placeholder="Amount ₹"
-                className="h-11 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm outline-none"
+                className="h-11 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm outline-none focus:border-[#1f225f]"
               />
 
-              <label className="flex h-11 cursor-pointer items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 text-xs font-semibold text-gray-600">
-                {fuelSlip ? fuelSlip.name : "Fuel Slip"}
+              <label className="flex h-11 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed border-gray-300 bg-gray-50 px-3 text-xs font-semibold text-gray-600">
+                <span className="truncate">
+                  {fuelSlip ? fuelSlip.name : "Fuel Slip"}
+                </span>
+
                 <input
                   type="file"
                   accept="image/*"
@@ -541,7 +915,7 @@ const ActiveTrip = () => {
             <button
               type="button"
               onClick={addFuelEntry}
-              className="mt-3 h-10 rounded-xl bg-gray-100 px-4 text-xs font-semibold text-gray-700"
+              className="mt-3 h-10 rounded-xl bg-gray-100 px-4 text-xs font-semibold text-gray-700 transition hover:bg-gray-200"
             >
               Add Fuel Entry
             </button>
@@ -553,9 +927,18 @@ const ActiveTrip = () => {
                     key={entry.id}
                     className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2"
                   >
-                    <span className="text-xs font-medium text-gray-700">
-                      {entry.litres} L
-                    </span>
+                    <div>
+                      <span className="text-xs font-medium text-gray-700">
+                        {entry.litres} L
+                      </span>
+
+                      {entry.slip && (
+                        <p className="max-w-[180px] truncate text-[10px] text-gray-400">
+                          {entry.slip.name}
+                        </p>
+                      )}
+                    </div>
+
                     <span className="text-xs font-semibold text-gray-800">
                       ₹{entry.totalAmount}
                     </span>
@@ -569,14 +952,14 @@ const ActiveTrip = () => {
             type="button"
             disabled={submitting}
             onClick={handleCompleteDestination}
-            className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#1f225f] text-sm font-bold text-white transition hover:bg-[#171a4d] disabled:opacity-50"
+            className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#1f225f] text-sm font-bold text-white transition hover:bg-[#171a4d] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? "Submitting..." : "Complete Destination"}
           </button>
         </motion.section>
       )}
 
-      {/* COMPLETE TRIP ACTION */}
+      {/* COMPLETE TRIP */}
       {allDestinationsCompleted && (
         <motion.section
           initial={{ opacity: 0, y: 10 }}
@@ -586,6 +969,7 @@ const ActiveTrip = () => {
           <h2 className="text-lg font-bold text-gray-900">
             All Destinations Visited
           </h2>
+
           <p className="mt-1 text-xs text-gray-500">
             You've completed all route stops. Click below to finish the entire
             trip.
@@ -595,7 +979,7 @@ const ActiveTrip = () => {
             type="button"
             disabled={submitting}
             onClick={handleCompleteTrip}
-            className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-green-600 text-sm font-bold text-white transition hover:bg-green-700 disabled:opacity-50"
+            className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-green-600 text-sm font-bold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? "Finishing..." : "Complete Entire Trip"}
           </button>

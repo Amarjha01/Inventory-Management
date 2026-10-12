@@ -14,6 +14,16 @@ import {
 
 const router = express.Router();
 
+
+router.post("/voltage", async (req, res) => {
+    console.log("Device data:", req.body);
+
+    res.json({
+        success: true,
+        received: true
+    });
+});
+
 // Add New DG
 router.post(
     "/add",

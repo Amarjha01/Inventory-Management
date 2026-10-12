@@ -19,7 +19,6 @@ export const getTripById = async (id) => {
 };
 
 export const createTrip = async (payload) => {
-    console.log(payload);
     
     const { data } = await api.post(
         ENDPOINTS.TRIPS,
@@ -62,8 +61,8 @@ export const updateTripLocation = async (id, payload) => {
 };
 
 export const completeDestination = async (id, destinationId, payload) => {
-    const { data } = await api.patch(
-        `${ENDPOINTS.TRIPS}/${id}/destinations/${destinationId}/complete`,
+    const { data } = await api.post(
+        `${ENDPOINTS.TRIPS}/${id}/destinations/${destinationId}/arrive`,
         payload
     );
 
@@ -137,3 +136,11 @@ export const getDrivingRoute = async (points) => {
 
     return data.routes[0].geometry.coordinates;
 };
+
+export const createGpsTrail = async(tripId , gpsCoordinates)=>{
+    const created = await api.post(`${ENDPOINTS.TRIPS}/${tripId}/gpstrail` , {
+        gpsCoordinates
+    })
+
+    return created.data
+}

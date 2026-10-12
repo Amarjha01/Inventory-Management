@@ -19,7 +19,7 @@ const Trip = () => {
       try {
         const response = await getMyTrips();
         const trips = response?.items || [];
-        const active = trips.find((trip) => trip.status === "READY");
+        const active = trips.find((trip) => trip.status != "COMPLETED");
         setActiveTrip(active || null);
       } catch (error) {
         console.error("Failed to fetch active trip:", error);
@@ -104,7 +104,8 @@ const Trip = () => {
     <div className="mx-auto w-full max-w-5xl space-y-5">
       {/* HEADER */}
 
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="pt-1">
+      <div className=" flex justify-between items-center">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="pt-1">
         <p className="text-sm font-medium text-gray-500">Driver Dashboard</p>
 
         <h1 className="mt-1 text-2xl font-bold text-[#1f225f]">Your Trips</h1>
@@ -114,8 +115,13 @@ const Trip = () => {
         </p>
       </motion.div>
 
-      {/* ACTIVE TRIP */}
+        <Link className=" cursor-pointer border border-dotted hover:bg-blue-950 hover:text-white transition-all duration-200 px-2.5 py-3 rounded-lg font-bold" to={"/trip/create"}>
+         Start New Trip +
+         </Link>
+      </div>
 
+
+      {/* ACTIVE TRIP */}
       {loading ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
           <div className="animate-pulse">

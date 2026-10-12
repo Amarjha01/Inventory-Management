@@ -1,9 +1,10 @@
+import gpsTrailModel from "./gpsTrail.model.js";
 import Trip from "./trip.model.js";
 
 class TripRepository {
   async create(payload) {
-    console.log("payload at repo" , payload );
-    
+    console.log("payload at repo", payload);
+
     return Trip.create(payload);
   }
 
@@ -11,9 +12,7 @@ class TripRepository {
     let query = Trip.findById(tripId);
 
     if (options.populate !== false) {
-      query = query
-        .populate("driver")
-        .populate("vehicle");
+      query = query.populate("driver").populate("vehicle");
     }
 
     return query;
@@ -24,11 +23,7 @@ class TripRepository {
   }
 
   async findByDriver(driverId, options = {}) {
-    const {
-      page = 1,
-      limit = 20,
-      status,
-    } = options;
+    const { page = 1, limit = 20, status } = options;
 
     const filter = { driver: driverId };
 
@@ -59,13 +54,7 @@ class TripRepository {
   }
 
   async findAll(options = {}) {
-    const {
-      page = 1,
-      limit = 20,
-      status,
-      driverId,
-      vehicleId,
-    } = options;
+    const { page = 1, limit = 20, status, driverId, vehicleId } = options;
 
     const filter = {};
 
@@ -113,14 +102,10 @@ class TripRepository {
   }
 
   async updateById(tripId, update) {
-    return Trip.findByIdAndUpdate(
-      tripId,
-      update,
-      {
-        new: true,
-        runValidators: true,
-      }
-    )
+    return Trip.findByIdAndUpdate(tripId, update, {
+      new: true,
+      runValidators: true,
+    })
       .populate("driver")
       .populate("vehicle");
   }
@@ -132,6 +117,68 @@ class TripRepository {
   async deleteById(tripId) {
     return Trip.findByIdAndDelete(tripId);
   }
+
+
+
+
+async CreateGpsTrail(tripId, gpsTrail) {
+  const trip = await Trip.findById(tripId);
+
+  if (!trip) {
+    throw new Error("Trip not found");
+  }
+
+  if (trip.status !== "IN_PROGRESS") {
+    throw new Error("GPS tracking is allowed only for active trips");
+  }
+
+  // Extract the nested GPS payload.
+  const coordinates = gpsTrail?.gpsCoordinates;
+
+  const latitude = Number(coordinates?.latitude);
+  const longitude = Number(coordinates?.longitude);
+
+  const accuracy =
+    coordinates?.accuracy == null
+      ? undefined
+      : Number(coordinates.accuracy);
+
+  if (
+    coordinates?.latitude == null ||
+    coordinates?.longitude == null ||
+    !Number.isFinite(latitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    !Number.isFinite(longitude) ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    throw new Error("Invalid GPS coordinates");
+  }
+
+  if (
+    accuracy !== undefined &&
+    (!Number.isFinite(accuracy) || accuracy < 0)
+  ) {
+    throw new Error("Invalid GPS accuracy");
+  }
+
+  trip.gpsTrail.push({
+    latitude,
+    longitude,
+    ...(accuracy !== undefined && { accuracy }),
+    createdAt: coordinates.capturedAt
+      ? new Date(coordinates.capturedAt)
+      : new Date(),
+  });
+
+  await trip.save();
+
+  return trip;
+}
+
+
+
 }
 
 export default new TripRepository();

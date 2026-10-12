@@ -16,6 +16,7 @@ import {
   completeDestination,
   finalizeTrip,
   cancelTrip,
+  gpsTrail,
 } from "./trip.controller.js";
 
 const router = Router();
@@ -32,13 +33,12 @@ router.get("/:tripId", getTripById);
 
 router.patch("/:tripId", updateTrip);
 
-router.post(
+router.patch(
   "/:tripId/start",
-  uploadTripStart.single("meterImage"),
   startTrip
 );
 
-router.post(
+router.patch(
   "/:tripId/location",
   updateCurrentLocation
 );
@@ -69,7 +69,7 @@ router.post(
   addFuel
 );
 
-router.post(
+router.patch(
   "/:tripId/destinations/:destinationId/complete",
   completeDestination
 );
@@ -82,5 +82,9 @@ router.post(
 
 router.post("/:tripId/cancel", cancelTrip);
 
+router.post(
+  "/:tripId/gpstrail",
+  gpsTrail
+)
 // router.post('/trips/:tripId/location' )
 export default router;

@@ -136,16 +136,8 @@ export const updateTrip = asyncHandler(async (req, res) => {
 });
 
 export const startTrip = asyncHandler(async (req, res) => {
-  const payload = {
-    ...req.body,
-    meterImageUrl:
-      req.body.meterImageUrl ||
-      getFileUrl(req.files, "meterImage"),
-  };
-
   const trip = await tripService.startTrip(
     req.params.tripId,
-    payload,
     req.user
   );
 
@@ -158,9 +150,12 @@ export const startTrip = asyncHandler(async (req, res) => {
 
 export const updateCurrentLocation = asyncHandler(
   async (req, res) => {
+    const location = req.body
+    console.log("location" , location);
+    
     const trip = await tripService.updateCurrentLocation(
       req.params.tripId,
-      req.body,
+      location,
       req.user
     );
 
@@ -173,7 +168,13 @@ export const updateCurrentLocation = asyncHandler(
 );
 
 export const arriveAtDestination = asyncHandler(
+  
   async (req, res) => {
+    console.log(      req.params.tripId,
+      req.params.destinationId,
+      req.body,
+      req.user);
+    
     const trip = await tripService.arriveAtDestination(
       req.params.tripId,
       req.params.destinationId,
@@ -289,4 +290,18 @@ export const cancelTrip = asyncHandler(async (req, res) => {
     "Trip cancelled successfully.",
     trip
   );
+});
+
+export const gpsTrail = asyncHandler(async(req , res)=>{
+  const tripId = req.params.tripId
+  const payload = {...req.body}
+
+  console.log("req.params.tripId" , req.params.tripId  );
+  const trip = await tripService.createGpsTrail(tripId , payload);
+
+  return ApiResponse.success(
+    res,
+    "gps trail recorded successfully",
+    trip
+  )
 });
