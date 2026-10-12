@@ -16,6 +16,7 @@ import {
   completeDestination,
   finalizeTrip,
   cancelTrip,
+  gpsTrail,
 } from "./trip.controller.js";
 
 const router = Router();
@@ -81,5 +82,9 @@ router.post(
 
 router.post("/:tripId/cancel", cancelTrip);
 
+router.post(
+  "/:tripId/gpstrail",
+  gpsTrail
+)
 // router.post('/trips/:tripId/location' )
 export default router;

@@ -310,7 +310,7 @@ formData.append("startMeter.imageUrl", meterImage);
        */
 
       if (trip?._id) {
-        navigate(`/trip/${trip._id}`);
+        navigate(`/trip/active?tripId=${trip._id}`);
       } else {
         navigate("/trip");
       }

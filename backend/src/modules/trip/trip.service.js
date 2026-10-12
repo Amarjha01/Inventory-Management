@@ -40,15 +40,13 @@ const getUserRole = (user) => user?.role?.toString?.() || "";
 /* -------------------------------------------------------------------------- */
 
 const assertTripOwner = (trip, user) => {
-  
   const userId = getUserId(user);
-  
+
   if (!userId) {
     throw new ApiError(401, "User could not be identified.");
   }
 
   if (trip.driver?._id?.toString?.() !== userId) {
- 
     throw new ApiError(403, "You are not authorized to access this trip.");
   }
 };
@@ -58,8 +56,8 @@ const assertTripOwner = (trip, user) => {
 /* -------------------------------------------------------------------------- */
 
 const normalizeLocation = (location, fallbackSource = "GPS") => {
-  console.log("location normalized" , location);
-  
+  console.log("location normalized", location);
+
   if (!location) {
     throw new ApiError(400, "Location is required.");
   }
@@ -239,7 +237,6 @@ class TripService {
   /* ------------------------------------------------------------------------ */
 
   async createTrip(payload, user) {
-    
     const driverId = payload.driverId || getUserId(user);
 
     if (!driverId) {
@@ -299,7 +296,7 @@ class TripService {
         sequence: index + 1,
         name: destination.name?.trim?.(),
         address: destination.address?.trim?.() || "",
-        startLocation:payload.startLocation,
+        startLocation: payload.startLocation,
         latitude,
         longitude,
         geofenceRadiusMeters: geofenceRadius,
@@ -320,9 +317,9 @@ class TripService {
 
       destinations,
 
-      startMeter:payload.startMeter,
-      
-      startLocation:payload.startLocation,
+      startMeter: payload.startMeter,
+
+      startLocation: payload.startLocation,
 
       route: payload.route || undefined,
 
@@ -521,7 +518,13 @@ class TripService {
     // trip.startMeter = meter;
 
     trip.status = "IN_PROGRESS";
+    const firstDestination = trip.destinations.find(
+      (destination) => destination.sequence === 1,
+    );
 
+    if (firstDestination) {
+      firstDestination.status = "CURRENT";
+    }
     trip.startedAt = new Date();
 
     // activateFirstDestination(trip);
@@ -575,7 +578,7 @@ class TripService {
     if (trip.status !== "IN_PROGRESS") {
       throw new ApiError(409, "Trip is not in progress.");
     }
-console.log("location at service" , payload);
+    console.log("location at service", payload);
 
     const location = normalizeLocation(payload);
 
@@ -621,11 +624,11 @@ console.log("location at service" , payload);
 
     assertCurrentDestination(trip, destination);
 
-    const location = normalizeLocation(payload.location);
+    // const location = normalizeLocation(payload.location);
 
     const distance = haversineDistanceMeters(
-      location.latitude,
-      location.longitude,
+      payload.latitude,
+      payload.longitude,
       destination.latitude,
       destination.longitude,
     );
@@ -647,26 +650,26 @@ console.log("location at service" , payload);
 
     destination.arrival = {
       location: {
-        latitude: location.latitude,
+        latitude: payload.latitude,
 
-        longitude: location.longitude,
+        longitude: payload.longitude,
 
-        accuracy: location.accuracy,
+        accuracy: payload.accuracy,
 
-        capturedAt: location.capturedAt,
+        capturedAt: Date.now(),
       },
 
       distanceFromDestinationMeters: Number(distance.toFixed(2)),
     };
 
     trip.currentLocation = {
-      latitude: location.latitude,
+      latitude: payload.latitude,
 
-      longitude: location.longitude,
+      longitude: payload.longitude,
 
-      accuracy: location.accuracy,
+      accuracy: payload.accuracy,
 
-      capturedAt: location.capturedAt,
+      capturedAt: Date.now(),
     };
 
     trip.auditLog.push({
@@ -1136,6 +1139,14 @@ console.log("location at service" , payload);
     await tripRepository.save(trip);
 
     return tripRepository.findById(trip._id);
+  }
+
+  /* ------------------------------------------------------------------------ */
+  /* Cancel Trip                                                              */
+  /* ------------------------------------------------------------------------ */
+
+  async createGpsTrail(tripId , payload) {
+    return tripRepository.CreateGpsTrail(tripId , payload);
   }
 }
 
