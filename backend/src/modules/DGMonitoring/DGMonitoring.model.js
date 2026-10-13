@@ -10,7 +10,7 @@ const DGSchema = new Schema(
 
     DGID: {
       type: Number,
-      required: true
+      required: true,
     },
 
     DGModel: {
@@ -36,10 +36,50 @@ const DGSchema = new Schema(
     current: {
       type: Number,
     },
-    
-    fuelConsumptionHr:{
-      type:Number,
-    }
+
+    fuelConsumptionHr: {
+      type: Number,
+    },
+
+    // ESP32 health monitoring
+    deviceId: {
+      type: String,
+      trim: true,
+    },
+
+    deviceStatus: {
+      type: String,
+      enum: ["ONLINE", "OFFLINE", "UNKNOWN"],
+      default: "UNKNOWN",
+    },
+
+    wifiConnected: {
+      type: Boolean,
+    },
+
+    uptimeSeconds: {
+      type: Number,
+      min: 0,
+    },
+
+    freeHeapBytes: {
+      type: Number,
+      min: 0,
+    },
+
+    dgState: {
+      type: String,
+      enum: ["RUNNING", "STOPPED", "UNKNOWN"],
+      default: "UNKNOWN",
+    },
+
+    lastApiSuccess: {
+      type: Boolean,
+    },
+
+    lastHealthReportAt: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );

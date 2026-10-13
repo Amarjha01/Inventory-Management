@@ -92,6 +92,60 @@ const getLatestDGSession = async (DGID) => {
   return await DGMonitoringRepository.getLatest(DGID);
 };
 
+// =====================================================
+// Update DG Health
+// =====================================================
+const updateDGHealth = async (kitchenId, DGID, data) => {
+  const dg = await DGMonitoringRepository.findDGByKitchenAndId(
+    kitchenId,
+    DGID,
+  );
+
+  if (!dg) {
+    throw new Error(`DG ${DGID} not found`);
+  }
+
+  const healthData = {
+    deviceId: data.deviceId,
+    wifiConnected: data.wifiConnected,
+    uptimeSeconds: data.uptimeSeconds,
+    freeHeapBytes: data.freeHeapBytes,
+    dgState: data.dgState,
+    lastApiSuccess: data.lastApiSuccess,
+    lastHealthReportAt: new Date(),
+    deviceStatus: "ONLINE",
+  };
+
+  const updatedDG = await DGMonitoringRepository.updateDGHealth(
+    kitchenId,
+    DGID,
+    healthData,
+  );
+
+  return updatedDG;
+};
+
+// =====================================================
+// Get DG Health
+// =====================================================
+const getDGHealth = async (kitchenId, DGID) => {
+  const dg = await DGMonitoringRepository.findDGByKitchenAndId(
+    kitchenId,
+    DGID,
+  );
+
+  if (!dg) {
+    throw new Error(`DG ${DGID} not found`);
+  }
+
+  const health = await DGMonitoringRepository.getDGHealth(
+    kitchenId,
+    DGID,
+  );
+
+  return health;
+};
+
 export default {
   addDG,
   getAllDG,
@@ -101,4 +155,6 @@ export default {
   getActiveDG,
   getDGHistory,
   getLatestDGSession,
+  updateDGHealth,
+  getDGHealth
 };

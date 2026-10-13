@@ -199,6 +199,48 @@ const getDailyRuntime = async (
   return DGMonitoringData;
 };
 
+// Update DG health report
+const updateDGHealth = async (DGID, data) => {
+  return await DG.findOneAndUpdate(
+    {
+      DGID: Number(DGID),
+    },
+    {
+      $set: {
+        wifiConnected: data.wifiConnected,
+        uptimeSeconds: data.uptimeSeconds,
+        freeHeapBytes: data.freeHeapBytes,
+        dgState: data.dgState,
+        lastApiSuccess: data.lastApiSuccess,
+        lastHealthReportAt: new Date(),
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+};
+
+// Get DG health report
+const getDGHealth = async (DGID) => {
+  return await DG.findOne(
+    {
+      DGID: Number(DGID),
+    },
+    {
+      deviceId: 1,
+      deviceStatus: 1,
+      wifiConnected: 1,
+      uptimeSeconds: 1,
+      freeHeapBytes: 1,
+      dgState: 1,
+      lastApiSuccess: 1,
+      lastHealthReportAt: 1,
+    }
+  );
+};
+
 export default {
     createDG,
     getAllDG,
@@ -211,5 +253,8 @@ export default {
     stopMonitoring,
     getHistoryByDGId,
     getLatest,
-    getDailyRuntime
+    getDailyRuntime,
+
+    updateDGHealth,
+    getDGHealth,
 };

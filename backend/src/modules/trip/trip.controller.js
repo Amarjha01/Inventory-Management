@@ -292,16 +292,44 @@ export const cancelTrip = asyncHandler(async (req, res) => {
   );
 });
 
-export const gpsTrail = asyncHandler(async(req , res)=>{
-  const tripId = req.params.tripId
-  const payload = {...req.body}
+// export const gpsTrail = asyncHandler(async(req , res)=>{
+//   const tripId = req.params.tripId
+//   const payload = {...req.body}
 
-  console.log("req.params.tripId" , req.params.tripId  );
-  const trip = await tripService.createGpsTrail(tripId , payload);
+//   console.log("req.params.tripId" , req.params.tripId  );
+//   const trip = await tripService.createGpsTrail(tripId , payload);
+
+//   return ApiResponse.success(
+//     res,
+//     "gps trail recorded successfully",
+    
+//   )
+// });
+
+
+export const gpsTrail = asyncHandler(async (req, res) => {
+  const { tripId } = req.params;
+
+  const body = req.body?.gpsCoordinates ?? req.body;
+
+  const capturedAt =
+    body?.capturedAt ??
+    (body?.time ? new Date(body.time) : new Date());
+
+  const gpsCoordinates = {
+    latitude: body?.latitude,
+    longitude: body?.longitude,
+    accuracy: body?.accuracy,
+    capturedAt,
+  };
+
+  const trip = await tripService.createGpsTrail(tripId, {
+    gpsCoordinates, 
+  });
 
   return ApiResponse.success(
     res,
-    "gps trail recorded successfully",
+    "GPS trail recorded successfully",
     trip
-  )
+  );
 });
