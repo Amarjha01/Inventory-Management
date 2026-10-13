@@ -10,6 +10,8 @@ import {
     addDG,
     getAllDG,
     getDailyRuntime,
+    updateDGHealth,
+    getDGHealth,
 } from "./DGMonitoring.controller.js";
 
 const router = express.Router();
@@ -74,5 +76,16 @@ router.get(
     getLatestDGSession
 );
 
+// Post DG Health
+router.post(
+    "/:DGID/health",
+    updateDGHealth
+)
+
+// Get DG Health
+router.get(
+    "/:DGID/health",
+    getDGHealth
+)
 
 export default router;
