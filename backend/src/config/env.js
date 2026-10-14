@@ -24,7 +24,7 @@ const env = {
 
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
 
-  CLIENT_URL: process.env.CLIENT_URL || "*",
+  CLIENT_URL: process.env.CLIENT_URL || "",
 
   UPLOAD_PATH: process.env.UPLOAD_PATH || "uploads",
 };

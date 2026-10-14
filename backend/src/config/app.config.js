@@ -17,13 +17,25 @@ const configureApplication = (app) => {
     })
 );
 
-    app.use(cors({
+const allowedOrigins = [
+  "https://esf.axeiro.com",
+  "https://localhost", // Capacitor Android
+  "http://localhost:5173", // Local Vite development
+];
 
-        origin: env.CLIENT_URL,
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Requests without an Origin header can include native clients.
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
 
-        credentials: true
-
-    }));
+      return callback(new Error(`CORS blocked origin: ${origin}`));
+    },
+    credentials: true,
+  })
+);
 
     app.use(cookieParser());
 
