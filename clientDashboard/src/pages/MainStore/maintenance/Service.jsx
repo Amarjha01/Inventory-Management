@@ -10,7 +10,6 @@ import {
   FiX,
 } from "react-icons/fi";
 
-
 import ServiceCard from "../../../components/mainStore/maintenance/ServiceCard.jsx";
 import MaintenanceDetailModal from "../../../components/mainStore/maintenance/MaintenanceDetailModal.jsx";
 import { getAllServiceForAdmin } from "../../../services/maintainence.service.js";
@@ -108,7 +107,7 @@ const formatDate = (value) => {
    ========================================================= */
 
 const Service = () => {
-    const [showReports , setShowReports] = useState([]);
+  const [showReports, setShowReports] = useState([]);
   /* -------------------------------------------------------
      DATA
   ------------------------------------------------------- */
@@ -145,10 +144,9 @@ const Service = () => {
 
   const [selectedRecord, setSelectedRecord] = useState(null);
 
-
-    const handleShowVisitorReports = () =>{
+  const handleShowVisitorReports = () => {
     setShowReports(!showReports);
-  }
+  };
   /* =======================================================
      FETCH SERVICE RECORDS
   ======================================================= */
@@ -178,7 +176,11 @@ const Service = () => {
     } catch (err) {
       console.error("Failed to fetch service records:", err);
 
-      setError(err?.response?.data?.message || err?.message || "Failed to load service records.");
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to load service records.",
+      );
     } finally {
       setLoading(false);
     }
@@ -217,7 +219,9 @@ const Service = () => {
       }
     });
 
-    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+    return Array.from(map.values()).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
   }, [records]);
 
   /* =======================================================
@@ -263,7 +267,10 @@ const Service = () => {
 
         const recordKitchenName = record.kitchenName || getKitchenName(record);
 
-        if (recordKitchenId !== selectedKitchen && recordKitchenName !== selectedKitchen) {
+        if (
+          recordKitchenId !== selectedKitchen &&
+          recordKitchenName !== selectedKitchen
+        ) {
           return false;
         }
       }
@@ -324,7 +331,12 @@ const Service = () => {
     setSearch("");
   };
 
-  const hasActiveFilters = selectedKitchen !== "ALL" || selectedStatus !== "ALL" || dateFrom || dateTo || search;
+  const hasActiveFilters =
+    selectedKitchen !== "ALL" ||
+    selectedStatus !== "ALL" ||
+    dateFrom ||
+    dateTo ||
+    search;
 
   /* =======================================================
      CARD CLICK
@@ -357,7 +369,10 @@ const Service = () => {
         {/* Cards skeleton */}
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="h-52 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+            <div
+              key={index}
+              className="h-52 animate-pulse rounded-2xl border border-slate-200 bg-white"
+            />
           ))}
         </div>
       </div>
@@ -407,10 +422,13 @@ const Service = () => {
         ================================================= */}
 
         <div className="mb-5">
-          <div className="flex gap-3 ">
+          <div className="flex flex-col md:flex-row gap-3 ">
             {/* Search */}
             <div className="relative flex-1">
-              <FiSearch size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              <FiSearch
+                size={17}
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              />
 
               <input
                 type="text"
@@ -431,6 +449,7 @@ const Service = () => {
               )}
             </div>
 
+              <div className="flex gap-3">
             {/* Filter button */}
             <button
               type="button"
@@ -439,9 +458,10 @@ const Service = () => {
             >
               <FiFilter size={15} />
               Filter
-
               {hasActiveFilters && (
-                <span className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] ${showFilters ? "bg-white text-slate-900" : "bg-slate-900 text-white"}`}>
+                <span
+                  className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] ${showFilters ? "bg-white text-slate-900" : "bg-slate-900 text-white"}`}
+                >
                   !
                 </span>
               )}
@@ -455,35 +475,22 @@ const Service = () => {
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
             >
               <FiRefreshCw size={15} />
-              <span className="hidden sm:inline">Refresh</span>
+              <span className="">Refresh</span>
             </button>
-                        <button
-                          type="button"
-                          onClick={handleShowVisitorReports}
-                          title="Reports"
-                          className="
-                            inline-flex
-                            h-11
-                            items-center
-                            justify-center
-                            gap-2
-                            rounded-xl
-                            border
-                            border-slate-200
-                            bg-white
-                            px-4
-                            text-xs
-                            font-semibold
-                            text-slate-600
-                            transition
-                            hover:border-slate-300
-                            hover:text-slate-900
-                          "
-                        >
-                          <SlGraph size={15} />
-            
-                          <span className="hidden sm:inline">Report</span>
-                        </button>
+
+            {/* Report */}
+            <button
+              type="button"
+              onClick={handleShowVisitorReports}
+              title="Reports"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+
+            >
+              <SlGraph size={15} />
+
+              <span className="">Report</span>
+            </button>
+              </div>
 
           </div>
 
@@ -496,7 +503,10 @@ const Service = () => {
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {/* Kitchen */}
                 <div>
-                  <label htmlFor="service-kitchen-filter" className="mb-1.5 block text-[11px] font-semibold text-slate-500">
+                  <label
+                    htmlFor="service-kitchen-filter"
+                    className="mb-1.5 block text-[11px] font-semibold text-slate-500"
+                  >
                     Kitchen
                   </label>
 
@@ -504,7 +514,9 @@ const Service = () => {
                     <select
                       id="service-kitchen-filter"
                       value={selectedKitchen}
-                      onChange={(event) => setSelectedKitchen(event.target.value)}
+                      onChange={(event) =>
+                        setSelectedKitchen(event.target.value)
+                      }
                       className="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 pr-9 text-xs text-slate-700 outline-none focus:border-slate-400"
                     >
                       <option value="ALL">All Kitchens</option>
@@ -516,13 +528,19 @@ const Service = () => {
                       ))}
                     </select>
 
-                    <FiChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <FiChevronDown
+                      size={14}
+                      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
                   </div>
                 </div>
 
                 {/* Status */}
                 <div>
-                  <label htmlFor="service-status-filter" className="mb-1.5 block text-[11px] font-semibold text-slate-500">
+                  <label
+                    htmlFor="service-status-filter"
+                    className="mb-1.5 block text-[11px] font-semibold text-slate-500"
+                  >
                     Status
                   </label>
 
@@ -530,7 +548,9 @@ const Service = () => {
                     <select
                       id="service-status-filter"
                       value={selectedStatus}
-                      onChange={(event) => setSelectedStatus(event.target.value)}
+                      onChange={(event) =>
+                        setSelectedStatus(event.target.value)
+                      }
                       className="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 pr-9 text-xs text-slate-700 outline-none focus:border-slate-400"
                     >
                       <option value="ALL">All Status</option>
@@ -539,18 +559,27 @@ const Service = () => {
                       <option value="CANCELLED">Cancelled</option>
                     </select>
 
-                    <FiChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <FiChevronDown
+                      size={14}
+                      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
                   </div>
                 </div>
 
                 {/* Date From */}
                 <div>
-                  <label htmlFor="service-date-from" className="mb-1.5 block text-[11px] font-semibold text-slate-500">
+                  <label
+                    htmlFor="service-date-from"
+                    className="mb-1.5 block text-[11px] font-semibold text-slate-500"
+                  >
                     Service Date From
                   </label>
 
                   <div className="relative">
-                    <FiCalendar size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <FiCalendar
+                      size={14}
+                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
 
                     <input
                       id="service-date-from"
@@ -564,12 +593,18 @@ const Service = () => {
 
                 {/* Date To */}
                 <div>
-                  <label htmlFor="service-date-to" className="mb-1.5 block text-[11px] font-semibold text-slate-500">
+                  <label
+                    htmlFor="service-date-to"
+                    className="mb-1.5 block text-[11px] font-semibold text-slate-500"
+                  >
                     Service Date To
                   </label>
 
                   <div className="relative">
-                    <FiCalendar size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <FiCalendar
+                      size={14}
+                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
 
                     <input
                       id="service-date-to"

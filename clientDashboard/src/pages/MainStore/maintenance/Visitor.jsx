@@ -976,7 +976,7 @@ const Visitor = () => {
                 size={15}
               />
 
-              <span className="hidden sm:inline">
+              <span className="">
                 Refresh
               </span>
 
@@ -1007,7 +1007,7 @@ const Visitor = () => {
                         >
                           <SlGraph size={15} />
             
-                          <span className="hidden sm:inline">Report</span>
+                          <span className="">Report</span>
                         </button>
 
           </div>

@@ -199,25 +199,33 @@ const ServiceSection = ({
           <div className={`flex-1 overflow-y-auto px-5 py-5 ${saving ? "pointer-events-none opacity-70" : ""}`}>
             <div className="space-y-5">
               {/* Machine */}
-              <Input
-                label="Machine Name / मशीन नेम"
-                name="partName"
-                value={form.partName}
-                onChange={handlePartChange}
-                placeholder="e.g. Engine Oil / जैसे: इंजन ऑयल"
-                icon={FiTool}
-                list="maintenance-parts"
-              />
+              <div className="w-full">
+                <label
+                  htmlFor="partName"
+                  className="mb-1 block text-sm font-medium text-gray-700"
+                >
+                  Machine Name / मशीन नेम
+                </label>
 
-              <datalist id="maintenance-parts">
-                {partName.map((part) => (
-                  <option
-                    key={part.name}
-                    value={part.name}
-                    label={part.hindiName}
-                  />
-                ))}
-              </datalist>
+                <select
+                  id="partName"
+                  name="partName"
+                  value={form.partName}
+                  onChange={handlePartChange}
+                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  required
+                >
+                  <option value="" disabled>
+                    Select a maintenance part / मेंटेनेंस पार्ट चुनें
+                  </option>
+
+                  {partName.map((part) => (
+                    <option key={part.name} value={part.name}>
+                      {part.name} ({part.hindiName})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               {/* Dates */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
