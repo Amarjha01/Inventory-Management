@@ -798,6 +798,8 @@ const handleVisitorFiles = async (event) => {
           <div
             className="
               flex
+              flex-col
+              md:flex-row
               gap-3
             "
           >
@@ -852,7 +854,8 @@ const handleVisitorFiles = async (event) => {
               )}
             </div>
 
-            {/* FILTER */}
+              <div className="flex gap-3">
+             {/* FILTER */}
 
             <button
               type="button"
@@ -946,8 +949,10 @@ const handleVisitorFiles = async (event) => {
             >
               <FiRefreshCw size={15} />
 
-              <span className="hidden sm:inline">Refresh</span>
+              <span className="">Refresh</span>
             </button>
+            
+              </div>
               <button onClick={()=>setShowForm(true)} className="hidden md:block px-3 py-1 bg-black cursor-pointer text-white ">
               Create New Complain/Repair +
             </button>

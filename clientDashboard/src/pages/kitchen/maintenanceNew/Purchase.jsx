@@ -908,6 +908,8 @@ const handlePurchaseFiles = async (event) => {
           <div
             className="
               flex
+              flex-col
+              md:flex-row
               gap-3
             "
           >
@@ -979,7 +981,8 @@ const handlePurchaseFiles = async (event) => {
               )}
             </div>
 
-            {/* FILTER */}
+              <div>
+                            {/* FILTER */}
 
             <button
               type="button"
@@ -1073,8 +1076,10 @@ const handlePurchaseFiles = async (event) => {
             >
               <FiRefreshCw size={15} />
 
-              <span className="hidden sm:inline">Refresh</span>
+              <span className="">Refresh</span>
             </button>
+              </div>
+
             <button
               onClick={() => setShowForm(true)}
               className="hidden md:block px-3 py-1 bg-black cursor-pointer text-white "

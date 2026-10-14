@@ -726,9 +726,9 @@ const Service = () => {
         ================================================= */}
 
         <div className="mb-5">
-          <div className="flex gap-3 ">
+          <div className="flex flex-col md:flex-row gap-3 ">
             {/* Search */}
-            <div className="relative flex-1">
+            <div className="relative flex-1 ">
               <FiSearch
                 size={17}
                 className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -753,7 +753,8 @@ const Service = () => {
               )}
             </div>
 
-            {/* Filter button */}
+<div className=" flex  gap-3">
+              {/* Filter button */}
             <button
               type="button"
               onClick={() => setShowFilters((previous) => !previous)}
@@ -778,7 +779,7 @@ const Service = () => {
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
             >
               <FiRefreshCw size={15} />
-              <span className="hidden sm:inline">Refresh</span>
+              <span className="">Refresh</span>
             </button>
             <button
               onClick={() => setShowForm(true)}
@@ -786,6 +787,7 @@ const Service = () => {
             >
               Create New Service +
             </button>
+</div>
           </div>
 
           {/* =================================================
