@@ -14,12 +14,16 @@ const destinationSchema = new mongoose.Schema(
       default: "PENDING",
     },
 
-    arrival: {
-      latitude: Number,
-      longitude: Number,
-      accuracy: Number,
-      capturedAt: Date,
-    },
+arrival: {
+  location: {
+    latitude: Number,
+    longitude: Number,
+    accuracy: Number,
+    capturedAt: Date,
+  },
+
+  distanceFromDestinationMeters: Number,
+},
 
     distance: Number,
 
@@ -99,6 +103,35 @@ const tripSchema = new mongoose.Schema(
       enum: ["DRAFT", "READY", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
       default: "DRAFT",
     },
+    auditLog: {
+  type: [
+    {
+      action: {
+        type: String,
+        required: true,
+      },
+
+      actor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+
+      role: String,
+
+      metadata: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {},
+      },
+
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
+
+  default: [],
+},
 
     startLocation: {
       address: String,

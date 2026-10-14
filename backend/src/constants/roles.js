@@ -1,17 +1,15 @@
 export const ROLE = Object.freeze({
+  ADMIN: "Admin",
 
-    ADMIN: "Admin",
+  STORE_SUPERVISOR: "Store Supervisor",
 
-    STORE_SUPERVISOR: "Store Supervisor",
+  DISTRICT_COORDINATOR: "district coordinator",
 
-    DISTRICT_COORDINATOR: "district coordinator",
+  STORE_INCHARGE: "Store Incharge",
 
-    STORE_INCHARGE: "Store Incharge",
+  KITCHEN_INCHARGE: "Kitchen Incharge",
 
-    KITCHEN_INCHARGE: "Kitchen Incharge",
+  CHIEF_COORDINATOR: "Chief Coordinator",
 
-    CHIEF_COORDINATOR:"Chief Coordinator",
-
-    DRIVER : "Driver"
-
+  DRIVER: "Driver",
 });

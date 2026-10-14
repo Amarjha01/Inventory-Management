@@ -1,6 +1,6 @@
 import { Router } from "express";
 import authMiddleware from "../../middleware/auth.middleware.js";
-import {uploadTripFuel , uploadTripEvidence , uploadTripStart , uploadTripFinal} from "../../middleware/upload.middleware.js";
+import {uploadTripFuel , uploadTripEvidence , uploadTripStart , uploadTripFinal, uploadTripArrival} from "../../middleware/upload.middleware.js";
 
 import {
   createTrip,
@@ -17,9 +17,18 @@ import {
   finalizeTrip,
   cancelTrip,
   gpsTrail,
+  createGpsTrackingToken
 } from "./trip.controller.js";
+import gpsTrackingAuth from "../../middleware/gpsTracking.middleware.js";
 
 const router = Router();
+
+// Native Android GPS: scoped Bearer token.
+router.post(
+  "/:tripId/gpstrail/native",
+  gpsTrackingAuth,
+  gpsTrail
+);
 
 router.use(authMiddleware);
 
@@ -45,6 +54,20 @@ router.patch(
 
 router.post(
   "/:tripId/destinations/:destinationId/arrive",
+  uploadTripArrival.fields([
+    {
+      name: "selfie",
+      maxCount: 1,
+    },
+    {
+      name: "meterImage",
+      maxCount: 1,
+    },
+    {
+      name: "fuelSlip_0",
+      maxCount: 1,
+    },
+  ]),
   arriveAtDestination
 );
 
@@ -60,6 +83,7 @@ router.post(
       maxCount: 1,
     },
   ]),
+   uploadTripFuel.single("fuelEntries.slip"),
   submitDestinationEvidence
 );
 

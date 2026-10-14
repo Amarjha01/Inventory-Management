@@ -2,7 +2,8 @@ import asyncHandler from "../../utils/asyncHandler.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import ApiError from "../../utils/ApiError.js";
 import tripService from "./trip.service.js";
-
+import Trip from "./trip.model.js";
+import { generateGpsTrackingToken } from "../../utils/jwt.js";
 const getPagination = (query = {}) => ({
   page: Math.max(Number(query.page) || 1, 1),
   limit: Math.min(Math.max(Number(query.limit) || 20, 1), 100),
@@ -170,10 +171,13 @@ export const updateCurrentLocation = asyncHandler(
 export const arriveAtDestination = asyncHandler(
   
   async (req, res) => {
-    console.log(      req.params.tripId,
+    console.log(
+      req.params.tripId,
       req.params.destinationId,
       req.body,
-      req.user);
+      req.user,
+      req.files
+    );
     
     const trip = await tripService.arriveAtDestination(
       req.params.tripId,
@@ -323,7 +327,7 @@ export const gpsTrail = asyncHandler(async (req, res) => {
     capturedAt,
   };
 
-  const trip = await tripService.createGpsTrail(tripId, {
+  const trip = await tripService.createGpsTrail(req.user ,tripId, {
     gpsCoordinates, 
   });
 
@@ -333,3 +337,45 @@ export const gpsTrail = asyncHandler(async (req, res) => {
     trip
   );
 });
+
+export const createGpsTrackingToken = asyncHandler(
+  async (req, res) => {
+    const { tripId } = req.params;
+
+    const trip = await Trip.findById(tripId).select(
+      "driver status"
+    );
+
+    if (!trip) {
+      throw new ApiError(404, "Trip not found");
+    }
+
+    if (!trip.driver.equals(req.user._id)) {
+      throw new ApiError(
+        403,
+        "You are not assigned to this trip"
+      );
+    }
+
+    if (trip.status !== "IN_PROGRESS") {
+      throw new ApiError(
+        409,
+        "GPS tracking requires an active trip"
+      );
+    }
+
+    const token = generateGpsTrackingToken(
+      req.user._id,
+      trip._id
+    );
+
+    return ApiResponse.success(
+      res,
+      "GPS tracking token issued",
+      {
+        token,
+        expiresIn: 86400,
+      }
+    );
+  }
+);

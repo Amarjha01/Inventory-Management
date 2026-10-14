@@ -26,6 +26,12 @@ import TripMap from "../../components/trip/map/TripMap";
 import GoogleMapProvider from "../../components/trip/map/GoogleMapProvider";
 import toast from "react-hot-toast";
 
+import { Capacitor } from "@capacitor/core";
+
+import {
+  startBackgroundGpsTracking,
+  stopBackgroundGpsTracking,
+} from "../../services/backgroundTracking.js";
 /* -------------------------------------------------------------------------- */
 /* Sub-component: EvidenceCard                                                */
 /* -------------------------------------------------------------------------- */
@@ -312,6 +318,59 @@ console.log("completedCount" , completedCount ,"destinationCount" , destinationC
     };
   }, [trip?.status, tripId, handleGpsError]);
 
+    /* ------------------------------------------------------------------------ */
+  /* Background GPS Tracing                                                      */
+  /* ------------------------------------------------------------------------ */
+
+  useEffect(() => {
+  if (!tripId || !trip) {
+    return;
+  }
+  if (Capacitor.isNativePlatform()) {
+  return undefined;
+}
+  // Stop native tracking when the trip is no longer active.
+  if (trip.status !== "IN_PROGRESS") {
+    if (Capacitor.isNativePlatform()) {
+      stopBackgroundGpsTracking().catch((error) => {
+        console.error("Unable to stop background GPS:", error);
+      });
+    }
+
+    return;
+  }
+
+  // The native tracker is only available inside Capacitor Android/iOS.
+  if (!Capacitor.isNativePlatform()) {
+    return;
+  }
+
+  let cancelled = false;
+
+  startBackgroundGpsTracking(tripId, (location) => {
+    if (cancelled || !mountedRef.current) {
+      return;
+    }
+
+    setCurrentLocation(location);
+    setGpsError("");
+  }).catch((error) => {
+    console.error("Unable to start background GPS:", error);
+
+    if (!cancelled && mountedRef.current) {
+      setGpsError(
+        error?.message || "Unable to start background GPS tracking."
+      );
+    }
+  });
+
+  // Do not stop native tracking merely because this page unmounts.
+  // The driver must still be tracked when navigating away or locking the screen.
+  return () => {
+    cancelled = true;
+  };
+}, [tripId, trip?.status]);
+
   /* ------------------------------------------------------------------------ */
   /* Manual GPS Capture                                                       */
   /* ------------------------------------------------------------------------ */
@@ -581,13 +640,24 @@ console.log("completedCount" , completedCount ,"destinationCount" , destinationC
     try {
       setSubmitting(true);
 
-      const updatedTrip = await completeTrip(tripId, {
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
-        accuracy: currentLocation.accuracy,
-        meterReading:
-          meterReading.trim() === "" ? undefined : Number(meterReading),
-      });
+    const updatedTrip = await completeTrip(tripId, {
+      latitude: currentLocation.latitude,
+      longitude: currentLocation.longitude,
+      accuracy: currentLocation.accuracy,
+      meterReading:
+        meterReading.trim() === ""
+          ? undefined
+          : Number(meterReading),
+    });
+
+    await stopBackgroundGpsTracking().catch((error) => {
+      console.error("Unable to stop background GPS:", error);
+    });
+
+    setTrip(updatedTrip);
+
+    toast.success("Trip completed successfully.");
+    navigate("/trip");
 
       setTrip(updatedTrip);
 

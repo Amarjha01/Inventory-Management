@@ -121,7 +121,7 @@ class TripRepository {
 
 
 
-async CreateGpsTrail(tripId, gpsTrail) {
+async CreateGpsTrail(user , tripId, gpsTrail) {
   const trip = await Trip.findById(tripId);
 
   if (!trip) {
@@ -131,7 +131,10 @@ async CreateGpsTrail(tripId, gpsTrail) {
   if (trip.status !== "IN_PROGRESS") {
     throw new Error("GPS tracking is allowed only for active trips");
   }
-
+  
+  if (!trip.driver.equals(user._id)) {
+  throw new Error("You are not assigned to this trip");
+}
   // Extract the nested GPS payload.
   const coordinates = gpsTrail?.gpsCoordinates;
 
