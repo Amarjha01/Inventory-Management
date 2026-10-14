@@ -118,6 +118,11 @@ export const uploadTripStart =
   );
 
 
+
+  export const uploadTripArrival = createUpload(
+  "trips/arrival",
+  3
+);
 /*
 |--------------------------------------------------------------------------
 | Destination evidence

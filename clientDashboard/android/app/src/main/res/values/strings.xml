@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ESF Trip</string>
+    <string name="title_activity_main">ESF Trip</string>
+    <string name="package_name">com.esf.trip</string>
+    <string name="custom_url_scheme">com.esf.trip</string>
+</resources>

@@ -117,7 +117,6 @@ const updateDGHealth = async (kitchenId, DGID, data) => {
   };
 
   const updatedDG = await DGMonitoringRepository.updateDGHealth(
-    kitchenId,
     DGID,
     healthData,
   );

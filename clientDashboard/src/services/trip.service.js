@@ -63,7 +63,12 @@ export const updateTripLocation = async (id, payload) => {
 export const completeDestination = async (id, destinationId, payload) => {
     const { data } = await api.post(
         `${ENDPOINTS.TRIPS}/${id}/destinations/${destinationId}/arrive`,
-        payload
+        payload,
+         {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
     );
 
     return data.data;
@@ -144,3 +149,27 @@ export const createGpsTrail = async(tripId , gpsCoordinates)=>{
 
     return created.data
 }
+
+export const createGpsTrackingToken = async (tripId) => {
+  const response = await api.post(
+    `${ENDPOINTS.TRIPS}/${tripId}/gpstrail/token`
+  );
+
+  const token =
+    response.data?.data?.token ??
+    response.data?.token;
+
+  if (!token) {
+    throw new Error(
+      "The server did not return a GPS tracking token"
+    );
+  }
+
+  return token;
+};
+
+export const getNativeGpsTrailUrl = (tripId) => {
+  return api.getUri({
+    url: `${ENDPOINTS.TRIPS}/${tripId}/gpstrail/native`,
+  });
+};

@@ -601,95 +601,107 @@ class TripService {
   /* Arrive At Destination                                                    */
   /* ------------------------------------------------------------------------ */
 
-  async arriveAtDestination(tripId, destinationId, payload, user) {
-    const trip = await tripRepository.findById(tripId, {
-      populate: false,
-    });
+ async arriveAtDestination(tripId, destinationId, payload, user) {
+  const trip = await tripRepository.findById(tripId, {
+    populate: false,
+  });
 
-    if (!trip) {
-      throw new ApiError(404, "Trip not found.");
-    }
+  if (!trip) {
+    throw new ApiError(404, "Trip not found.");
+  }
 
-    assertTripOwner(trip, user);
+  assertTripOwner(trip, user);
 
-    if (trip.status !== "IN_PROGRESS") {
-      throw new ApiError(409, "Trip is not in progress.");
-    }
+  if (trip.status !== "IN_PROGRESS") {
+    throw new ApiError(409, "Trip is not in progress.");
+  }
 
-    const destination = findDestination(trip, destinationId);
+  const destination = findDestination(trip, destinationId);
 
-    if (destination.status === "COMPLETED") {
-      throw new ApiError(409, "Destination is already completed.");
-    }
+  if (destination.status === "COMPLETED") {
+    throw new ApiError(409, "Destination is already completed.");
+  }
 
-    assertCurrentDestination(trip, destination);
+  assertCurrentDestination(trip, destination);
 
-    // const location = normalizeLocation(payload.location);
+  const distance = haversineDistanceMeters(
+    payload.latitude,
+    payload.longitude,
+    destination.latitude,
+    destination.longitude
+  );
 
-    const distance = haversineDistanceMeters(
-      payload.latitude,
-      payload.longitude,
-      destination.latitude,
-      destination.longitude,
+  const radius =
+    Number(destination.geofenceRadiusMeters) ||
+    DEFAULT_GEOFENCE_RADIUS_METERS;
+
+  if (distance > radius) {
+    throw new ApiError(
+      400,
+      `You are ${Math.round(distance)}m away from the destination. You must be within ${radius}m.`
+    );
+  }
+
+  // 1. Mark the destination as arrived
+  destination.status = "ARRIVED";
+
+  destination.arrival = {
+    location: {
+      latitude: payload.latitude,
+      longitude: payload.longitude,
+      accuracy: payload.accuracy,
+      capturedAt: new Date(),
+    },
+    distanceFromDestinationMeters: Number(
+      distance.toFixed(2)
+    ),
+  };
+
+  // 2. Update trip's latest location
+  trip.currentLocation = {
+    latitude: payload.latitude,
+    longitude: payload.longitude,
+    accuracy: payload.accuracy,
+    capturedAt: new Date(),
+  };
+
+  // 3. Find the next destination by sequence
+  const nextDestination = trip.destinations
+    .filter(
+      (item) => item.sequence > destination.sequence
+    )
+    .sort((a, b) => a.sequence - b.sequence)
+    .find(
+      (item) => item.status === "PENDING"
     );
 
-    const radius =
-      Number(destination.geofenceRadiusMeters) ||
-      DEFAULT_GEOFENCE_RADIUS_METERS;
-
-    if (distance > radius) {
-      throw new ApiError(
-        400,
-        `You are ${Math.round(
-          distance,
-        )}m away from the destination. You must be within ${radius}m.`,
-      );
-    }
-
-    destination.status = "ARRIVED";
-
-    destination.arrival = {
-      location: {
-        latitude: payload.latitude,
-
-        longitude: payload.longitude,
-
-        accuracy: payload.accuracy,
-
-        capturedAt: Date.now(),
-      },
-
-      distanceFromDestinationMeters: Number(distance.toFixed(2)),
-    };
-
-    trip.currentLocation = {
-      latitude: payload.latitude,
-
-      longitude: payload.longitude,
-
-      accuracy: payload.accuracy,
-
-      capturedAt: Date.now(),
-    };
-
-    trip.auditLog.push({
-      action: "DESTINATION_ARRIVED",
-
-      actor: getUserId(user),
-
-      role: getUserRole(user),
-
-      metadata: {
-        destinationId,
-
-        distanceMeters: Number(distance.toFixed(2)),
-      },
-    });
-
-    await tripRepository.save(trip);
-
-    return tripRepository.findById(trip._id);
+  // 4. Activate the next destination
+  if (nextDestination) {
+    nextDestination.status = "CURRENT";
   }
+
+  // 5. Record the audit event
+  if (!Array.isArray(trip.auditLog)) {
+    trip.auditLog = [];
+  }
+
+  trip.auditLog.push({
+    action: "DESTINATION_ARRIVED",
+    actor: user._id,
+    role: user.role,
+    metadata: {
+      destinationId,
+      distanceMeters: Number(distance.toFixed(2)),
+      nextDestinationId: nextDestination?._id || null,
+    },
+    createdAt: new Date(),
+  });
+
+  // 6. Persist the trip
+  await tripRepository.save(trip);
+
+  return tripRepository.findById(trip._id);
+}
 
   /* ------------------------------------------------------------------------ */
   /* Submit Destination Evidence                                              */
@@ -1145,8 +1157,8 @@ class TripService {
   /* Cancel Trip                                                              */
   /* ------------------------------------------------------------------------ */
 
-  async createGpsTrail(tripId , payload) {
-    return tripRepository.CreateGpsTrail(tripId , payload);
+  async createGpsTrail(user , tripId , payload) {
+    return tripRepository.CreateGpsTrail(user , tripId , payload);
   }
 }
 
