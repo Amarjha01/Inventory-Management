@@ -118,9 +118,6 @@ class TripRepository {
     return Trip.findByIdAndDelete(tripId);
   }
 
-
-
-
 async CreateGpsTrail(user , tripId, gpsTrail) {
   const trip = await Trip.findById(tripId);
 
@@ -180,6 +177,41 @@ async CreateGpsTrail(user , tripId, gpsTrail) {
   return trip;
 }
 
+async getAdminTripSummary(){
+  const [total, statusCounts] = await Promise.all([
+    Trip.countDocuments(),
+    Trip.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]),
+  ]);
+
+  return {
+    total,
+    byStatus: statusCounts.reduce((result, item)=>{
+      result[item._id] = item.count;
+      return result;
+    }, {}),
+  };
+};
+
+async getAdminTripById(tripId){
+  return Trip.findById(tripId)
+    .select("-gpsTrail")
+    .populate("driver", "name phone")
+    .populate("vehicle", "vehicleNumber vehicleName capacity")
+    .lean();
+};
+
+async getAdminTripGpsTrail(tripId){
+  return Trip.findById(tripId)
+    .select("gpsTrail")
+    .lean();
+};
 
 
 }

@@ -32,6 +32,26 @@ import {
   startBackgroundGpsTracking,
   stopBackgroundGpsTracking,
 } from "../../services/backgroundTracking.js";
+
+const MAX_DESTINATION_DISTANCE_METERS = 200;
+const MAX_GPS_ACCURACY_METERS = 100;
+
+const calculateDistanceMeters = (lat1, lon1, lat2, lon2) => {
+  const toRadians = (degrees) => (degrees * Math.PI) / 180;
+  const earthRadiusMeters = 6_371_000;
+
+  const latitudeDifference = toRadians(lat2 - lat1);
+  const longitudeDifference = toRadians(lon2 - lon1);
+
+  const a =
+    Math.sin(latitudeDifference / 2) ** 2 +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(longitudeDifference / 2) ** 2;
+
+  return 2 * earthRadiusMeters * Math.asin(Math.sqrt(Math.min(1, a)));
+};
+
 /* -------------------------------------------------------------------------- */
 /* Sub-component: EvidenceCard                                                */
 /* -------------------------------------------------------------------------- */
@@ -198,7 +218,13 @@ const ActiveTrip = () => {
   const destinationCount = trip?.destinations?.length || 0;
 
   const allDestinationsCompleted = completedCount === destinationCount;
-console.log("completedCount" , completedCount ,"destinationCount" , destinationCount  , allDestinationsCompleted);
+  console.log(
+    "completedCount",
+    completedCount,
+    "destinationCount",
+    destinationCount,
+    allDestinationsCompleted,
+  );
 
   /* ------------------------------------------------------------------------ */
   /* GPS Error Handler                                                        */
@@ -229,147 +255,53 @@ console.log("completedCount" , completedCount ,"destinationCount" , destinationC
   }, []);
 
   /* ------------------------------------------------------------------------ */
-  /* Live GPS Tracking                                                        */
-  /*                                                                        */
-  /* Track only when trip.status === IN_PROGRESS.                            */
-  /* Capture immediately, then request another position every 3 seconds.     */
-  /* Each successful position is sent to the backend.                         */
-  /* ------------------------------------------------------------------------ */
-
-  useEffect(() => {
-    if (trip?.status !== "IN_PROGRESS" || !tripId) {
-      setGpsError("");
-      return undefined;
-    }
-
-    if (!("geolocation" in navigator)) {
-      const message = "Geolocation is not supported by this browser.";
-      setGpsError(message);
-      toast.error(message);
-      return undefined;
-    }
-
-    let cancelled = false;
-    let requestInFlight = false;
-
-    const updateLocation = () => {
-      // Avoid overlapping browser GPS requests.
-      if (cancelled || requestInFlight) {
-        return;
-      }
-
-      requestInFlight = true;
-
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          if (cancelled) {
-            requestInFlight = false;
-            return;
-          }
-
-          const location = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            accuracy: position.coords.accuracy,
-            capturedAt: new Date(position.timestamp).toISOString(),
-          };
-
-          // Update the map immediately, without waiting for the API.
-          setCurrentLocation(location);
-          setGpsError("");
-
-          try {
-            // Persist the latest position on the backend.
-            await createGpsTrail(tripId, location);
-          } catch (error) {
-            console.error("Automatic location update failed:", error);
-
-            if (!cancelled) {
-              setGpsError("GPS captured, but server update failed.");
-            }
-          } finally {
-            requestInFlight = false;
-          }
-        },
-        (error) => {
-          requestInFlight = false;
-
-          if (!cancelled) {
-            handleGpsError(error);
-          }
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
-        },
-      );
-    };
-
-    // Capture and send the first location immediately.
-    updateLocation();
-
-    // Continue tracking every 3 seconds.
-    const intervalId = setInterval(updateLocation, 3000);
-
-    return () => {
-      cancelled = true;
-      clearInterval(intervalId);
-    };
-  }, [trip?.status, tripId, handleGpsError]);
-
-    /* ------------------------------------------------------------------------ */
   /* Background GPS Tracing                                                      */
   /* ------------------------------------------------------------------------ */
 
   useEffect(() => {
-  if (!tripId || !trip) {
-    return;
-  }
-  if (Capacitor.isNativePlatform()) {
-  return undefined;
-}
-  // Stop native tracking when the trip is no longer active.
-  if (trip.status !== "IN_PROGRESS") {
-    if (Capacitor.isNativePlatform()) {
-      stopBackgroundGpsTracking().catch((error) => {
-        console.error("Unable to stop background GPS:", error);
+    if (!Capacitor.isNativePlatform() || !tripId || !trip) {
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    const manageTracking = async () => {
+      if (trip.status !== "IN_PROGRESS") {
+        await stopBackgroundGpsTracking();
+        return;
+      }
+
+      await startBackgroundGpsTracking(tripId, (location) => {
+        if (cancelled || !mountedRef.current) return;
+
+        setCurrentLocation(location);
+        setGpsError("");
       });
-    }
+    };
 
-    return;
-  }
+    manageTracking().catch((error) => {
+      console.error("GPS startup failed:", {
+        message: error.message,
+        status: error.response?.status,
+        response: error.response?.data,
+        requestUrl: error.config?.url,
+        method: error.config?.method,
+      });
 
-  // The native tracker is only available inside Capacitor Android/iOS.
-  if (!Capacitor.isNativePlatform()) {
-    return;
-  }
+      if (!cancelled && mountedRef.current) {
+        setGpsError(
+          error.response?.data?.message ||
+            error.message ||
+            "Unable to start background GPS tracking.",
+        );
+      }
+    });
 
-  let cancelled = false;
-
-  startBackgroundGpsTracking(tripId, (location) => {
-    if (cancelled || !mountedRef.current) {
-      return;
-    }
-
-    setCurrentLocation(location);
-    setGpsError("");
-  }).catch((error) => {
-    console.error("Unable to start background GPS:", error);
-
-    if (!cancelled && mountedRef.current) {
-      setGpsError(
-        error?.message || "Unable to start background GPS tracking."
-      );
-    }
-  });
-
-  // Do not stop native tracking merely because this page unmounts.
-  // The driver must still be tracked when navigating away or locking the screen.
-  return () => {
-    cancelled = true;
-  };
-}, [tripId, trip?.status]);
+    // Do not stop tracking when this page unmounts.
+    return () => {
+      cancelled = true;
+    };
+  }, [tripId, trip?.status]);
 
   /* ------------------------------------------------------------------------ */
   /* Manual GPS Capture                                                       */
@@ -550,6 +482,57 @@ console.log("completedCount" , completedCount ,"destinationCount" , destinationC
       return;
     }
 
+    const destinationLatitude = Number(currentDestination.latitude);
+    const destinationLongitude = Number(currentDestination.longitude);
+
+    const driverLatitude = Number(currentLocation.latitude);
+    const driverLongitude = Number(currentLocation.longitude);
+    const gpsAccuracy = Number(currentLocation.accuracy);
+
+    const hasValidCoordinates =
+      [
+        destinationLatitude,
+        destinationLongitude,
+        driverLatitude,
+        driverLongitude,
+      ].every(Number.isFinite) &&
+      Math.abs(destinationLatitude) <= 90 &&
+      Math.abs(destinationLongitude) <= 180 &&
+      Math.abs(driverLatitude) <= 90 &&
+      Math.abs(driverLongitude) <= 180;
+
+    if (!hasValidCoordinates) {
+      toast.error(
+        "Valid GPS coordinates are required to verify this destination.",
+      );
+      return;
+    }
+
+    if (
+      !Number.isFinite(gpsAccuracy) ||
+      gpsAccuracy < 0 ||
+      gpsAccuracy > MAX_GPS_ACCURACY_METERS
+    ) {
+      toast.error(
+        "GPS accuracy is too low. Move to an area with a better GPS signal and capture your location again.",
+      );
+      return;
+    }
+
+    const distanceMeters = calculateDistanceMeters(
+      driverLatitude,
+      driverLongitude,
+      destinationLatitude,
+      destinationLongitude,
+    );
+
+    if (distanceMeters > MAX_DESTINATION_DISTANCE_METERS) {
+      toast.error(
+        `You are approximately ${Math.round(distanceMeters)} m away. You must be within 200 m of the destination.`,
+      );
+      return;
+    }
+
     if (!Number.isFinite(Number(meterReading)) || meterReading.trim() === "") {
       toast.error("Please enter a valid meter reading.");
       return;
@@ -640,24 +623,22 @@ console.log("completedCount" , completedCount ,"destinationCount" , destinationC
     try {
       setSubmitting(true);
 
-    const updatedTrip = await completeTrip(tripId, {
-      latitude: currentLocation.latitude,
-      longitude: currentLocation.longitude,
-      accuracy: currentLocation.accuracy,
-      meterReading:
-        meterReading.trim() === ""
-          ? undefined
-          : Number(meterReading),
-    });
+      const updatedTrip = await completeTrip(tripId, {
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+        accuracy: currentLocation.accuracy,
+        meterReading:
+          meterReading.trim() === "" ? undefined : Number(meterReading),
+      });
 
-    await stopBackgroundGpsTracking().catch((error) => {
-      console.error("Unable to stop background GPS:", error);
-    });
+      await stopBackgroundGpsTracking().catch((error) => {
+        console.error("Unable to stop background GPS:", error);
+      });
 
-    setTrip(updatedTrip);
+      setTrip(updatedTrip);
 
-    toast.success("Trip completed successfully.");
-    navigate("/trip");
+      toast.success("Trip completed successfully.");
+      navigate("/trip");
 
       setTrip(updatedTrip);
 

@@ -12,8 +12,9 @@ export const login = asyncHandler(async (req, res) => {
     res.cookie("accessToken", result.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        sameSite: "none",
+        path: "/",
+        maxAge: 5 * 365 * 24 * 60 * 60 * 1000,
     });
 
     return ApiResponse.success(

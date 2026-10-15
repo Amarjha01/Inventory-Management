@@ -20,50 +20,65 @@ export const startBackgroundGpsTracking = async (tripId, onLocation) => {
   await BackgroundGeolocation.stop().catch(() => {});
 
   const token = await createGpsTrackingToken(tripId);
+const permissions =
+  await BackgroundGeolocation.checkPermissions();
 
-  await BackgroundGeolocation.start(
-    {
-      backgroundTitle: "ESF Trip — GPS Tracking",
-      backgroundMessage:
-        "Your active trip is sharing location with the server.",
+console.log(
+  "Background GPS permissions:",
+  JSON.stringify(permissions)
+);
 
-      requestPermissions: true,
-      stale: false,
+const result =
+  await BackgroundGeolocation.requestPermissions({
+    permissions: ["location", "notification"],
+  });
 
-      // Request updates after meaningful movement.
-      distanceFilter: 10,
+console.log(
+  "Permission request result:",
+  JSON.stringify(result)
+);
 
-      // Native Android service sends GPS directly to the backend.
-      url: getNativeGpsTrailUrl(tripId),
+await BackgroundGeolocation.start(
+  {
+    backgroundTitle: "ESF Trip — GPS Tracking",
+    backgroundMessage:
+      "Your active trip is sharing location with the server.",
 
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    requestPermissions: true,
+    stale: false,
+    distanceFilter: 10,
+
+    // Required for native HTTP delivery on Android.
+    backgroundLocation: true,
+
+    // Sends each location directly from native code.
+    url:  `https://esfserver.axeiro.com/api/v1/trips/${tripId}/gpstrail/native`,
+    headers: {
+      Authorization: `Bearer ${token}`,
     },
-    (location, error) => {
-      if (error) {
-        console.error("Background GPS error:", error);
-        return;
-      }
+  },
+  (location, error) => {
+    if (error) {
+      console.error("Background GPS error:", error);
+      return;
+    }
 
-      if (
-        !location ||
-        !Number.isFinite(location.latitude) ||
-        !Number.isFinite(location.longitude)
-      ) {
-        return;
-      }
+    if (!location) return;
 
-      // This callback updates the UI while the WebView is active.
-      // Native POST delivery is configured separately above.
-      onLocation?.({
-        latitude: location.latitude,
-        longitude: location.longitude,
-        accuracy: location.accuracy,
-        capturedAt: new Date(location.time ?? Date.now()).toISOString(),
-      });
-    },
-  );
+    console.log("GPS location received:", {
+      latitude: location.latitude,
+      longitude: location.longitude,
+      time: location.time,
+    });
+
+    onLocation?.({
+      latitude: location.latitude,
+      longitude: location.longitude,
+      accuracy: location.accuracy,
+      capturedAt: new Date(location.time ?? Date.now()).toISOString(),
+    });
+  },
+);
 
   activeTripId = tripId;
   return true;

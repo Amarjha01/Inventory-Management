@@ -173,3 +173,37 @@ export const getNativeGpsTrailUrl = (tripId) => {
     url: `${ENDPOINTS.TRIPS}/${tripId}/gpstrail/native`,
   });
 };
+
+export const getAdminTrips = async (params = {}) => {
+  const { data } = await api.get(
+    `${ENDPOINTS.TRIPS}/admin/trips`,
+    { params }
+  );
+
+  return data.data;
+};
+
+export const getAdminTripSummary = async (params = {}) => {
+  const { data } = await api.get(
+    `${ENDPOINTS.TRIPS}/admin/trips/summary`,
+    { params }
+  );
+
+  return data.data;
+};
+
+export const getAdminTripById = async (tripId) => {
+  const { data } = await api.get(
+    `${ENDPOINTS.TRIPS}/admin/trips/${tripId}`
+  );
+
+  return data.data;
+};
+
+export const getAdminTripGpsTrail = async (tripId) => {
+  const { data } = await api.get(
+    `${ENDPOINTS.TRIPS}/admin/trips/${tripId}/gpstrail`
+  );
+
+  return data.data;
+};

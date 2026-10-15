@@ -174,7 +174,7 @@ const haversineDistanceMeters = (
 ) => {
   const earthRadiusMeters = 6371000;
 
-  const toRadians = (degrees) => (degrees * Math.PI) / 180;
+  const toRadians = (degrees)(degrees * Math.PI) / 180;
 
   const dLat = toRadians(latitude2 - latitude1);
 
@@ -1160,6 +1160,20 @@ class TripService {
   async createGpsTrail(user , tripId , payload) {
     return tripRepository.CreateGpsTrail(user , tripId , payload);
   }
+
+  // ADMIN
+
+  async getAdminTripSummary(filters = {}){
+  return tripRepository.getAdminTripSummary(filters);
+};
+
+async getAdminTripById(tripId){
+  return tripRepository.getAdminTripById(tripId);
+};
+
+async getAdminTripGpsTrail(tripId){
+  return tripRepository.getAdminTripGpsTrail(tripId);
+};
 }
 
 export default new TripService();

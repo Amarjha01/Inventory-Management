@@ -38,10 +38,7 @@ const parseJsonField = (value, fieldName) => {
 export const createTrip = asyncHandler(async (req, res) => {
   const startMeter = parseJsonField(req.body.startMeter, "startMeter");
 
-  const destinations = parseJsonField(
-    req.body.destinations,
-    "destinations"
-  );
+  const destinations = parseJsonField(req.body.destinations, "destinations");
 
   const route = req.body.route
     ? parseJsonField(req.body.route, "route")
@@ -70,164 +67,109 @@ export const createTrip = asyncHandler(async (req, res) => {
 
   console.log(payload);
 
-  const trip = await tripService.createTrip(
-    payload,
-    req.user
-  );
+  const trip = await tripService.createTrip(payload, req.user);
 
-  return ApiResponse.success(
-    res,
-    "Trip created successfully.",
-    trip
-  );
+  return ApiResponse.success(res, "Trip created successfully.", trip);
 });
 
 export const getMyTrips = asyncHandler(async (req, res) => {
   const result = await tripService.getMyTrips(
     req.user,
-    getPagination(req.query)
+    getPagination(req.query),
   );
 
-  return ApiResponse.success(
-    res,
-    "Trips fetched successfully.",
-    result
-  );
-});
-
-export const getAllTrips = asyncHandler(async (req, res) => {
-  const result = await tripService.getAllTrips(req.user, {
-    ...getPagination(req.query),
-    driverId: req.query.driverId || undefined,
-    vehicleId: req.query.vehicleId || undefined,
-  });
-
-  return ApiResponse.success(
-    res,
-    "Trips fetched successfully.",
-    result
-  );
+  return ApiResponse.success(res, "Trips fetched successfully.", result);
 });
 
 export const getTripById = asyncHandler(async (req, res) => {
-  const trip = await tripService.getTripById(
-    req.params.tripId,
-    req.user
-  );
+  const trip = await tripService.getTripById(req.params.tripId, req.user);
 
-  return ApiResponse.success(
-    res,
-    "Trip fetched successfully.",
-    trip
-  );
+  return ApiResponse.success(res, "Trip fetched successfully.", trip);
 });
 
 export const updateTrip = asyncHandler(async (req, res) => {
   const trip = await tripService.updateTrip(
     req.params.tripId,
     req.body,
-    req.user
+    req.user,
   );
 
-  return ApiResponse.success(
-    res,
-    "Trip updated successfully.",
-    trip
-  );
+  return ApiResponse.success(res, "Trip updated successfully.", trip);
 });
 
 export const startTrip = asyncHandler(async (req, res) => {
-  const trip = await tripService.startTrip(
+  const trip = await tripService.startTrip(req.params.tripId, req.user);
+
+  return ApiResponse.success(res, "Trip started successfully.", trip);
+});
+
+export const updateCurrentLocation = asyncHandler(async (req, res) => {
+  const location = req.body;
+  console.log("location", location);
+
+  const trip = await tripService.updateCurrentLocation(
     req.params.tripId,
-    req.user
+    location,
+    req.user,
   );
 
   return ApiResponse.success(
     res,
-    "Trip started successfully.",
-    trip
+    "Current location updated successfully.",
+    trip,
   );
 });
 
-export const updateCurrentLocation = asyncHandler(
-  async (req, res) => {
-    const location = req.body
-    console.log("location" , location);
-    
-    const trip = await tripService.updateCurrentLocation(
-      req.params.tripId,
-      location,
-      req.user
-    );
+export const arriveAtDestination = asyncHandler(async (req, res) => {
+  console.log(
+    req.params.tripId,
+    req.params.destinationId,
+    req.body,
+    req.user,
+    req.files,
+  );
 
-    return ApiResponse.success(
-      res,
-      "Current location updated successfully.",
-      trip
-    );
-  }
-);
+  const trip = await tripService.arriveAtDestination(
+    req.params.tripId,
+    req.params.destinationId,
+    req.body,
+    req.user,
+  );
 
-export const arriveAtDestination = asyncHandler(
-  
-  async (req, res) => {
-    console.log(
-      req.params.tripId,
-      req.params.destinationId,
-      req.body,
-      req.user,
-      req.files
-    );
-    
-    const trip = await tripService.arriveAtDestination(
-      req.params.tripId,
-      req.params.destinationId,
-      req.body,
-      req.user
-    );
+  return ApiResponse.success(
+    res,
+    "Destination arrival verified successfully.",
+    trip,
+  );
+});
 
-    return ApiResponse.success(
-      res,
-      "Destination arrival verified successfully.",
-      trip
-    );
-  }
-);
+export const submitDestinationEvidence = asyncHandler(async (req, res) => {
+  const payload = {
+    ...req.body,
+    selfieImageUrl: req.body.selfieImageUrl || getFileUrl(req.files, "selfie"),
+    meterImageUrl:
+      req.body.meterImageUrl || getFileUrl(req.files, "meterImage"),
+  };
 
-export const submitDestinationEvidence = asyncHandler(
-  async (req, res) => {
-    const payload = {
-      ...req.body,
-      selfieImageUrl:
-        req.body.selfieImageUrl ||
-        getFileUrl(req.files, "selfie"),
-      meterImageUrl:
-        req.body.meterImageUrl ||
-        getFileUrl(req.files, "meterImage"),
-    };
+  const trip = await tripService.submitDestinationEvidence(
+    req.params.tripId,
+    req.params.destinationId,
+    payload,
+    req.files,
+    req.user,
+  );
 
-    const trip = await tripService.submitDestinationEvidence(
-      req.params.tripId,
-      req.params.destinationId,
-      payload,
-      req.files,
-      req.user
-    );
-
-    return ApiResponse.success(
-      res,
-      "Destination evidence submitted successfully.",
-      trip
-    );
-  }
-);
+  return ApiResponse.success(
+    res,
+    "Destination evidence submitted successfully.",
+    trip,
+  );
+});
 
 export const addFuel = asyncHandler(async (req, res) => {
   const payload = {
     ...req.body,
-    slipImageUrl:
-      req.body.slipImageUrl ||
-      getFileUrl(req.files, "fuelSlip"),
+    slipImageUrl: req.body.slipImageUrl || getFileUrl(req.files, "fuelSlip"),
   };
 
   const trip = await tripService.addFuel(
@@ -235,65 +177,46 @@ export const addFuel = asyncHandler(async (req, res) => {
     req.params.destinationId,
     payload,
     req.files,
-    req.user
+    req.user,
   );
 
-  return ApiResponse.success(
-    res,
-    "Fuel entry added successfully.",
-    trip
-  );
+  return ApiResponse.success(res, "Fuel entry added successfully.", trip);
 });
 
-export const completeDestination = asyncHandler(
-  async (req, res) => {
-    const trip = await tripService.completeDestination(
-      req.params.tripId,
-      req.params.destinationId,
-      req.user
-    );
+export const completeDestination = asyncHandler(async (req, res) => {
+  const trip = await tripService.completeDestination(
+    req.params.tripId,
+    req.params.destinationId,
+    req.user,
+  );
 
-    return ApiResponse.success(
-      res,
-      "Destination completed successfully.",
-      trip
-    );
-  }
-);
+  return ApiResponse.success(res, "Destination completed successfully.", trip);
+});
 
 export const finalizeTrip = asyncHandler(async (req, res) => {
   const payload = {
     ...req.body,
     finalMeterImageUrl:
-      req.body.finalMeterImageUrl ||
-      getFileUrl(req.files, "finalMeterImage"),
+      req.body.finalMeterImageUrl || getFileUrl(req.files, "finalMeterImage"),
   };
 
   const trip = await tripService.finalizeTrip(
     req.params.tripId,
     payload,
-    req.user
+    req.user,
   );
 
-  return ApiResponse.success(
-    res,
-    "Trip completed successfully.",
-    trip
-  );
+  return ApiResponse.success(res, "Trip completed successfully.", trip);
 });
 
 export const cancelTrip = asyncHandler(async (req, res) => {
   const trip = await tripService.cancelTrip(
     req.params.tripId,
     req.body,
-    req.user
+    req.user,
   );
 
-  return ApiResponse.success(
-    res,
-    "Trip cancelled successfully.",
-    trip
-  );
+  return ApiResponse.success(res, "Trip cancelled successfully.", trip);
 });
 
 // export const gpsTrail = asyncHandler(async(req , res)=>{
@@ -306,10 +229,9 @@ export const cancelTrip = asyncHandler(async (req, res) => {
 //   return ApiResponse.success(
 //     res,
 //     "gps trail recorded successfully",
-    
+
 //   )
 // });
-
 
 export const gpsTrail = asyncHandler(async (req, res) => {
   const { tripId } = req.params;
@@ -317,8 +239,7 @@ export const gpsTrail = asyncHandler(async (req, res) => {
   const body = req.body?.gpsCoordinates ?? req.body;
 
   const capturedAt =
-    body?.capturedAt ??
-    (body?.time ? new Date(body.time) : new Date());
+    body?.capturedAt ?? (body?.time ? new Date(body.time) : new Date());
 
   const gpsCoordinates = {
     latitude: body?.latitude,
@@ -327,55 +248,97 @@ export const gpsTrail = asyncHandler(async (req, res) => {
     capturedAt,
   };
 
-  const trip = await tripService.createGpsTrail(req.user ,tripId, {
-    gpsCoordinates, 
+  const trip = await tripService.createGpsTrail(req.user, tripId, {
+    gpsCoordinates,
   });
 
-  return ApiResponse.success(
-    res,
-    "GPS trail recorded successfully",
-    trip
-  );
+  return ApiResponse.success(res, "GPS trail recorded successfully", trip);
 });
 
-export const createGpsTrackingToken = asyncHandler(
-  async (req, res) => {
-    const { tripId } = req.params;
+export const createGpsTrackingToken = asyncHandler(async (req, res) => {
+  const { tripId } = req.params;
 
-    const trip = await Trip.findById(tripId).select(
-      "driver status"
+  const trip = await Trip.findById(tripId).select("driver status");
+
+  if (!trip) {
+    throw new ApiError(404, "Trip not found");
+  }
+
+  if (!trip.driver.equals(req.user._id)) {
+    throw new ApiError(403, "You are not assigned to this trip");
+  }
+
+  if (trip.status !== "IN_PROGRESS") {
+    throw new ApiError(409, "GPS tracking requires an active trip");
+  }
+
+  const token = generateGpsTrackingToken(req.user._id, trip._id);
+
+  return ApiResponse.success(res, "GPS tracking token issued", {
+    token,
+    expiresIn: 86400,
+  });
+});
+
+// ADMIN
+
+export const getAllTrips = asyncHandler(async (req, res) => {
+  const result = await tripService.getAllTrips(req.user, {
+    ...getPagination(req.query),
+    driverId: req.query.driverId || undefined,
+    vehicleId: req.query.vehicleId || undefined,
+  });
+
+  return ApiResponse.success(res, "Trips fetched successfully.", result);
+});
+
+export const getAdminTripSummary = async (req, res, next) => {
+  try {
+    const summary = await tripService.getAdminTripSummary(req.query);
+    return ApiResponse.success(
+      res,
+      "Trip summary fetched successfully.",
+      summary,
     );
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getAdminTripById = async (req, res, next) => {
+  try {
+    const trip = await tripService.getAdminTripById(req.params.tripId);
 
     if (!trip) {
-      throw new ApiError(404, "Trip not found");
+      return res.status(404).json({
+        success: false,
+        message: "Trip not found",
+      });
     }
 
-    if (!trip.driver.equals(req.user._id)) {
-      throw new ApiError(
-        403,
-        "You are not assigned to this trip"
-      );
-    }
+    return ApiResponse.success(res, "Trip fetched successfully.", trip);
+  } catch (error) {
+    return next(error);
+  }
+};
 
-    if (trip.status !== "IN_PROGRESS") {
-      throw new ApiError(
-        409,
-        "GPS tracking requires an active trip"
-      );
-    }
+export const getAdminTripGpsTrail = async (req, res, next) => {
+  try {
+    const trail = await tripService.getAdminTripGpsTrail(req.params.tripId);
 
-    const token = generateGpsTrackingToken(
-      req.user._id,
-      trip._id
-    );
+    if (!trail) {
+      return res.status(404).json({
+        success: false,
+        message: "Trip not found",
+      });
+    }
 
     return ApiResponse.success(
       res,
-      "GPS tracking token issued",
-      {
-        token,
-        expiresIn: 86400,
-      }
+      "Trip GPS trail fetched successfully.",
+      trail,
     );
+  } catch (error) {
+    return next(error);
   }
-);
+};

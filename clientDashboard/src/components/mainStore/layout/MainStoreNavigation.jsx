@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -15,7 +15,7 @@ import {
 import { FaTools, FaTruckMoving, FaUsers } from "react-icons/fa";
 import { HiOutlineBuildingStorefront } from "react-icons/hi2";
 import { VscVmPending } from "react-icons/vsc";
-import { RiImageDownloadFill } from "react-icons/ri";
+import { AiFillTruck } from "react-icons/ai";
 
 import { storage } from "../../../utils/storage";
 import { SlGraph } from "react-icons/sl";
@@ -26,6 +26,34 @@ const MainStoreNavbar = () => {
 
   const user = storage.getUser();
   const activeTab = storage.getActiveTab();
+
+  const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+
+useEffect(() => {
+  let lastScrollY = window.scrollY;
+
+  const handleScroll = () => {
+    const currentScrollY = window.scrollY;
+
+    // Hide header when scrolling down beyond 50px
+    if (currentScrollY > 50 && currentScrollY > lastScrollY) {
+      setIsHeaderHidden(true);
+    }
+    // Show header when scrolling up
+    else if (currentScrollY < lastScrollY) {
+      setIsHeaderHidden(false);
+    }
+
+    lastScrollY = currentScrollY;
+  };
+
+  window.addEventListener("scroll", handleScroll, { passive: true });
+
+  return () => {
+    window.removeEventListener("scroll", handleScroll);
+  };
+}, []);
+
   /*
   |--------------------------------------------------------------------------
   | Menus
@@ -86,11 +114,11 @@ const MainStoreNavbar = () => {
       icon: SlGraph,
       path: "/store/dgmonetoring",
     },
-    // {
-    //   title: "Downloads",
-    //   icon: RiImageDownloadFill,
-    //   path: "/store/downloads",
-    // },
+    {
+      title: "Trips",
+      icon: AiFillTruck,
+      path: "/store/trips",
+    },
     {
       title: "Settings",
       icon: MdSettings,
@@ -210,18 +238,27 @@ const MainStoreNavbar = () => {
           HEADER
       ========================================================== */}
 
-      <header
-        className="
-          sticky
-          top-2
-          mx-3
-          z-40
-          bg-white/30
-          backdrop-blur
-          shadow-sm
-          rounded-4xl
-        "
-      >
+      <motion.header
+  initial={false}
+  animate={{
+    y: isHeaderHidden ? "-150%" : 0,
+    opacity: isHeaderHidden ? 0 : 1,
+  }}
+  transition={{
+    duration: 0.3,
+    ease: "easeInOut",
+  }}
+  className="
+    sticky
+    top-2
+    mx-3
+    z-40
+    bg-white/30
+    backdrop-blur
+    shadow-sm
+    rounded-4xl
+  "
+>
         <div
           className="
             flex
@@ -333,7 +370,7 @@ const MainStoreNavbar = () => {
             </div>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* ==========================================================
           BOTTOM NAVIGATION
