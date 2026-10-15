@@ -49,6 +49,7 @@ import Submitted from "../pages/MainStore/NewRequirements/Submitted.jsx";
 import Received from "../pages/MainStore/NewRequirements/Received.jsx";
 import OutForDelivery from "../pages/MainStore/NewRequirements/OutForDelivery.jsx";
 import DGMonetoring from "../pages/MainStore/DGMonetoring/DGMonetoring.jsx";
+import Trips from "../pages/MainStore/Trips/Trips.jsx";
 
 
 const AppRoutes = () => {
@@ -254,6 +255,11 @@ element={<Notification />}
    <Route
     path="dgmonetoring"
     element={<DGMonetoring />}
+    />
+
+   <Route
+    path="trips"
+    element={<Trips />}
     />
 
 </Route>

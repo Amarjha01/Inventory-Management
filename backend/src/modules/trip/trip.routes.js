@@ -5,7 +5,6 @@ import {uploadTripFuel , uploadTripEvidence , uploadTripStart , uploadTripFinal,
 import {
   createTrip,
   getMyTrips,
-  getAllTrips,
   getTripById,
   updateTrip,
   startTrip,
@@ -17,10 +16,16 @@ import {
   finalizeTrip,
   cancelTrip,
   gpsTrail,
-  createGpsTrackingToken
+  createGpsTrackingToken,
+
+  getAllTrips,
+  getAdminTripSummary,
+  getAdminTripById,
+  getAdminTripGpsTrail,
 } from "./trip.controller.js";
 import gpsTrackingAuth from "../../middleware/gpsTracking.middleware.js";
-
+import authorizeRoles from "../../middleware/role.middleware.js";
+import { ROLE } from "../../constants/roles.js";
 const router = Router();
 
 // Native Android GPS: scoped Bearer token.
@@ -30,13 +35,19 @@ router.post(
   gpsTrail
 );
 
+router.post(
+  "/:tripId/gpstrail/token",
+  createGpsTrackingToken
+);
+
 router.use(authMiddleware);
 
 // Driver routes
 router.post("/", 
   uploadTripStart.single("startMeter.imageUrl"),
   createTrip);
-router.get("/admin/all", getAllTrips);
+
+
 router.get("/my", getMyTrips);
 router.get("/:tripId", getTripById);
 
@@ -72,22 +83,6 @@ router.post(
 );
 
 router.post(
-  "/:tripId/destinations/:destinationId/evidence",
-  uploadTripEvidence.fields([
-    {
-      name: "selfie",
-      maxCount: 1,
-    },
-    {
-      name: "meterImage",
-      maxCount: 1,
-    },
-  ]),
-   uploadTripFuel.single("fuelEntries.slip"),
-  submitDestinationEvidence
-);
-
-router.post(
   "/:tripId/destinations/:destinationId/fuel",
   uploadTripFuel.single("slip"),
   addFuel
@@ -106,9 +101,36 @@ router.post(
 
 router.post("/:tripId/cancel", cancelTrip);
 
-router.post(
-  "/:tripId/gpstrail",
-  gpsTrail
-)
-// router.post('/trips/:tripId/location' )
+
+// ADMMIN
+
+// Admin tracking routes
+router.get(
+  "/admin/trips",
+  authorizeRoles(ROLE.ADMIN),
+  getAllTrips
+);
+
+router.get(
+  "/admin/trips/summary",
+  authorizeRoles(ROLE.ADMIN),
+  getAdminTripSummary
+);
+
+router.get(
+  "/admin/trips/:tripId/gpstrail",
+  authorizeRoles(ROLE.ADMIN),
+  getAdminTripGpsTrail
+);
+
+router.get(
+  "/admin/trips/:tripId",
+  authorizeRoles(ROLE.ADMIN),
+  getAdminTripById
+);
+
+// router.patch("admin/:tripId", )
+
+// router.delete("/admin/:tripId" , )
+
 export default router;

@@ -400,7 +400,7 @@ const TripMap = ({
         gestureHandling
         disableDefaultUI={false}
         zoomControl={true}
-        streetViewControl={true}
+        streetViewControl={false}
         fullscreenControl
        cameraControl={false}
         mapTypeControl={false}
