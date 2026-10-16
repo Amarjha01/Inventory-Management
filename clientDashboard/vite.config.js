@@ -58,6 +58,9 @@ export default defineConfig({
           "**/*.{js,css,html,ico,png,svg,webp}",
         ],
       },
+       injectManifest: {
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, 
+      },
     }),
   ],
 });
