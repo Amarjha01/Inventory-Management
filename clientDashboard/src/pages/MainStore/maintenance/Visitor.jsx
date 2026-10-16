@@ -19,7 +19,8 @@ import VisitorCard from "../../../components/mainStore/maintenance/VisitorCard.j
 import MaintenanceDetailModal from "../../../components/mainStore/maintenance/MaintenanceDetailModal.jsx";
 import { getAllVisitorForAdmin } from "../../../services/maintainence.service.js";
 import { SlGraph } from "react-icons/sl";
-import Reports from "./Reports.jsx";
+import Reports from "./ExportExcel.jsx";
+import ExportExcel from "./ExportExcel.jsx";
 
 
 /* =========================================================
@@ -108,7 +109,6 @@ const normalizeVisitorRecord = (record) => {
 ========================================================= */
 
 const Visitor = () => {
-  const [showReports , setShowReports] = useState([]);
   /* -------------------------------------------------------
      DATA
   ------------------------------------------------------- */
@@ -154,9 +154,6 @@ const Visitor = () => {
   const [selectedRecord, setSelectedRecord] =
     useState(null);
 
-    const handleShowVisitorReports = () =>{
-    setShowReports(!showReports);
-  }
   /* =======================================================
      FETCH VISITOR RECORDS
   ======================================================= */
@@ -982,33 +979,18 @@ const Visitor = () => {
 
             </button>
 
-                        <button
-                          type="button"
-                          onClick={handleShowVisitorReports}
-                          title="Reports"
-                          className="
-                            inline-flex
-                            h-11
-                            items-center
-                            justify-center
-                            gap-2
-                            rounded-xl
-                            border
-                            border-slate-200
-                            bg-white
-                            px-4
-                            text-xs
-                            font-semibold
-                            text-slate-600
-                            transition
-                            hover:border-slate-300
-                            hover:text-slate-900
-                          "
-                        >
-                          <SlGraph size={15} />
-            
-                          <span className="">Report</span>
-                        </button>
+            {/* Report */}
+            <button
+              type="button"
+              onClick={()=>ExportExcel("complain-repair" , records)}
+              title="Reports"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+
+            >
+              <SlGraph size={15} />
+
+              <span className="">Report</span>
+            </button>
 
           </div>
           {/* =================================================

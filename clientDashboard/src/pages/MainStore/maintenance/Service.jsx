@@ -14,7 +14,7 @@ import ServiceCard from "../../../components/mainStore/maintenance/ServiceCard.j
 import MaintenanceDetailModal from "../../../components/mainStore/maintenance/MaintenanceDetailModal.jsx";
 import { getAllServiceForAdmin } from "../../../services/maintainence.service.js";
 import { SlGraph } from "react-icons/sl";
-import Reports from "./Reports.jsx";
+import ExportExcel from "./ExportExcel.jsx";
 
 /* =========================================================
    HELPERS
@@ -144,9 +144,7 @@ const Service = () => {
 
   const [selectedRecord, setSelectedRecord] = useState(null);
 
-  const handleShowVisitorReports = () => {
-    setShowReports(!showReports);
-  };
+
   /* =======================================================
      FETCH SERVICE RECORDS
   ======================================================= */
@@ -481,7 +479,7 @@ const Service = () => {
             {/* Report */}
             <button
               type="button"
-              onClick={handleShowVisitorReports}
+              onClick={()=>ExportExcel("service" , records)}
               title="Reports"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
 
