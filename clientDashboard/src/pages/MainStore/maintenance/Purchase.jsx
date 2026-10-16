@@ -15,7 +15,7 @@ import MaintenanceDetailModal from "../../../components/mainStore/maintenance/Ma
 
 import { getAllPurchaseForAdmin } from "../../../services/maintainence.service.js";
 import PurchaseCard from "../../../components/mainStore/maintenance/PurchaseCard.jsx";
-import Reports from "./Reports.jsx";
+import ExportExcel from "./ExportExcel.jsx";
 
 /* =========================================================
    HELPERS
@@ -85,7 +85,6 @@ console.log(record);
 ========================================================= */
 
 const Purchase = () => {
-    const [showReports , setShowReports] = useState([]);
   
   /* =======================================================
      DATA
@@ -131,9 +130,6 @@ const Purchase = () => {
 
   const [selectedRecord, setSelectedRecord] = useState(null);
 
-    const handleShowVisitorReports = () =>{
-    setShowReports(!showReports);
-  }
   /* =======================================================
      FETCH PURCHASE RECORDS
   ======================================================= */
@@ -585,7 +581,7 @@ const Purchase = () => {
     {/* REPORT */}
     <button 
       type="button" 
-      onClick={handleShowVisitorReports} 
+              onClick={()=>ExportExcel("purchase" , records)}
       title="Reports" 
       className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
     >
