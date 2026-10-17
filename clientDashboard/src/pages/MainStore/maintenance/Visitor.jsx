@@ -21,6 +21,8 @@ import { getAllVisitorForAdmin } from "../../../services/maintainence.service.js
 import { SlGraph } from "react-icons/sl";
 import Reports from "./ExportExcel.jsx";
 import ExportExcel from "./ExportExcel.jsx";
+import { IoMdAddCircle } from "react-icons/io";
+import VisitorForm from "./forms/VisitorForm.jsx";
 
 
 /* =========================================================
@@ -109,6 +111,12 @@ const normalizeVisitorRecord = (record) => {
 ========================================================= */
 
 const Visitor = () => {
+   const [formOpen , setFormOpen] = useState(false)
+      const handleSubmit = async (values) => {
+      console.log("Complain data:", values);
+      // Call your purchase API here.
+    };
+    
   /* -------------------------------------------------------
      DATA
   ------------------------------------------------------- */
@@ -792,7 +800,7 @@ const Visitor = () => {
             "
           >
 
-            {/* SEARCH */}
+            
 
             <div
               className="
@@ -803,6 +811,7 @@ const Visitor = () => {
               "
             >
 
+            {/* SEARCH */}
               <FiSearch
                 size={17}
                 className="
@@ -991,7 +1000,16 @@ const Visitor = () => {
 
               <span className="">Report</span>
             </button>
-
+                                  <button 
+      type="button" 
+              onClick={()=>setFormOpen(!formOpen)}
+      title="Reports" 
+      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+    >
+      <IoMdAddCircle size={15} />
+      <span>Add Record</span>
+    </button>
+{formOpen && <VisitorForm onSubmit={handleSubmit} onClose={()=>setFormOpen(false)} />}
           </div>
           {/* =================================================
               FILTER PANEL

@@ -10,12 +10,14 @@ import {
   FiX,
 } from "react-icons/fi";
 import { SlGraph } from "react-icons/sl";
+import { IoMdAddCircle } from "react-icons/io";
 
 import MaintenanceDetailModal from "../../../components/mainStore/maintenance/MaintenanceDetailModal.jsx";
 
 import { getAllPurchaseForAdmin } from "../../../services/maintainence.service.js";
 import PurchaseCard from "../../../components/mainStore/maintenance/PurchaseCard.jsx";
 import ExportExcel from "./ExportExcel.jsx";
+import PurchaseForm from "./forms/PurchaseForm.jsx";
 
 /* =========================================================
    HELPERS
@@ -85,6 +87,11 @@ console.log(record);
 ========================================================= */
 
 const Purchase = () => {
+  const [formOpen , setFormOpen] = useState(false)
+    const handleSubmit = async (values) => {
+    console.log("Purchase data:", values);
+    // Call your purchase API here.
+  };
   
   /* =======================================================
      DATA
@@ -555,6 +562,7 @@ const Purchase = () => {
     {/* FILTER */}
     <button 
       type="button" 
+      title="Filter"
       onClick={() => setShowFilters((previous) => !previous)} 
       className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-4 text-xs font-semibold transition ${showFilters || hasActiveFilters ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"}`}
     >
@@ -588,8 +596,19 @@ const Purchase = () => {
       <SlGraph size={15} />
       <span>Report</span>
     </button>
+    <button 
+      type="button" 
+              onClick={()=>setFormOpen(!formOpen)}
+      title="Reports" 
+      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+    >
+      <IoMdAddCircle size={15} />
+      <span>Add Record</span>
+    </button>
   </div>
 </div>
+{formOpen && <PurchaseForm onSubmit={handleSubmit} onClose={()=>setFormOpen(false)} />}
+
 
           {/* =================================================
               FILTER PANEL
