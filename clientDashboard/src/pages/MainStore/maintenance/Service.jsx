@@ -15,6 +15,8 @@ import MaintenanceDetailModal from "../../../components/mainStore/maintenance/Ma
 import { getAllServiceForAdmin } from "../../../services/maintainence.service.js";
 import { SlGraph } from "react-icons/sl";
 import ExportExcel from "./ExportExcel.jsx";
+import ServiceForm from "./forms/ServiceForm.jsx";
+import { IoMdAddCircle } from "react-icons/io";
 
 /* =========================================================
    HELPERS
@@ -107,7 +109,12 @@ const formatDate = (value) => {
    ========================================================= */
 
 const Service = () => {
-  const [showReports, setShowReports] = useState([]);
+   const [formOpen , setFormOpen] = useState(false)
+    const handleSubmit = async (values) => {
+    console.log("Purchase data:", values);
+    // Call your purchase API here.
+  };
+  
   /* -------------------------------------------------------
      DATA
   ------------------------------------------------------- */
@@ -488,6 +495,17 @@ const Service = () => {
 
               <span className="">Report</span>
             </button>
+                                <button 
+      type="button" 
+              onClick={()=>setFormOpen(!formOpen)}
+      title="Reports" 
+      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+    >
+      <IoMdAddCircle size={15} />
+      <span>Add Record</span>
+    </button>
+
+{formOpen && <ServiceForm onSubmit={handleSubmit} onClose={()=>setFormOpen(false)} />}
               </div>
 
           </div>
