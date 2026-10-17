@@ -1,9 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   FiCalendar,
@@ -24,7 +19,6 @@ import ExportExcel from "./ExportExcel.jsx";
 import { IoMdAddCircle } from "react-icons/io";
 import VisitorForm from "./forms/VisitorForm.jsx";
 
-
 /* =========================================================
    HELPERS
 ========================================================= */
@@ -39,14 +33,10 @@ const getId = (value) => {
   return value._id || value.id || null;
 };
 
-
 const getKitchenName = (record) => {
   if (!record) return "Unknown Kitchen";
 
-  if (
-    record.kitchenId &&
-    typeof record.kitchenId === "object"
-  ) {
+  if (record.kitchenId && typeof record.kitchenId === "object") {
     return (
       record.kitchenId?.name ||
       record.kitchenId?.kitchenName ||
@@ -69,8 +59,7 @@ const normalizeVisitorRecord = (record) => {
   if (!record) return null;
 
   const visitorData =
-    record.visitor &&
-    typeof record.visitor === "object"
+    record.visitor && typeof record.visitor === "object"
       ? record.visitor
       : record;
 
@@ -78,56 +67,42 @@ const normalizeVisitorRecord = (record) => {
     ...record,
     ...visitorData,
 
-    _id:
-      record._id ||
-      visitorData._id,
+    _id: record._id || visitorData._id,
 
-    kitchenId:
-      record.kitchenId ||
-      visitorData.kitchenId,
+    kitchenId: record.kitchenId || visitorData.kitchenId,
 
-    userId:
-      record.userId ||
-      visitorData.userId,
+    userId: record.userId || visitorData.userId,
 
-    createdAt:
-      record.createdAt ||
-      visitorData.createdAt,
+    createdAt: record.createdAt || visitorData.createdAt,
 
-    updatedAt:
-      record.updatedAt ||
-      visitorData.updatedAt,
+    updatedAt: record.updatedAt || visitorData.updatedAt,
 
-    kitchenName:
-      getKitchenName(record),
+    kitchenName: getKitchenName(record),
 
     visitor: visitorData,
   };
 };
-
 
 /* =========================================================
    COMPONENT
 ========================================================= */
 
 const Visitor = () => {
-   const [formOpen , setFormOpen] = useState(false)
-      const handleSubmit = async (values) => {
-      console.log("Complain data:", values);
-      // Call your purchase API here.
-    };
-    
+  const [formOpen, setFormOpen] = useState(false);
+  const handleSubmit = async (values) => {
+    console.log("Complain data:", values);
+    // Call your purchase API here.
+  };
+
   /* -------------------------------------------------------
      DATA
   ------------------------------------------------------- */
 
   const [records, setRecords] = useState([]);
 
-
   const [loading, setLoading] = useState(true);
 
   const [error, setError] = useState("");
-
 
   /* -------------------------------------------------------
      SEARCH
@@ -139,98 +114,72 @@ const Visitor = () => {
      FILTERS
   ------------------------------------------------------- */
 
-  const [showFilters, setShowFilters] =
-    useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
-  const [selectedKitchen, setSelectedKitchen] =
-    useState("ALL");
+  const [selectedKitchen, setSelectedKitchen] = useState("ALL");
 
-  const [selectedStatus, setSelectedStatus] =
-    useState("ALL");
+  const [selectedStatus, setSelectedStatus] = useState("ALL");
 
-  const [dateFrom, setDateFrom] =
-    useState("");
+  const [dateFrom, setDateFrom] = useState("");
 
-  const [dateTo, setDateTo] =
-    useState("");
-
+  const [dateTo, setDateTo] = useState("");
 
   /* -------------------------------------------------------
      SELECTED RECORD
   ------------------------------------------------------- */
 
-  const [selectedRecord, setSelectedRecord] =
-    useState(null);
+  const [selectedRecord, setSelectedRecord] = useState(null);
 
   /* =======================================================
      FETCH VISITOR RECORDS
   ======================================================= */
 
-  const fetchRecords = useCallback(
-    async () => {
-      try {
-        setLoading(true);
-        setError("");
+  const fetchRecords = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-        const response =
-          await getAllVisitorForAdmin();
+      const response = await getAllVisitorForAdmin();
 
-        console.log(
-          "VISITOR RECORDS RESPONSE:",
-          response
-        );
+      console.log("VISITOR RECORDS RESPONSE:", response);
 
-        let data = response;
+      let data = response;
 
-        /*
-         * Handles:
-         *
-         * [...]
-         *
-         * or:
-         *
-         * {
-         *   data: [...]
-         * }
-         */
+      /*
+       * Handles:
+       *
+       * [...]
+       *
+       * or:
+       *
+       * {
+       *   data: [...]
+       * }
+       */
 
-        if (
-          response?.data &&
-          Array.isArray(response.data)
-        ) {
-          data = response.data;
-        }
-
-        if (!Array.isArray(data)) {
-          data = [];
-        }
-
-        const normalized =
-          data
-            .map(normalizeVisitorRecord)
-            .filter(Boolean);
-
-        setRecords(normalized);
-
-      } catch (err) {
-
-        console.error(
-          "Failed to fetch visitor records:",
-          err
-        );
-
-        setError(
-          err?.response?.data?.message ||
-          err?.message ||
-          "Failed to load visitor records."
-        );
-
-      } finally {
-        setLoading(false);
+      if (response?.data && Array.isArray(response.data)) {
+        data = response.data;
       }
-    },
-    []
-  );
+
+      if (!Array.isArray(data)) {
+        data = [];
+      }
+
+      const normalized = data.map(normalizeVisitorRecord).filter(Boolean);
+
+      setRecords(normalized);
+    } catch (err) {
+      console.error("Failed to fetch visitor records:", err);
+
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to load visitor records.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   /* =======================================================
      INITIAL FETCH
@@ -240,81 +189,52 @@ const Visitor = () => {
     fetchRecords();
   }, [fetchRecords]);
 
-
   /* =======================================================
      KITCHEN OPTIONS
   ======================================================= */
 
   const kitchens = useMemo(() => {
-
     const map = new Map();
 
     records.forEach((record) => {
+      const kitchenId = getId(record.kitchenId);
 
-      const kitchenId =
-        getId(record.kitchenId);
-
-      const kitchenName =
-        record.kitchenName ||
-        getKitchenName(record);
-
+      const kitchenName = record.kitchenName || getKitchenName(record);
 
       if (kitchenId) {
-
         map.set(kitchenId, {
           id: kitchenId,
           name: kitchenName,
         });
-
-      } else if (
-        kitchenName !==
-        "Unknown Kitchen"
-      ) {
-
+      } else if (kitchenName !== "Unknown Kitchen") {
         map.set(kitchenName, {
           id: kitchenName,
           name: kitchenName,
         });
-
       }
-
     });
 
-
-    return Array
-      .from(map.values())
-      .sort((a, b) =>
-        a.name.localeCompare(b.name)
-      );
-
+    return Array.from(map.values()).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
   }, [records]);
-
 
   /* =======================================================
      FILTERED RECORDS
   ======================================================= */
 
   const filteredRecords = useMemo(() => {
-
-    const normalizedSearch =
-      search.trim().toLowerCase();
-
+    const normalizedSearch = search.trim().toLowerCase();
 
     return records.filter((record) => {
-
       /* ---------------------------------------------------
          SEARCH
       --------------------------------------------------- */
 
       if (normalizedSearch) {
-
-        const visitor =
-          record.visitor ||
-          record;
-
+        const visitor = record.visitor || record;
 
         const searchableText = [
-
           visitor.visitorName,
 
           visitor.name,
@@ -338,158 +258,82 @@ const Visitor = () => {
           record.userId?.name,
 
           record.userId?.username,
-
         ]
           .filter(Boolean)
           .join(" ")
           .toLowerCase();
 
-
-        if (
-          !searchableText.includes(
-            normalizedSearch
-          )
-        ) {
+        if (!searchableText.includes(normalizedSearch)) {
           return false;
         }
-
       }
-
 
       /* ---------------------------------------------------
          KITCHEN FILTER
       --------------------------------------------------- */
 
-      if (
-        selectedKitchen !==
-        "ALL"
-      ) {
+      if (selectedKitchen !== "ALL") {
+        const recordKitchenId = getId(record.kitchenId);
 
-        const recordKitchenId =
-          getId(record.kitchenId);
-
-        const recordKitchenName =
-          record.kitchenName ||
-          getKitchenName(record);
-
+        const recordKitchenName = record.kitchenName || getKitchenName(record);
 
         if (
-          recordKitchenId !==
-            selectedKitchen &&
-          recordKitchenName !==
-            selectedKitchen
+          recordKitchenId !== selectedKitchen &&
+          recordKitchenName !== selectedKitchen
         ) {
           return false;
         }
-
       }
-
 
       /* ---------------------------------------------------
          STATUS FILTER
       --------------------------------------------------- */
 
-      if (
-        selectedStatus !==
-        "ALL"
-      ) {
+      if (selectedStatus !== "ALL") {
+        const recordStatus = String(record.status || "").toUpperCase();
 
-        const recordStatus =
-          String(
-            record.status || ""
-          ).toUpperCase();
-
-
-        if (
-          recordStatus !==
-          selectedStatus
-        ) {
+        if (recordStatus !== selectedStatus) {
           return false;
         }
-
       }
-
 
       /* ---------------------------------------------------
          DATE FROM
       --------------------------------------------------- */
 
-      if (
-        dateFrom &&
-        record.problemDate
-      ) {
+      if (dateFrom && record.problemDate) {
+        const problemDate = new Date(record.problemDate);
 
-        const problemDate =
-          new Date(
-            record.problemDate
-          );
+        const fromDate = new Date(`${dateFrom}T00:00:00`);
 
-        const fromDate =
-          new Date(
-            `${dateFrom}T00:00:00`
-          );
-
-
-        if (
-          problemDate <
-          fromDate
-        ) {
+        if (problemDate < fromDate) {
           return false;
         }
-
       }
-
 
       /* ---------------------------------------------------
          DATE TO
       --------------------------------------------------- */
 
-      if (
-        dateTo &&
-        record.problemDate
-      ) {
+      if (dateTo && record.problemDate) {
+        const problemDate = new Date(record.problemDate);
 
-        const problemDate =
-          new Date(
-            record.problemDate
-          );
+        const toDate = new Date(`${dateTo}T23:59:59`);
 
-        const toDate =
-          new Date(
-            `${dateTo}T23:59:59`
-          );
-
-
-        if (
-          problemDate >
-          toDate
-        ) {
+        if (problemDate > toDate) {
           return false;
         }
-
       }
 
-
       return true;
-
     });
-
-  }, [
-    records,
-    search,
-    selectedKitchen,
-    selectedStatus,
-    dateFrom,
-    dateTo,
-  ]);
-
+  }, [records, search, selectedKitchen, selectedStatus, dateFrom, dateTo]);
 
   /* =======================================================
      CLEAR FILTERS
   ======================================================= */
 
   const clearFilters = () => {
-
     setSelectedKitchen("ALL");
 
     setSelectedStatus("ALL");
@@ -499,9 +343,7 @@ const Visitor = () => {
     setDateTo("");
 
     setSearch("");
-
   };
-
 
   const hasActiveFilters =
     selectedKitchen !== "ALL" ||
@@ -510,19 +352,15 @@ const Visitor = () => {
     dateTo ||
     search;
 
-
   /* =======================================================
      CARD CLICK
   ======================================================= */
 
-  const handleRecordClick = (
-    record
-  ) => {
+  const handleRecordClick = (record) => {
     console.log(record);
-    
+
     setSelectedRecord(record);
   };
-
 
   /* =======================================================
      CLOSE MODAL
@@ -532,21 +370,16 @@ const Visitor = () => {
     setSelectedRecord(null);
   };
 
-
   /* =======================================================
      LOADING
   ======================================================= */
 
   if (loading) {
-
     return (
-
       <div className="p-4 sm:p-6">
-
         {/* Toolbar skeleton */}
 
         <div className="mb-6 animate-pulse">
-
           <div
             className="
               h-11
@@ -554,9 +387,7 @@ const Visitor = () => {
               bg-slate-200
             "
           />
-
         </div>
-
 
         {/* Cards skeleton */}
 
@@ -568,14 +399,10 @@ const Visitor = () => {
             xl:grid-cols-3
           "
         >
-
-          {Array
-            .from({ length: 6 })
-            .map((_, index) => (
-
-              <div
-                key={index}
-                className="
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div
+              key={index}
+              className="
                   h-52
                   animate-pulse
                   rounded-2xl
@@ -583,27 +410,19 @@ const Visitor = () => {
                   border-slate-200
                   bg-white
                 "
-              />
-
-            ))}
-
+            />
+          ))}
         </div>
-
       </div>
-
     );
-
   }
-
 
   /* =======================================================
      ERROR
   ======================================================= */
 
   if (error) {
-
     return (
-
       <div
         className="
           flex
@@ -613,7 +432,6 @@ const Visitor = () => {
           p-6
         "
       >
-
         <div
           className="
             w-full
@@ -627,7 +445,6 @@ const Visitor = () => {
             shadow-sm
           "
         >
-
           <div
             className="
               mx-auto
@@ -640,14 +457,8 @@ const Visitor = () => {
               bg-red-50
             "
           >
-
-            <FiUsers
-              size={20}
-              className="text-red-500"
-            />
-
+            <FiUsers size={20} className="text-red-500" />
           </div>
-
 
           <h2
             className="
@@ -660,7 +471,6 @@ const Visitor = () => {
             Unable to load visitor records
           </h2>
 
-
           <p
             className="
               mt-2
@@ -671,7 +481,6 @@ const Visitor = () => {
           >
             {error}
           </p>
-
 
           <button
             type="button"
@@ -692,53 +501,39 @@ const Visitor = () => {
               hover:bg-slate-800
             "
           >
-
-            <FiRefreshCw
-              size={14}
-            />
-
+            <FiRefreshCw size={14} />
             Try Again
-
           </button>
-
         </div>
-
       </div>
-
     );
-
   }
-
 
   /* =======================================================
      MAIN UI
   ======================================================= */
 
   return (
-
     <>
-
       <div className="p-4 sm:p-6">
-
         {/* =================================================
             TOP TOOLBAR
         ================================================= */}
 
         <div className="mb-5">
-            {/* SEARCH */}
+          {/* SEARCH */}
 
-            <div
-              className="
+          <div
+            className="
                 relative
                 flex-1
                 md:hidden
                 mb-2
               "
-            >
-
-              <FiSearch
-                size={17}
-                className="
+          >
+            <FiSearch
+              size={17}
+              className="
                   pointer-events-none
                   absolute
                   left-4
@@ -746,30 +541,23 @@ const Visitor = () => {
                   -translate-y-1/2
                   text-slate-400
                 "
-              />
+            />
 
-
-              <input
-                type="text"
-                value={search}
-                onChange={(event) =>
-                  setSearch(
-                    event.target.value
-                  )
-                }
-                placeholder="
+            <input
+              type="text"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="
                   Search Complain/Repair records...
                 "
-                className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"/>
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+            />
 
-              {search && (
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setSearch("")
-                  }
-                  className="
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="
                     absolute
                     right-3
                     top-1/2
@@ -780,18 +568,11 @@ const Visitor = () => {
                     hover:bg-slate-100
                     hover:text-slate-700
                   "
-                >
-
-                  <FiX
-                    size={15}
-                  />
-
-                </button>
-
-              )}
-
-            </div>
-
+              >
+                <FiX size={15} />
+              </button>
+            )}
+          </div>
 
           <div
             className="
@@ -799,9 +580,6 @@ const Visitor = () => {
               gap-3
             "
           >
-
-            
-
             <div
               className="
                 relative
@@ -810,8 +588,7 @@ const Visitor = () => {
                 md:block
               "
             >
-
-            {/* SEARCH */}
+              {/* SEARCH */}
               <FiSearch
                 size={17}
                 className="
@@ -824,27 +601,20 @@ const Visitor = () => {
                 "
               />
 
-
               <input
                 type="text"
                 value={search}
-                onChange={(event) =>
-                  setSearch(
-                    event.target.value
-                  )
-                }
+                onChange={(event) => setSearch(event.target.value)}
                 placeholder="
                   Search Complain/Repair records...
                 "
-                className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"/>
+                className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+              />
 
               {search && (
-
                 <button
                   type="button"
-                  onClick={() =>
-                    setSearch("")
-                  }
+                  onClick={() => setSearch("")}
                   className="
                     absolute
                     right-3
@@ -857,28 +627,17 @@ const Visitor = () => {
                     hover:text-slate-700
                   "
                 >
-
-                  <FiX
-                    size={15}
-                  />
-
+                  <FiX size={15} />
                 </button>
-
               )}
-
             </div>
 
-
-            {/* FILTER */}
+              <div className=" flex gap-2 overflow-x-scroll sm:overflow-x-hidden">
+              {/* FILTER */}
 
             <button
               type="button"
-              onClick={() =>
-                setShowFilters(
-                  (previous) =>
-                    !previous
-                )
-              }
+              onClick={() => setShowFilters((previous) => !previous)}
               className={`
                 inline-flex
                 h-11
@@ -893,8 +652,7 @@ const Visitor = () => {
                 transition
 
                 ${
-                  showFilters ||
-                  hasActiveFilters
+                  showFilters || hasActiveFilters
                     ? `
                       border-slate-900
                       bg-slate-900
@@ -910,16 +668,9 @@ const Visitor = () => {
                 }
               `}
             >
-
-              <FiFilter
-                size={15}
-              />
-
+              <FiFilter size={15} />
               Filter
-
-
               {hasActiveFilters && (
-
                 <span
                   className={`
                     flex
@@ -946,11 +697,8 @@ const Visitor = () => {
                 >
                   !
                 </span>
-
               )}
-
             </button>
-
 
             {/* REFRESH */}
 
@@ -977,46 +725,45 @@ const Visitor = () => {
                 hover:text-slate-900
               "
             >
+              <FiRefreshCw size={15} />
 
-              <FiRefreshCw
-                size={15}
-              />
-
-              <span className="">
-                Refresh
-              </span>
-
+              <span className="">Refresh</span>
             </button>
 
             {/* Report */}
             <button
               type="button"
-              onClick={()=>ExportExcel("complain-repair" , records)}
+              onClick={() => ExportExcel("complain-repair", records)}
               title="Reports"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
-
             >
               <SlGraph size={15} />
 
               <span className="">Report</span>
             </button>
-                                  <button 
-      type="button" 
-              onClick={()=>setFormOpen(!formOpen)}
-      title="Reports" 
-      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
-    >
-      <IoMdAddCircle size={15} />
-      <span>Add Record</span>
-    </button>
-{formOpen && <VisitorForm onSubmit={handleSubmit} onClose={()=>setFormOpen(false)} />}
+
+            <button
+              type="button"
+              onClick={() => setFormOpen(!formOpen)}
+              title="Reports"
+              className="inline-flex min-w-fit h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+            >
+              <IoMdAddCircle size={15} />
+              <span>Add Record</span>
+            </button>
+            {formOpen && (
+              <VisitorForm
+                onSubmit={handleSubmit}
+                onClose={() => setFormOpen(false)}
+              />
+            )}
+              </div>
           </div>
           {/* =================================================
               FILTER PANEL
           ================================================= */}
 
           {showFilters && (
-
             <div
               className="
                 mt-3
@@ -1028,7 +775,6 @@ const Visitor = () => {
                 shadow-sm
               "
             >
-
               <div
                 className="
                   grid
@@ -1037,11 +783,9 @@ const Visitor = () => {
                   xl:grid-cols-4
                 "
               >
-
                 {/* KITCHEN */}
 
                 <div>
-
                   <label
                     htmlFor="
                       visitor-kitchen-filter
@@ -1057,18 +801,14 @@ const Visitor = () => {
                     Kitchen
                   </label>
 
-
                   <div className="relative">
-
                     <select
                       id="
                         visitor-kitchen-filter
                       "
                       value={selectedKitchen}
                       onChange={(event) =>
-                        setSelectedKitchen(
-                          event.target.value
-                        )
+                        setSelectedKitchen(event.target.value)
                       }
                       className="
                         h-10
@@ -1086,27 +826,14 @@ const Visitor = () => {
                         focus:border-slate-400
                       "
                     >
+                      <option value="ALL">All Kitchens</option>
 
-                      <option value="ALL">
-                        All Kitchens
-                      </option>
-
-
-                      {kitchens.map(
-                        (kitchen) => (
-
-                          <option
-                            key={kitchen.id}
-                            value={kitchen.id}
-                          >
-                            {kitchen.name}
-                          </option>
-
-                        )
-                      )}
-
+                      {kitchens.map((kitchen) => (
+                        <option key={kitchen.id} value={kitchen.id}>
+                          {kitchen.name}
+                        </option>
+                      ))}
                     </select>
-
 
                     <FiChevronDown
                       size={14}
@@ -1119,16 +846,12 @@ const Visitor = () => {
                         text-slate-400
                       "
                     />
-
                   </div>
-
                 </div>
-
 
                 {/* STATUS */}
 
                 <div>
-
                   <label
                     htmlFor="
                       visitor-status-filter
@@ -1144,18 +867,14 @@ const Visitor = () => {
                     Status
                   </label>
 
-
                   <div className="relative">
-
                     <select
                       id="
                         visitor-status-filter
                       "
                       value={selectedStatus}
                       onChange={(event) =>
-                        setSelectedStatus(
-                          event.target.value
-                        )
+                        setSelectedStatus(event.target.value)
                       }
                       className="
                         h-10
@@ -1173,21 +892,12 @@ const Visitor = () => {
                         focus:border-slate-400
                       "
                     >
+                      <option value="ALL">All Status</option>
 
-                      <option value="ALL">
-                        All Status
-                      </option>
+                      <option value="PENDING">Pending</option>
 
-                      <option value="PENDING">
-                        Pending
-                      </option>
-
-                      <option value="COMPLETED">
-                        Completed
-                      </option>
-
+                      <option value="COMPLETED">Completed</option>
                     </select>
-
 
                     <FiChevronDown
                       size={14}
@@ -1200,16 +910,12 @@ const Visitor = () => {
                         text-slate-400
                       "
                     />
-
                   </div>
-
                 </div>
-
 
                 {/* DATE FROM */}
 
                 <div>
-
                   <label
                     htmlFor="
                       visitor-date-from
@@ -1225,9 +931,7 @@ const Visitor = () => {
                     Visitor Date From
                   </label>
 
-
                   <div className="relative">
-
                     <FiCalendar
                       size={14}
                       className="
@@ -1240,18 +944,13 @@ const Visitor = () => {
                       "
                     />
 
-
                     <input
                       id="
                         visitor-date-from
                       "
                       type="date"
                       value={dateFrom}
-                      onChange={(event) =>
-                        setDateFrom(
-                          event.target.value
-                        )
-                      }
+                      onChange={(event) => setDateFrom(event.target.value)}
                       className="
                         h-10
                         w-full
@@ -1267,16 +966,12 @@ const Visitor = () => {
                         focus:border-slate-400
                       "
                     />
-
                   </div>
-
                 </div>
-
 
                 {/* DATE TO */}
 
                 <div>
-
                   <label
                     htmlFor="
                       visitor-date-to
@@ -1292,9 +987,7 @@ const Visitor = () => {
                     Visitor Date To
                   </label>
 
-
                   <div className="relative">
-
                     <FiCalendar
                       size={14}
                       className="
@@ -1307,18 +1000,13 @@ const Visitor = () => {
                       "
                     />
 
-
                     <input
                       id="
                         visitor-date-to
                       "
                       type="date"
                       value={dateTo}
-                      onChange={(event) =>
-                        setDateTo(
-                          event.target.value
-                        )
-                      }
+                      onChange={(event) => setDateTo(event.target.value)}
                       className="
                         h-10
                         w-full
@@ -1334,18 +1022,13 @@ const Visitor = () => {
                         focus:border-slate-400
                       "
                     />
-
                   </div>
-
                 </div>
-
               </div>
-
 
               {/* CLEAR FILTERS */}
 
               {hasActiveFilters && (
-
                 <div
                   className="
                     mt-4
@@ -1353,12 +1036,9 @@ const Visitor = () => {
                     justify-end
                   "
                 >
-
                   <button
                     type="button"
-                    onClick={
-                      clearFilters
-                    }
+                    onClick={clearFilters}
                     className="
                       text-xs
                       font-semibold
@@ -1368,17 +1048,11 @@ const Visitor = () => {
                   >
                     Clear all filters
                   </button>
-
                 </div>
-
               )}
-
             </div>
-
           )}
-
         </div>
-
 
         {/* =================================================
             RESULT HEADER
@@ -1392,7 +1066,6 @@ const Visitor = () => {
             justify-between
           "
         >
-
           <div>
             <p
               className="
@@ -1402,16 +1075,11 @@ const Visitor = () => {
               "
             >
               {filteredRecords.length}{" "}
-              {filteredRecords.length === 1
-                ? "record"
-                : "records"}
+              {filteredRecords.length === 1 ? "record" : "records"}
             </p>
-
           </div>
 
-
           {hasActiveFilters && (
-
             <button
               type="button"
               onClick={clearFilters}
@@ -1424,18 +1092,14 @@ const Visitor = () => {
             >
               Clear filters
             </button>
-
           )}
-
         </div>
-
 
         {/* =================================================
             EMPTY STATE
         ================================================= */}
 
         {filteredRecords.length === 0 ? (
-
           <div
             className="
               flex
@@ -1449,14 +1113,12 @@ const Visitor = () => {
               bg-white
             "
           >
-
             <div
               className="
                 px-6
                 text-center
               "
             >
-
               <div
                 className="
                   mx-auto
@@ -1469,14 +1131,8 @@ const Visitor = () => {
                   bg-slate-100
                 "
               >
-
-                <FiUsers
-                  size={22}
-                  className="text-slate-400"
-                />
-
+                <FiUsers size={22} className="text-slate-400" />
               </div>
-
 
               <h3
                 className="
@@ -1488,7 +1144,6 @@ const Visitor = () => {
               >
                 No visitor records found
               </h3>
-
 
               <p
                 className="
@@ -1505,9 +1160,7 @@ const Visitor = () => {
                   : "There are no visitor records available yet."}
               </p>
 
-
               {hasActiveFilters && (
-
                 <button
                   type="button"
                   onClick={clearFilters}
@@ -1525,15 +1178,10 @@ const Visitor = () => {
                 >
                   Clear Filters
                 </button>
-
               )}
-
             </div>
-
           </div>
-
         ) : (
-
           /* =================================================
              RECORD GRID
           ================================================= */
@@ -1544,51 +1192,30 @@ const Visitor = () => {
               gap-4
             "
           >
-
-            {filteredRecords.map(
-              (record) => (
-
-                <VisitorCard
-                  key={
-                    record._id ||
-                    record.id
-                  }
-                  record={record}
-                  onClick={
-                    handleRecordClick
-                  }
-                />
-
-              )
-            )}
-
+            {filteredRecords.map((record) => (
+              <VisitorCard
+                key={record._id || record.id}
+                record={record}
+                onClick={handleRecordClick}
+              />
+            ))}
           </div>
-
         )}
-
       </div>
-
 
       {/* ===================================================
           DETAIL MODAL
       =================================================== */}
 
       {selectedRecord && (
-
         <MaintenanceDetailModal
           type="visitor"
           record={selectedRecord}
-          onClose={
-            handleCloseModal
-          }
+          onClose={handleCloseModal}
         />
-
       )}
-
     </>
-
   );
 };
-
 
 export default Visitor;

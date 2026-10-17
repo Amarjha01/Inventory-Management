@@ -109,12 +109,12 @@ const formatDate = (value) => {
    ========================================================= */
 
 const Service = () => {
-   const [formOpen , setFormOpen] = useState(false)
-    const handleSubmit = async (values) => {
+  const [formOpen, setFormOpen] = useState(false);
+  const handleSubmit = async (values) => {
     console.log("Purchase data:", values);
     // Call your purchase API here.
   };
-  
+
   /* -------------------------------------------------------
      DATA
   ------------------------------------------------------- */
@@ -150,7 +150,6 @@ const Service = () => {
   ------------------------------------------------------- */
 
   const [selectedRecord, setSelectedRecord] = useState(null);
-
 
   /* =======================================================
      FETCH SERVICE RECORDS
@@ -454,60 +453,66 @@ const Service = () => {
               )}
             </div>
 
-              <div className="flex gap-3">
-            {/* Filter button */}
-            <button
-              type="button"
-              onClick={() => setShowFilters((previous) => !previous)}
-              className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-4 text-xs font-semibold transition ${showFilters || hasActiveFilters ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"}`}
-            >
-              <FiFilter size={15} />
-              Filter
-              {hasActiveFilters && (
-                <span
-                  className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] ${showFilters ? "bg-white text-slate-900" : "bg-slate-900 text-white"}`}
-                >
-                  !
-                </span>
+            <div className="flex gap-3 overflow-x-scroll sm:overflow-x-hidden">
+              {/* Filter button */}
+              <button
+                type="button"
+                onClick={() => setShowFilters((previous) => !previous)}
+                className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-4 text-xs font-semibold transition ${showFilters || hasActiveFilters ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"}`}
+              >
+                <FiFilter size={15} />
+                Filter
+                {hasActiveFilters && (
+                  <span
+                    className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] ${showFilters ? "bg-white text-slate-900" : "bg-slate-900 text-white"}`}
+                  >
+                    !
+                  </span>
+                )}
+              </button>
+
+              {/* Refresh */}
+              <button
+                type="button"
+                onClick={fetchRecords}
+                title="Refresh"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+              >
+                <FiRefreshCw size={15} />
+                <span className="">Refresh</span>
+              </button>
+
+              {/* Report */}
+              <button
+                type="button"
+                onClick={() => ExportExcel("service", records)}
+                title="Reports"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+              >
+                <SlGraph size={15} />
+
+                <span className="">Report</span>
+              </button>
+
+              {/* Add Record */}
+
+              <button
+                type="button"
+                onClick={() => setFormOpen(!formOpen)}
+                title="Reports"
+                className="inline-flex min-w-fit h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+              >
+                <IoMdAddCircle size={15} />
+                <span>Add Record</span>
+              </button>
+
+              {formOpen && (
+                <ServiceForm
+                  onSubmit={handleSubmit}
+                  onClose={() => setFormOpen(false)}
+                />
               )}
-            </button>
-
-            {/* Refresh */}
-            <button
-              type="button"
-              onClick={fetchRecords}
-              title="Refresh"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
-            >
-              <FiRefreshCw size={15} />
-              <span className="">Refresh</span>
-            </button>
-
-            {/* Report */}
-            <button
-              type="button"
-              onClick={()=>ExportExcel("service" , records)}
-              title="Reports"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
-
-            >
-              <SlGraph size={15} />
-
-              <span className="">Report</span>
-            </button>
-                                <button 
-      type="button" 
-              onClick={()=>setFormOpen(!formOpen)}
-      title="Reports" 
-      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
-    >
-      <IoMdAddCircle size={15} />
-      <span>Add Record</span>
-    </button>
-
-{formOpen && <ServiceForm onSubmit={handleSubmit} onClose={()=>setFormOpen(false)} />}
-              </div>
-
+            </div>
           </div>
 
           {/* =================================================
