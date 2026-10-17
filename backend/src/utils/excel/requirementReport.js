@@ -148,6 +148,7 @@ export default async function createRequirementWorkbook(
     "Kitchen",
     "District",
     "Date",
+    "Remark",
 
     ...inventoryColumns.map(
       ([, name]) => name,
@@ -191,6 +192,12 @@ export default async function createRequirementWorkbook(
       requirement.createdAt
         ? new Date(requirement.createdAt)
         : 0,
+    );
+
+        row.push(
+      valueOrZero(
+        requirement?.remarks,
+      ),
     );
 
     /**

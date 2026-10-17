@@ -1165,6 +1165,9 @@ console.log(reportData);
         <th className="border-r p-3 text-left font-semibold">
           Status
         </th>
+        <th className="border-r p-3 text-left font-semibold">
+          Remark
+        </th>
 
         {/* Dynamic item columns */}
         {reportTable.columns.map((item) => (
@@ -1234,6 +1237,14 @@ console.log(reportData);
               <td className="border-r p-3 whitespace-nowrap">
                 {row.status}
               </td>
+
+             <td className="border-r p-3 whitespace-nowrap">
+              {reportData?.map((item, index) => (
+                <div key={index}>
+                  {item?.remarks || "N/A"}
+                </div>
+              ))}
+            </td>
 
               {/* Item quantities */}
               {reportTable.columns.map(
