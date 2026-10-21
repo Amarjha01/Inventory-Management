@@ -192,6 +192,14 @@ export const completeDestination = asyncHandler(async (req, res) => {
 
   return ApiResponse.success(res, "Destination completed successfully.", trip);
 });
+export const completeTrip = asyncHandler(async (req, res) => {
+  const trip = await tripService.completeTrip(
+    req.params.tripId,
+    req.user,
+  );
+
+  return ApiResponse.success(res, "Destination completed successfully.", trip);
+});
 
 export const finalizeTrip = asyncHandler(async (req, res) => {
   const payload = {

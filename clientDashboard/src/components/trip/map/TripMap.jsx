@@ -188,43 +188,41 @@ const TripMap = ({
   /*
    * Live GPS
    */
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      console.error("Geolocation is not supported.");
+useEffect(() => {
+  if (externalLocation) {
+    return;
+  }
 
-      return;
-    }
+  if (!navigator.geolocation) {
+    console.error("Geolocation is not supported.");
+    return;
+  }
 
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const location = {
-          latitude: position.coords.latitude,
+  const watchId = navigator.geolocation.watchPosition(
+    (position) => {
+      const location = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+        capturedAt: new Date(position.timestamp).toISOString(),
+      };
 
-          longitude: position.coords.longitude,
+      setCurrentLocation(location);
+    },
+    (error) => {
+      console.error("GPS error:", error);
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 5000,
+      timeout: 15000,
+    },
+  );
 
-          accuracy: position.coords.accuracy,
-
-          capturedAt: new Date(position.timestamp).toISOString(),
-        };
-
-        setCurrentLocation(location);
-      },
-
-      (error) => {
-        console.error("GPS error:", error);
-      },
-
-      {
-        enableHighAccuracy: true,
-        maximumAge: 5000,
-        timeout: 15000,
-      },
-    );
-
-    return () => {
-      navigator.geolocation.clearWatch(watchId);
-    };
-  }, []);
+  return () => {
+    navigator.geolocation.clearWatch(watchId);
+  };
+}, [externalLocation]);
 
   /*
    * Active destination

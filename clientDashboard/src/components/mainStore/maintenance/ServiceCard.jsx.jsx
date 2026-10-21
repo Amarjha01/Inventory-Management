@@ -48,7 +48,7 @@ const ServiceCard = ({ record, onClick }) => {
     <button
       type="button"
       onClick={() => onClick?.(record)}
-      className="group w-full rounded-xl border border-slate-200 bg-white p-3.5 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-slate-200 flex items-start md:items-center justify-between gap-4"
+      className="group w-90 sm:w-full rounded-xl border border-slate-200 bg-white p-3.5 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-slate-200 flex items-start md:items-center justify-between gap-4"
     >
       {/* Left Area: Icon & Main Details */}
       <div className="flex items-start md:items-center gap-3.5 min-w-0 flex-1">

@@ -72,7 +72,7 @@ const Trip = () => {
   const getCompletedDestinationCount = () => {
     return (
       activeTrip?.destinations?.filter(
-        (destination) => destination.status === "COMPLETED",
+        (destination) => destination.status === "COMPLETED" || destination.status === "ARRIVED",
       ).length || 0
     );
   };

@@ -61,7 +61,7 @@ const getKitchenName = (record) => {
 
 const normalizePurchaseRecord = (record) => {
   if (!record) return null;
-console.log(record);
+  console.log(record);
 
   return {
     ...record,
@@ -87,12 +87,12 @@ console.log(record);
 ========================================================= */
 
 const Purchase = () => {
-  const [formOpen , setFormOpen] = useState(false)
-    const handleSubmit = async (values) => {
+  const [formOpen, setFormOpen] = useState(false);
+  const handleSubmit = async (values) => {
     console.log("Purchase data:", values);
     // Call your purchase API here.
   };
-  
+
   /* =======================================================
      DATA
   ======================================================= */
@@ -536,79 +536,88 @@ const Purchase = () => {
         ================================================= */}
 
         <div className="mb-5">
-<div className="flex flex-col md:flex-row gap-3">
-  {/* SEARCH */}
-  <div className="relative flex-1">
-    <FiSearch size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-    <input 
-      type="text" 
-      value={search} 
-      onChange={(event) => setSearch(event.target.value)} 
-      placeholder="Search purchase records..." 
-      className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100" 
-    />
-    {search && (
-      <button 
-        type="button" 
-        onClick={() => setSearch("")} 
-        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-      >
-        <FiX size={15} />
-      </button>
-    )}
-  </div>
+          <div className="flex flex-col md:flex-row gap-3">
+            {/* SEARCH */}
+            <div className="relative flex-1">
+              <FiSearch
+                size={17}
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                type="text"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search purchase records..."
+                className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                >
+                  <FiX size={15} />
+                </button>
+              )}
+            </div>
 
-  <div className="flex gap-3">
-    {/* FILTER */}
-    <button 
-      type="button" 
-      title="Filter"
-      onClick={() => setShowFilters((previous) => !previous)} 
-      className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-4 text-xs font-semibold transition ${showFilters || hasActiveFilters ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"}`}
-    >
-      <FiFilter size={15} />
-      Filter
-      {hasActiveFilters && (
-        <span className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] ${showFilters ? "bg-white text-slate-900" : "bg-slate-900 text-white"}`}>
-          !
-        </span>
-      )}
-    </button>
+            <div className="flex gap-3 overflow-x-scroll sm:overflow-x-hidden">
+              {/* FILTER */}
+              <button
+                type="button"
+                title="Filter"
+                onClick={() => setShowFilters((previous) => !previous)}
+                className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-4 text-xs font-semibold transition ${showFilters || hasActiveFilters ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"}`}
+              >
+                <FiFilter size={15} />
+                Filter
+                {hasActiveFilters && (
+                  <span
+                    className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] ${showFilters ? "bg-white text-slate-900" : "bg-slate-900 text-white"}`}
+                  >
+                    !
+                  </span>
+                )}
+              </button>
 
-    {/* REFRESH */}
-    <button 
-      type="button" 
-      onClick={fetchRecords} 
-      title="Refresh" 
-      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
-    >
-      <FiRefreshCw size={15} />
-      <span>Refresh</span>
-    </button>
+              {/* REFRESH */}
+              <button
+                type="button"
+                onClick={fetchRecords}
+                title="Refresh"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+              >
+                <FiRefreshCw size={15} />
+                <span>Refresh</span>
+              </button>
 
-    {/* REPORT */}
-    <button 
-      type="button" 
-              onClick={()=>ExportExcel("purchase" , records)}
-      title="Reports" 
-      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
-    >
-      <SlGraph size={15} />
-      <span>Report</span>
-    </button>
-    <button 
-      type="button" 
-              onClick={()=>setFormOpen(!formOpen)}
-      title="Reports" 
-      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
-    >
-      <IoMdAddCircle size={15} />
-      <span>Add Record</span>
-    </button>
-  </div>
-</div>
-{formOpen && <PurchaseForm onSubmit={handleSubmit} onClose={()=>setFormOpen(false)} />}
-
+              {/* REPORT */}
+              <button
+                type="button"
+                onClick={() => ExportExcel("purchase", records)}
+                title="Reports"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+              >
+                <SlGraph size={15} />
+                <span>Report</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormOpen(!formOpen)}
+                title="Reports"
+                className="inline-flex min-w-fit h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+              >
+                <IoMdAddCircle size={15} />
+                <span>Add Record</span>
+              </button>
+            </div>
+          </div>
+          {formOpen && (
+            <PurchaseForm
+              onSubmit={handleSubmit}
+              onClose={() => setFormOpen(false)}
+            />
+          )}
 
           {/* =================================================
               FILTER PANEL
@@ -918,7 +927,6 @@ const Purchase = () => {
           "
         >
           <div>
-
             <p
               className="
                 mt-0.5

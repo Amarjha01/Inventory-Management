@@ -35,7 +35,7 @@ const PurchaseCard = ({ record, onClick }) => {
       type="button"
       onClick={() => onClick?.(record)}
       className="
-        group w-full
+        group w-90 sm:w-full
         rounded-xl
         border border-slate-200
         bg-white
