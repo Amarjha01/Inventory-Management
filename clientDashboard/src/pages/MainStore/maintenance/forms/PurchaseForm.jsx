@@ -33,19 +33,20 @@ const PurchaseForm = ({ onSubmit, onClose, loading = false }) => {
     }));
   };
 
-  const handleOtherImages = (e) => {
-    const selected = Array.from(e.target.files || []);
+const handleOtherImages = (e) => {
+  const selected = Array.from(e.target.files || []);
 
-    if (otherImages.length + selected.length > 5) {
-      setError("Maximum 5 supporting images are allowed.");
-      e.target.value = "";
-      return;
-    }
-
-    setOtherImages((prev) => [...prev, ...selected]);
-    setError("");
+  if (otherImages.length + selected.length > 5) {
+    setError("Maximum 5 supporting images are allowed.");
     e.target.value = "";
-  };
+    return;
+  }
+
+  setOtherImages((prev) => [...prev, ...selected]);
+
+  setError("");
+  e.target.value = "";
+};
 
   const removeOtherImage = (index) => {
     setOtherImages((prev) =>
@@ -209,9 +210,7 @@ const PurchaseForm = ({ onSubmit, onClose, loading = false }) => {
               type="number"
               value={values.expiryWarrantyYear}
               onChange={handleChange}
-              placeholder="e.g. 2028"
-              min="1900"
-              max="9999"
+              placeholder="e.g. 1 , 2 for years &  0.1 , 0.5 for months"
               className={inputClass}
             />
           </Field>

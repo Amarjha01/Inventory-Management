@@ -12,7 +12,10 @@ import {
 
 import VisitorCard from "../../../components/mainStore/maintenance/VisitorCard.jsx";
 import MaintenanceDetailModal from "../../../components/mainStore/maintenance/MaintenanceDetailModal.jsx";
-import { getAllVisitorForAdmin } from "../../../services/maintainence.service.js";
+import {
+  createVisitorRecord,
+  getAllVisitorForAdmin,
+} from "../../../services/maintainence.service.js";
 import { SlGraph } from "react-icons/sl";
 import Reports from "./ExportExcel.jsx";
 import ExportExcel from "./ExportExcel.jsx";
@@ -91,7 +94,13 @@ const Visitor = () => {
   const [formOpen, setFormOpen] = useState(false);
   const handleSubmit = async (values) => {
     console.log("Complain data:", values);
-    // Call your purchase API here.
+    try {
+      await createVisitorRecord(values);
+      setFormOpen(false);
+      toast.success("record added");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   /* -------------------------------------------------------
@@ -632,13 +641,13 @@ const Visitor = () => {
               )}
             </div>
 
-              <div className=" flex gap-2 overflow-x-scroll sm:overflow-x-hidden">
+            <div className=" flex gap-2 overflow-x-scroll sm:overflow-x-hidden">
               {/* FILTER */}
 
-            <button
-              type="button"
-              onClick={() => setShowFilters((previous) => !previous)}
-              className={`
+              <button
+                type="button"
+                onClick={() => setShowFilters((previous) => !previous)}
+                className={`
                 inline-flex
                 h-11
                 items-center
@@ -667,12 +676,12 @@ const Visitor = () => {
                     `
                 }
               `}
-            >
-              <FiFilter size={15} />
-              Filter
-              {hasActiveFilters && (
-                <span
-                  className={`
+              >
+                <FiFilter size={15} />
+                Filter
+                {hasActiveFilters && (
+                  <span
+                    className={`
                     flex
                     h-5
                     min-w-5
@@ -694,19 +703,19 @@ const Visitor = () => {
                         `
                     }
                   `}
-                >
-                  !
-                </span>
-              )}
-            </button>
+                  >
+                    !
+                  </span>
+                )}
+              </button>
 
-            {/* REFRESH */}
+              {/* REFRESH */}
 
-            <button
-              type="button"
-              onClick={fetchRecords}
-              title="Refresh"
-              className="
+              <button
+                type="button"
+                onClick={fetchRecords}
+                title="Refresh"
+                className="
                 inline-flex
                 h-11
                 items-center
@@ -724,40 +733,40 @@ const Visitor = () => {
                 hover:border-slate-300
                 hover:text-slate-900
               "
-            >
-              <FiRefreshCw size={15} />
+              >
+                <FiRefreshCw size={15} />
 
-              <span className="">Refresh</span>
-            </button>
+                <span className="">Refresh</span>
+              </button>
 
-            {/* Report */}
-            <button
-              type="button"
-              onClick={() => ExportExcel("complain-repair", records)}
-              title="Reports"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
-            >
-              <SlGraph size={15} />
+              {/* Report */}
+              <button
+                type="button"
+                onClick={() => ExportExcel("complain-repair", records)}
+                title="Reports"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+              >
+                <SlGraph size={15} />
 
-              <span className="">Report</span>
-            </button>
+                <span className="">Report</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setFormOpen(!formOpen)}
-              title="Reports"
-              className="inline-flex min-w-fit h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
-            >
-              <IoMdAddCircle size={15} />
-              <span>Add Record</span>
-            </button>
-            {formOpen && (
-              <VisitorForm
-                onSubmit={handleSubmit}
-                onClose={() => setFormOpen(false)}
-              />
-            )}
-              </div>
+              <button
+                type="button"
+                onClick={() => setFormOpen(!formOpen)}
+                title="Reports"
+                className="inline-flex min-w-fit h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+              >
+                <IoMdAddCircle size={15} />
+                <span>Add Record</span>
+              </button>
+              {formOpen && (
+                <VisitorForm
+                  onSubmit={handleSubmit}
+                  onClose={() => setFormOpen(false)}
+                />
+              )}
+            </div>
           </div>
           {/* =================================================
               FILTER PANEL

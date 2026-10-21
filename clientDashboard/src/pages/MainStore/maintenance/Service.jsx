@@ -12,11 +12,12 @@ import {
 
 import ServiceCard from "../../../components/mainStore/maintenance/ServiceCard.jsx";
 import MaintenanceDetailModal from "../../../components/mainStore/maintenance/MaintenanceDetailModal.jsx";
-import { getAllServiceForAdmin } from "../../../services/maintainence.service.js";
+import { createServiceRecord, getAllServiceForAdmin } from "../../../services/maintainence.service.js";
 import { SlGraph } from "react-icons/sl";
 import ExportExcel from "./ExportExcel.jsx";
 import ServiceForm from "./forms/ServiceForm.jsx";
 import { IoMdAddCircle } from "react-icons/io";
+import toast from "react-hot-toast";
 
 /* =========================================================
    HELPERS
@@ -112,7 +113,13 @@ const Service = () => {
   const [formOpen, setFormOpen] = useState(false);
   const handleSubmit = async (values) => {
     console.log("Purchase data:", values);
-    // Call your purchase API here.
+    try {
+      await createServiceRecord(values)
+      setFormOpen(false)
+      toast.success("record added")
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   /* -------------------------------------------------------

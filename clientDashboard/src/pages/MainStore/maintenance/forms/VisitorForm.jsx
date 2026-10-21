@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { FiImage, FiX } from "react-icons/fi";
 import { IoMdCloseCircle } from "react-icons/io";
+import kitchens from "../../../../constants/kitchen";
 
 const VisitorForm = ({ onSubmit, onClose, loading = false }) => {
   const [values, setValues] = useState({
+    kitchenId: "",
     problemDate: new Date().toISOString().slice(0, 10),
     visitorName: "",
     phoneNumber: "",
@@ -23,30 +25,30 @@ const VisitorForm = ({ onSubmit, onClose, loading = false }) => {
     }));
   };
 
-  const handleImages = (e) => {
-    const selected = Array.from(e.target.files || []);
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+const handleImages = (e) => {
+  const selected = Array.from(e.target.files || []);
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
-    if (images.length + selected.length > 5) {
-      setError("Maximum 5 images are allowed.");
-      e.target.value = "";
-      return;
-    }
-
-    const invalidFiles = selected.filter(
-      (file) => !allowedTypes.includes(file.type)
-    );
-
-    if (invalidFiles.length > 0) {
-      setError("Only JPG, PNG, or WebP images are allowed.");
-      e.target.value = "";
-      return;
-    }
-
-    setImages((prev) => [...prev, ...selected]);
-    setError("");
+  if (images.length + selected.length > 5) {
+    setError("Maximum 5 images are allowed.");
     e.target.value = "";
-  };
+    return;
+  }
+
+  const invalidFiles = selected.filter(
+    (file) => !allowedTypes.includes(file.type)
+  );
+
+  if (invalidFiles.length > 0) {
+    setError("Only JPG, PNG, or WebP images are allowed.");
+    e.target.value = "";
+    return;
+  }
+
+  setImages((prev) => [...prev, ...selected]);
+  setError("");
+  e.target.value = "";
+};
 
   const removeImage = (index) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
@@ -78,7 +80,7 @@ const VisitorForm = ({ onSubmit, onClose, loading = false }) => {
         {/* Header */}
         <div className="pr-10">
           <h2 className="text-lg font-semibold text-black">
-            Visitor / Problem Record
+            Complain / Problem Record
           </h2>
           <p className="text-sm text-gray-500">
             Record complaints, visitors, and work updates.
@@ -94,7 +96,29 @@ const VisitorForm = ({ onSubmit, onClose, loading = false }) => {
         >
           <IoMdCloseCircle />
         </button>
-
+            {/* Kitchen Selection */}
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <Field label="Select Kitchen" required>
+                <select
+                  name="kitchenId"
+                  value={values.kitchenId}
+                  onChange={handleChange}
+                  required
+                  className={inputClass}
+                >
+                  <option value="">Choose a kitchen</option>
+    
+                  {kitchens.map((kitchen) => (
+                    <option
+                      key={kitchen._id}
+                      value={kitchen._id}
+                    >
+                      {kitchen.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </div>
         {/* Form Fields */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Problem Date" required>

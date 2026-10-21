@@ -19,6 +19,12 @@ class MaintenanceService {
       filter
     );
   }
+  async findByKitchenId(KitchenId , filter) {
+    return await maintenanceRepository.findByKitchenId(
+      KitchenId,
+      filter
+    );
+  }
 
   /*
   |--------------------------------------------------------------------------

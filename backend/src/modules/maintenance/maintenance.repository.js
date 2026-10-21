@@ -27,6 +27,26 @@ class MaintenanceRepository {
   |--------------------------------------------------------------------------
   */
 
+  async findByKitchenId(KitchenId , filter) {
+    console.log("KitchenId" , KitchenId);
+    
+    const data = await Maintenance.find({ kitchenId: KitchenId , ...filter})
+      .populate({
+        path: "userId",
+        select: "_id name",
+      })
+      .populate({
+        path: "kitchenId",
+        select: "_id name",
+      })
+      ?.populate({
+        path: "visitor.feedbackTrail.sentBy",
+        select: "name",
+      })
+      .sort({ createdAt: -1 });
+    return data;
+    
+  }
   async findByUserId(userId , filter) {
     const data = await Maintenance.find({userId , ...filter})
       .populate({

@@ -96,7 +96,7 @@ const getAllPurchaseForAdmin = async (req, res, next) => {
 
 const getAllServiceForKitchen = async (req, res, next) => {
   try {
-   const userId = req.user._id;
+   const kitchenId = req.user.kitchenId._id;
     const filter = {
       service: {
         $exists: true,
@@ -105,7 +105,7 @@ const getAllServiceForKitchen = async (req, res, next) => {
     };
 
     const data =
-            await maintenanceService.findByUserId(userId , filter);
+            await maintenanceService.findByKitchenId(kitchenId , filter);
 
     return ApiResponse.success(
       res,
@@ -119,7 +119,7 @@ const getAllServiceForKitchen = async (req, res, next) => {
 
 const getAllVisitorsForKitchen = async (req, res, next) => {
   try {
-   const userId = req.user._id;
+   const kitchenId = req.user.kitchenId._id;
     const filter = {
       visitor: {
         $exists: true,
@@ -128,7 +128,7 @@ const getAllVisitorsForKitchen = async (req, res, next) => {
     };
 
     const data =
-            await maintenanceService.findByUserId(userId , filter);
+            await maintenanceService.findByKitchenId(kitchenId , filter);
 
     return ApiResponse.success(
       res,
@@ -142,7 +142,7 @@ const getAllVisitorsForKitchen = async (req, res, next) => {
 
 const getAllPurchasesForKitchen = async (req, res, next) => {
   try {
-   const userId = req.user._id;
+   const KitchenId = req.user.kitchenId._id;
     const filter = {
       purchaseRecord: {
         $exists: true,
@@ -151,7 +151,7 @@ const getAllPurchasesForKitchen = async (req, res, next) => {
     };
 
     const data =
-            await maintenanceService.findByUserId(userId , filter);
+            await maintenanceService.findByKitchenId(KitchenId , filter);
 
     return ApiResponse.success(
       res,
@@ -229,9 +229,9 @@ const createService = async (
 ) => {
   try {
     const userId = req?.user._id;
-    const kitchenId = req?.user.kitchenId
+    const kitchenId = req?.user.kitchenId || req.body.kitchenId
     const { type, ...body } = req.body;
-      body.images = req.files.images.map((element)=>element.filename)
+      body.images = req?.files?.images?.map((element)=>element.filename)
         const data = {
           userId,
           kitchenId,
@@ -343,7 +343,7 @@ const createVisitor = async (
     const body = { ...req.body };    
     body.otherImages =
       files?.otherImages?.map((element) => element.filename) || [];
-    const kitchenId = req?.user.kitchenId
+    const kitchenId = req?.user.kitchenId || req.body.kitchenId
       const  data = {
           userId,
           kitchenId,
@@ -435,7 +435,7 @@ const createPurchaseRecord = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const body = { ...req.body };
-    const kitchenId = req?.user.kitchenId
+    const kitchenId = req?.user.kitchenId || req.body.kitchenId
     const files = req.files;
 
     console.log("files" , files);
