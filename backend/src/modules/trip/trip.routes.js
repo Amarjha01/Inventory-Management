@@ -22,6 +22,7 @@ import {
   getAdminTripSummary,
   getAdminTripById,
   getAdminTripGpsTrail,
+  completeTrip,
 } from "./trip.controller.js";
 import gpsTrackingAuth from "../../middleware/gpsTracking.middleware.js";
 import authorizeRoles from "../../middleware/role.middleware.js";
@@ -35,13 +36,14 @@ router.post(
   gpsTrail
 );
 
+
+
+router.use(authMiddleware);
+
 router.post(
   "/:tripId/gpstrail/token",
   createGpsTrackingToken
 );
-
-router.use(authMiddleware);
-
 // Driver routes
 router.post("/", 
   uploadTripStart.single("startMeter.imageUrl"),
@@ -91,6 +93,10 @@ router.post(
 router.patch(
   "/:tripId/destinations/:destinationId/complete",
   completeDestination
+);
+router.patch(
+  "/:tripId/complete",
+  completeTrip
 );
 
 router.post(

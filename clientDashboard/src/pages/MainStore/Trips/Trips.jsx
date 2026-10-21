@@ -38,16 +38,16 @@ const STATUS_STYLES = {
 const formatDate = (value) => {
   if (!value) return "—";
 
-  return new Intl.DateTimeFormat(undefined, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(value));
-};
-
-const formatDistance = (value) => {
-  if (value == null || value === "") return "—";
-  return `${Number(value).toLocaleString()} km`;
+return new Intl.DateTimeFormat("en-IN", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: true,
+  timeZone: "Asia/Kolkata",
+}).format(new Date(value));
 };
 
 const getDriverName = (trip) =>
@@ -185,6 +185,7 @@ const Trips = () => {
     );
   }, [search, trips]);
 
+  
   const selectTrip = async (trip) => {
     setSelectedTrip(trip);
     setActiveTab("Overview");
@@ -212,6 +213,9 @@ const Trips = () => {
     }
   };
 
+  console.log(selectedTrip);
+  
+
   const statusCounts = summary?.byStatus ?? {};
   const activeCount = statusCounts.IN_PROGRESS ?? 0;
   const completedCount = statusCounts.COMPLETED ?? 0;
@@ -228,13 +232,7 @@ const latestGpsPoint = gpsTrail[gpsTrail.length - 1];
 const destinations = selectedTrip?.destinations ?? [];
 
 const mapCurrentLocation =
-  selectedTrip?.currentLocation ??
-  (latestGpsPoint
-    ? {
-        latitude: Number(latestGpsPoint.latitude),
-        longitude: Number(latestGpsPoint.longitude),
-      }
-    : null);
+ gpsTrail[0];
 
 const routeCoordinates = gpsTrail
   .filter(
@@ -404,8 +402,11 @@ const activeDestinationId =
                             )}
                           </span>
                         </td>
-                        <td className="px-4 py-4 text-sm text-slate-600">
-                          {formatDistance(trip.distance)}
+                       <td className="px-4 py-4 text-sm text-slate-600">
+                          {trip.destinations.reduce(
+                            (sum, d) => sum + (Number(d.arrival?.distanceFromDestinationMeters)/1000 || 0),
+                            0
+                          )} Km
                         </td>
                         <td className="px-2 py-4 text-slate-400">
                           <MdChevronRight className="text-xl" />
@@ -513,7 +514,10 @@ const activeDestinationId =
                 <div>
                   <p className="text-slate-400">Distance</p>
                   <p className="mt-1 font-semibold text-slate-700">
-                    {formatDistance(selectedTrip.distance)}
+                      {selectedTrip.destinations.reduce(
+                        (sum, d) => sum + (Number(d.arrival?.distanceFromDestinationMeters)/1000 || 0),
+                        0
+                      )} Kms
                   </p>
                 </div>
                 <div>
@@ -588,7 +592,7 @@ const activeDestinationId =
                       </span>
                     </div>
                     <div className="max-h-96 space-y-2 overflow-y-auto">
-                      {gpsTrail.map((point, index) => (
+                      {gpsTrail.slice().reverse().map((point, index) => (
                         <div
                           key={`${point.createdAt ?? "point"}-${index}`}
                           className="rounded-lg bg-slate-50 p-3 text-xs text-slate-600"

@@ -170,14 +170,13 @@ const haversineDistanceMeters = (
   latitude1,
   longitude1,
   latitude2,
-  longitude2,
+  longitude2
 ) => {
   const earthRadiusMeters = 6371000;
 
-  const toRadians = (degrees)(degrees * Math.PI) / 180;
+  const toRadians = (degrees) => (degrees * Math.PI) / 180;
 
   const dLat = toRadians(latitude2 - latitude1);
-
   const dLon = toRadians(longitude2 - longitude1);
 
   const lat1 = toRadians(latitude1);
@@ -185,9 +184,18 @@ const haversineDistanceMeters = (
 
   const a =
     Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+    Math.cos(lat1) *
+      Math.cos(lat2) *
+      Math.sin(dLon / 2) ** 2;
 
-  return 2 * earthRadiusMeters * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return (
+    2 *
+    earthRadiusMeters *
+    Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1 - a)
+    )
+  );
 };
 
 /* -------------------------------------------------------------------------- */
@@ -198,25 +206,26 @@ const recalculateTripTotals = (trip) => {
   let fuelLitres = 0;
   let fuelAmount = 0;
 
-  for (const destination of trip.destinations) {
+  for (const destination of trip.destinations || []) {
     for (const fuel of destination.fuelEntries || []) {
       fuelLitres += Number(fuel.litres || 0);
-
       fuelAmount += Number(fuel.totalAmount || 0);
     }
   }
 
   trip.totalFuelLitres = Number(fuelLitres.toFixed(3));
-
   trip.totalFuelAmount = Number(fuelAmount.toFixed(2));
 
+  // Official distance: odometer readings
   if (
     trip.finalMeter?.reading !== undefined &&
     trip.startMeter?.reading !== undefined
   ) {
-    const distance = trip.finalMeter.reading - trip.startMeter.reading;
+    const distance =
+      Number(trip.finalMeter.reading) -
+      Number(trip.startMeter.reading);
 
-    if (distance < 0) {
+    if (!Number.isFinite(distance) || distance < 0) {
       throw new ApiError(
         400,
         "Final meter reading cannot be lower than initial meter reading.",
@@ -941,6 +950,41 @@ class TripService {
     return tripRepository.findById(trip._id);
   }
 
+  /* ------------------------------------------------------------------------ */
+  /* Complete Trip                                                     */
+  /* ------------------------------------------------------------------------ */
+
+  async completeTrip(tripId, user) {
+    const trip = await tripRepository.findById(tripId, {
+      populate: false,
+    });
+
+    if (!trip) {
+      throw new ApiError(404, "Trip not found.");
+    }
+
+    assertTripOwner(trip, user);
+
+    if (trip.status !== "IN_PROGRESS") {
+      throw new ApiError(409, "Trip is not in progress.");
+    }
+    trip.status = "COMPLETED";
+    
+    trip.auditLog.push({
+      action: "TRIP_COMPLETED",
+
+      actor: getUserId(user),
+
+      role: getUserRole(user),
+    });
+
+    recalculateTripTotals(trip);
+
+    await tripRepository.save(trip);
+
+    return tripRepository.findById(trip._id);
+  }
+  
   /* ------------------------------------------------------------------------ */
   /* Complete Destination                                                     */
   /* ------------------------------------------------------------------------ */

@@ -376,7 +376,16 @@ useEffect(() => {
           BOTTOM NAVIGATION
       ========================================================== */}
 
-      <nav
+      <motion.nav
+        initial={false}
+  animate={{
+    y: isHeaderHidden ? "150%" : 0,
+    opacity: isHeaderHidden ? 0 : 1,
+  }}
+  transition={{
+    duration: 0.3,
+    ease: "easeInOut",
+  }}
         className="
           fixed
           bottom-0
@@ -524,7 +533,7 @@ useEffect(() => {
             </button>
           )}
         </div>
-      </nav>
+      </motion.nav>
 
       {/* ==========================================================
           MORE MENU

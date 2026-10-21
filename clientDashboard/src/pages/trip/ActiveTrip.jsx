@@ -210,21 +210,14 @@ const ActiveTrip = () => {
     );
   }, [trip?.destinations]);
 
-  const completedCount =
-    trip?.destinations?.filter(
-      (destination) => destination.status === "COMPLETED",
+  const completedCount = trip?.destinations?.filter(
+      (destination) => destination.status === "COMPLETED" || destination.status === "ARRIVED",
     ).length || 0;
 
   const destinationCount = trip?.destinations?.length || 0;
 
   const allDestinationsCompleted = completedCount === destinationCount;
-  console.log(
-    "completedCount",
-    completedCount,
-    "destinationCount",
-    destinationCount,
-    allDestinationsCompleted,
-  );
+
 
   /* ------------------------------------------------------------------------ */
   /* GPS Error Handler                                                        */
