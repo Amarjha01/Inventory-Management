@@ -1239,11 +1239,7 @@ console.log(reportData);
               </td>
 
              <td className="border-r p-3 whitespace-nowrap">
-              {reportData?.map((item, index) => (
-                <div key={index}>
-                  {item?.remarks || "N/A"}
-                </div>
-              ))}
+             {reportData[index].remarks || "N/A"}
             </td>
 
               {/* Item quantities */}
