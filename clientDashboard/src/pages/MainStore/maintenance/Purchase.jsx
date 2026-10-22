@@ -14,7 +14,10 @@ import { IoMdAddCircle } from "react-icons/io";
 
 import MaintenanceDetailModal from "../../../components/mainStore/maintenance/MaintenanceDetailModal.jsx";
 
-import { getAllPurchaseForAdmin } from "../../../services/maintainence.service.js";
+import {
+  createPurchaseRecord,
+  getAllPurchaseForAdmin,
+} from "../../../services/maintainence.service.js";
 import PurchaseCard from "../../../components/mainStore/maintenance/PurchaseCard.jsx";
 import ExportExcel from "./ExportExcel.jsx";
 import PurchaseForm from "./forms/PurchaseForm.jsx";
@@ -90,7 +93,13 @@ const Purchase = () => {
   const [formOpen, setFormOpen] = useState(false);
   const handleSubmit = async (values) => {
     console.log("Purchase data:", values);
-    // Call your purchase API here.
+    try {
+      await createPurchaseRecord(values);
+      setFormOpen(false);
+      toast.success("record added");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   /* =======================================================

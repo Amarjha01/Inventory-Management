@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { FiImage, FiTool, FiX } from "react-icons/fi";
 import { IoMdCloseCircle } from "react-icons/io";
+import partName from "../../../../constants/maintenancePartName";
+import kitchens from "../../../../constants/kitchen";
 
 const initialValues = {
+  kitchenId: "",
   partName: "",
   serviceDate: new Date().toISOString().slice(0, 10),
   partyName: "",
@@ -33,7 +36,7 @@ const ServiceForm = ({ onSubmit, onClose, loading = false }) => {
     }
 
     const invalidFiles = selected.filter(
-      (file) => !allowedTypes.includes(file.type)
+      (file) => !allowedTypes.includes(file.type),
     );
 
     if (invalidFiles.length > 0) {
@@ -80,9 +83,7 @@ const ServiceForm = ({ onSubmit, onClose, loading = false }) => {
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold text-black">
-              Service Record
-            </h2>
+            <h2 className="text-lg font-semibold text-black">Service Record</h2>
             <p className="text-sm text-gray-500">
               Record maintenance and service details.
             </p>
@@ -98,18 +99,52 @@ const ServiceForm = ({ onSubmit, onClose, loading = false }) => {
         >
           <IoMdCloseCircle />
         </button>
+      
+        {/* Kitchen Selection */}
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+          <Field label="Select Kitchen" required>
+            <select
+              name="kitchenId"
+              value={values.kitchenId}
+              onChange={handleChange}
+              required
+              className={inputClass}
+            >
+              <option value="">Choose a kitchen</option>
+
+              {kitchens.map((kitchen) => (
+                <option
+                  key={kitchen._id}
+                  value={kitchen._id}
+                >
+                  {kitchen.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
 
         {/* Form Fields */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Part Name" required>
-            <input
+            <select
+              id="partName"
               name="partName"
               value={values.partName}
               onChange={handleChange}
-              placeholder="e.g. Generator filter"
               required
               className={inputClass}
-            />
+            >
+              <option value="" disabled>
+                Select a maintenance part / मेंटेनेंस पार्ट चुनें
+              </option>
+
+              {partName.map((part) => (
+                <option key={part.name} value={part.name}>
+                  {part.name} ({part.hindiName})
+                </option>
+              ))}
+            </select>
           </Field>
 
           <Field label="Party / Service Provider" required>
@@ -179,9 +214,7 @@ const ServiceForm = ({ onSubmit, onClose, loading = false }) => {
             Cancel
           </button>
 
-          <SubmitButton loading={loading}>
-            Save Service Record
-          </SubmitButton>
+          <SubmitButton loading={loading}>Save Service Record</SubmitButton>
         </div>
       </form>
     </div>
@@ -205,17 +238,13 @@ const ImagePicker = ({ images, onSelect, onRemove }) => (
   <div className="space-y-3">
     <label
       className={`flex items-center gap-3 rounded-xl border border-dashed border-gray-400 bg-white p-4 transition hover:border-black hover:bg-gray-50 ${
-        images.length >= 5
-          ? "cursor-not-allowed opacity-50"
-          : "cursor-pointer"
+        images.length >= 5 ? "cursor-not-allowed opacity-50" : "cursor-pointer"
       }`}
     >
       <FiImage size={22} className="shrink-0 text-black" />
 
       <div>
-        <p className="text-sm font-medium text-black">
-          Upload images
-        </p>
+        <p className="text-sm font-medium text-black">Upload images</p>
         <p className="text-xs text-gray-500">
           {images.length}/5 images uploaded · JPG, PNG, or WebP
         </p>
@@ -239,10 +268,7 @@ const ImagePicker = ({ images, onSelect, onRemove }) => (
             className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2"
           >
             <div className="flex min-w-0 items-center gap-2">
-              <FiImage
-                size={17}
-                className="shrink-0 text-gray-500"
-              />
+              <FiImage size={17} className="shrink-0 text-gray-500" />
               <span className="truncate text-sm text-gray-700">
                 {file.name}
               </span>

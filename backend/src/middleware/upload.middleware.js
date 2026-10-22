@@ -156,6 +156,61 @@ export const uploadTripFuel =
   );
 
 
+  export const uploadTripCompletion = multer({
+  storage: multer.diskStorage({
+    destination(req, file, cb) {
+      const folders = {
+        selfie: "trips/evidence",
+        meterImage: "trips/evidence",
+        slip: "trips/fuel",
+      };
+
+      const folder = folders[file.fieldname];
+
+      if (!folder) {
+        return cb(new Error("Unexpected file field"));
+      }
+
+      const uploadDir = path.join(
+        process.cwd(),
+        "uploads",
+        folder
+      );
+
+      fs.mkdirSync(uploadDir, { recursive: true });
+
+      cb(null, uploadDir);
+    },
+
+    filename(req, file, cb) {
+      const extension = path.extname(file.originalname);
+
+      cb(
+        null,
+        `${Date.now()}-${Math.round(
+          Math.random() * 1e9
+        )}${extension}`
+      );
+    },
+  }),
+
+  fileFilter(req, file, cb) {
+    if (file.mimetype.startsWith("image/")) {
+      return cb(null, true);
+    }
+
+    cb(new Error("Only image files are allowed"));
+  },
+
+  limits: {
+    fileSize: 20 * 1024 * 1024,
+    files: 3,
+  },
+}).fields([
+  { name: "selfie", maxCount: 1 },
+  { name: "meterImage", maxCount: 1 },
+  { name: "slip", maxCount: 1 },
+]);
 /*
 |--------------------------------------------------------------------------
 | Trip finalization

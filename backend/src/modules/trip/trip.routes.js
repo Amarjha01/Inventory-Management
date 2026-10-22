@@ -1,6 +1,6 @@
 import { Router } from "express";
 import authMiddleware from "../../middleware/auth.middleware.js";
-import {uploadTripFuel , uploadTripEvidence , uploadTripStart , uploadTripFinal, uploadTripArrival} from "../../middleware/upload.middleware.js";
+import {uploadTripFuel , uploadTripEvidence , uploadTripStart , uploadTripFinal, uploadTripArrival, uploadTripCompletion} from "../../middleware/upload.middleware.js";
 
 import {
   createTrip,
@@ -94,6 +94,7 @@ router.patch(
   "/:tripId/destinations/:destinationId/complete",
   completeDestination
 );
+
 router.patch(
   "/:tripId/complete",
   completeTrip

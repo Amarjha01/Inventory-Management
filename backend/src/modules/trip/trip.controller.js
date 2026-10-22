@@ -134,6 +134,7 @@ export const arriveAtDestination = asyncHandler(async (req, res) => {
     req.params.destinationId,
     req.body,
     req.user,
+    req.files,
   );
 
   return ApiResponse.success(

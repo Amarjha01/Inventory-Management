@@ -38,16 +38,16 @@ const STATUS_STYLES = {
 const formatDate = (value) => {
   if (!value) return "—";
 
-return new Intl.DateTimeFormat("en-IN", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hour12: true,
-  timeZone: "Asia/Kolkata",
-}).format(new Date(value));
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Kolkata",
+  }).format(new Date(value));
 };
 
 const getDriverName = (trip) =>
@@ -185,7 +185,6 @@ const Trips = () => {
     );
   }, [search, trips]);
 
-  
   const selectTrip = async (trip) => {
     setSelectedTrip(trip);
     setActiveTab("Overview");
@@ -214,7 +213,6 @@ const Trips = () => {
   };
 
   console.log(selectedTrip);
-  
 
   const statusCounts = summary?.byStatus ?? {};
   const activeCount = statusCounts.IN_PROGRESS ?? 0;
@@ -226,72 +224,66 @@ const Trips = () => {
     setPage(nextPage);
   };
 
+  const latestGpsPoint = gpsTrail[gpsTrail.length - 1];
 
-const latestGpsPoint = gpsTrail[gpsTrail.length - 1];
+  const destinations = selectedTrip?.destinations ?? [];
 
-const destinations = selectedTrip?.destinations ?? [];
+  const mapCurrentLocation = gpsTrail[0];
 
-const mapCurrentLocation =
- gpsTrail[0];
+  const routeCoordinates = gpsTrail
+    .filter(
+      (point) =>
+        Number.isFinite(Number(point.latitude)) &&
+        Number.isFinite(Number(point.longitude)),
+    )
+    .map((point) => [Number(point.latitude), Number(point.longitude)]);
 
-const routeCoordinates = gpsTrail
-  .filter(
-    (point) =>
-      Number.isFinite(Number(point.latitude)) &&
-      Number.isFinite(Number(point.longitude)),
-  )
-  .map((point) => [
-    Number(point.latitude),
-    Number(point.longitude),
-  ]);
-
-const activeDestinationId =
-  destinations.find((destination) => destination.status === "CURRENT")?._id ??
-  destinations.find((destination) => destination.status === "PENDING")?._id ??
-  null;
-
+  const activeDestinationId =
+    destinations.find((destination) => destination.status === "CURRENT")?._id ??
+    destinations.find((destination) => destination.status === "PENDING")?._id ??
+    null;
 
   return (
     <div className="min-h-full bg-slate-50">
-    <div className=" flex flex-col md:flex-row lg:justify-between">
+      <div className=" flex flex-col md:flex-row lg:justify-between">
         <header className="mb-5">
-        <h1 className="text-2xl font-bold text-slate-900">Trips</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Monitor driver trips, track progress, and view trip details.
-        </p>
-      </header>
+          <h1 className="text-2xl font-bold text-slate-900">Trips</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Monitor driver trips, track progress, and view trip details.
+          </p>
+        </header>
 
-      <section className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-4">
-        <StatsCard
-          title="Total Trips"
-          value={loadingSummary ? null : (summary?.total ?? totalTrips)}
-          note="All trips"
-          icon={MdLocalShipping}
-          tone="bg-blue-50 text-blue-600"
-        />
-        <StatsCard
-          title="Active Trips"
-          value={loadingSummary ? null : activeCount}
-          note="In progress"
-          icon={MdPlayArrow}
-          tone="bg-emerald-50 text-emerald-600"
-        />
-        <StatsCard
-          title="Completed Trips"
-          value={loadingSummary ? null : completedCount}
-          note="Completed"
-          icon={MdCheckCircleOutline}
-          tone="bg-violet-50 text-violet-600"
-        />
-        <StatsCard
-          title="Cancelled Trips"
-          value={loadingSummary ? null : cancelledCount}
-          note="Cancelled"
-          icon={MdBlock}
-          tone="bg-rose-50 text-rose-600"
-        />
-      </section>
-</div>
+        <section className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-4">
+          <StatsCard
+            title="Total Trips"
+            value={loadingSummary ? null : (summary?.total ?? totalTrips)}
+            note="All trips"
+            icon={MdLocalShipping}
+            tone="bg-blue-50 text-blue-600"
+          />
+          <StatsCard
+            title="Active Trips"
+            value={loadingSummary ? null : activeCount}
+            note="In progress"
+            icon={MdPlayArrow}
+            tone="bg-emerald-50 text-emerald-600"
+          />
+          <StatsCard
+            title="Completed Trips"
+            value={loadingSummary ? null : completedCount}
+            note="Completed"
+            icon={MdCheckCircleOutline}
+            tone="bg-violet-50 text-violet-600"
+          />
+          <StatsCard
+            title="Cancelled Trips"
+            value={loadingSummary ? null : cancelledCount}
+            note="Cancelled"
+            icon={MdBlock}
+            tone="bg-rose-50 text-rose-600"
+          />
+        </section>
+      </div>
 
       <section className="grid min-h-170 grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(380px,0.85fr)]">
         <div className="flex min-w-0 flex-col rounded-2xl border border-slate-100 bg-white shadow-sm">
@@ -366,7 +358,7 @@ const activeDestinationId =
                         ))}
                       </tr>
                     ))
-                  : visibleTrips.map((trip , index) => (
+                  : visibleTrips.map((trip, index) => (
                       <tr
                         key={trip._id}
                         onClick={() => selectTrip(trip)}
@@ -375,7 +367,7 @@ const activeDestinationId =
                         }`}
                       >
                         <td className="px-4 py-4 text-sm font-semibold text-slate-800">
-                         {index+1}
+                          {index + 1}
                         </td>
                         <td className="px-4 py-4 text-sm text-slate-600">
                           {getDriverName(trip)}
@@ -387,7 +379,7 @@ const activeDestinationId =
                           {formatDate(trip.travelDate ?? trip.createdAt)}
                         </td>
                         <td className="px-4 py-4 text-sm text-slate-600">
-                          {`${trip.startLocation.name} -> ${trip.destinations[trip.destinations.length-1].name}`}
+                          {`${trip.startLocation.name} -> ${trip.destinations[trip.destinations.length - 1].name}`}
                         </td>
                         <td className="px-4 py-4">
                           <span
@@ -402,11 +394,16 @@ const activeDestinationId =
                             )}
                           </span>
                         </td>
-                       <td className="px-4 py-4 text-sm text-slate-600">
+                        <td className="px-4 py-4 text-sm text-slate-600">
                           {trip.destinations.reduce(
-                            (sum, d) => sum + (Number(d.arrival?.distanceFromDestinationMeters)/1000 || 0),
-                            0
-                          )} Km
+                            (sum, d) =>
+                              sum +
+                              (Number(
+                                d.arrival?.distanceFromDestinationMeters,
+                              ) / 1000 || 0),
+                            0,
+                          )}{" "}
+                          Km
                         </td>
                         <td className="px-2 py-4 text-slate-400">
                           <MdChevronRight className="text-xl" />
@@ -514,10 +511,14 @@ const activeDestinationId =
                 <div>
                   <p className="text-slate-400">Distance</p>
                   <p className="mt-1 font-semibold text-slate-700">
-                      {selectedTrip.destinations.reduce(
-                        (sum, d) => sum + (Number(d.arrival?.distanceFromDestinationMeters)/1000 || 0),
-                        0
-                      )} Kms
+                    {selectedTrip.destinations.reduce(
+                      (sum, d) =>
+                        sum +
+                        (Number(d.arrival?.distanceFromDestinationMeters) /
+                          1000 || 0),
+                      0,
+                    )}{" "}
+                    Kms
                   </p>
                 </div>
                 <div>
@@ -529,22 +530,26 @@ const activeDestinationId =
               </div>
 
               <nav className="mt-2 flex gap-4 overflow-x-auto border-b border-slate-100">
-                {["Overview", "Destinations", "GPS Trail", "Audit Log"].map(
-                  (tab) => (
-                    <button
-                      key={tab}
-                      type="button"
-                      onClick={() => setActiveTab(tab)}
-                      className={`whitespace-nowrap border-b-2 px-1 py-3 text-sm ${
-                        activeTab === tab
-                          ? "border-[#1f225f] font-semibold text-[#1f225f]"
-                          : "border-transparent text-slate-500"
-                      }`}
-                    >
-                      {tab}
-                    </button>
-                  ),
-                )}
+                {[
+                  "Overview",
+                  "Destinations",
+                  "Audit Log",
+                  "Meter Reading",
+                  "Fuel Entry",
+                ].map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveTab(tab)}
+                    className={`whitespace-nowrap border-b-2 px-1 py-3 text-sm ${
+                      activeTab === tab
+                        ? "border-[#1f225f] font-semibold text-[#1f225f]"
+                        : "border-transparent text-slate-500"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
               </nav>
 
               <div className="pt-4">
@@ -592,20 +597,23 @@ const activeDestinationId =
                       </span>
                     </div>
                     <div className="max-h-96 space-y-2 overflow-y-auto">
-                      {gpsTrail.slice().reverse().map((point, index) => (
-                        <div
-                          key={`${point.createdAt ?? "point"}-${index}`}
-                          className="rounded-lg bg-slate-50 p-3 text-xs text-slate-600"
-                        >
-                          <p className="font-semibold">Point {index + 1}</p>
-                          <p>
-                            {point.latitude}, {point.longitude}
-                          </p>
-                          <p className="text-slate-400">
-                            {formatDate(point.createdAt)}
-                          </p>
-                        </div>
-                      ))}
+                      {gpsTrail
+                        .slice()
+                        .reverse()
+                        .map((point, index) => (
+                          <div
+                            key={`${point.createdAt ?? "point"}-${index}`}
+                            className="rounded-lg bg-slate-50 p-3 text-xs text-slate-600"
+                          >
+                            <p className="font-semibold">Point {index + 1}</p>
+                            <p>
+                              {point.latitude}, {point.longitude}
+                            </p>
+                            <p className="text-slate-400">
+                              {formatDate(point.createdAt)}
+                            </p>
+                          </div>
+                        ))}
                       {!gpsTrail.length && (
                         <p className="text-sm text-slate-500">
                           No GPS points recorded.
@@ -635,6 +643,131 @@ const activeDestinationId =
                       </p>
                     )}
                   </div>
+                ) : activeTab === "Meter Reading" ? (
+                  <div className="space-y-3">
+                    {/* Start Meter */}
+                    {selectedTrip.startMeter && (
+                      <div className="rounded-xl bg-slate-50 p-3">
+                        <p className="text-sm font-semibold text-slate-800">
+                          Trip Start Meter
+                        </p>
+
+                        <p className="mt-1 text-sm text-slate-600">
+                          Reading: {selectedTrip.startMeter.reading ?? "N/A"}
+                        </p>
+
+                        {selectedTrip.startMeter.imageUrl && (
+                          <a
+                            href={`https://esf.axeiro.com/uploads/trips/start/${selectedTrip.startMeter.imageUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-2 inline-block text-sm text-blue-600 hover:underline"
+                          >
+                            View Meter Image
+                          </a>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Destination Meter Readings */}
+                    {(selectedTrip.destinations ?? []).map(
+                      (destination, index) => {
+                        const meter =
+                          destination.meterReading ??
+                          destination.arrival?.meterReading;
+
+                        if (!meter && !destination.meterImageUrl) return null;
+
+                        return (
+                          <div
+                            key={destination._id ?? index}
+                            className="rounded-xl bg-slate-50 p-3"
+                          >
+                            <p className="text-sm font-semibold text-slate-800">
+                              {destination.name ?? `Destination ${index + 1}`}
+                            </p>
+
+                            {meter?.reading != null && (
+                              <p className="mt-1 text-sm text-slate-600">
+                                Reading: {meter.reading}
+                              </p>
+                            )}
+
+                            {(meter?.imageUrl ?? destination.meterImageUrl) && (
+                              <a
+                                href={`https://esf.axeiro.com${meter?.imageUrl ?? destination.meterImageUrl}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-2 inline-block text-sm text-blue-600 hover:underline"
+                              >
+                                View Meter Image
+                              </a>
+                            )}
+                          </div>
+                        );
+                      },
+                    )}
+
+                    {/* Empty State */}
+                    {!selectedTrip.startMeter &&
+                      !(selectedTrip.destinations ?? []).some(
+                        (destination) =>
+                          destination.meterReading ||
+                          destination.arrival?.meterReading ||
+                          destination.meterImageUrl,
+                      ) && (
+                        <p className="text-sm text-slate-500">
+                          No Meter Reading entries available.
+                        </p>
+                      )}
+                  </div>
+                ) : activeTab === "Fuel Entry" ? (
+                  <div className="space-y-3">
+                    {(selectedTrip.destinations ?? []).flatMap((destination) =>
+                      (destination.fuelEntries ?? []).map((fuel, index) => (
+                        <div
+                          key={fuel._id ?? `${destination._id}-${index}`}
+                          className="rounded-xl bg-slate-50 p-3"
+                        >
+                          <p className="text-sm font-semibold text-slate-800">
+                            {destination.name} — {fuel.litres} Litres
+                          </p>
+
+                          <p className="mt-1 text-sm text-slate-600">
+                            Total Amount: ₹
+                            {Number(fuel.totalAmount ?? 0).toLocaleString(
+                              "en-IN",
+                            )}
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-500">
+                            {fuel.capturedAt
+                              ? formatDate(fuel.capturedAt)
+                              : "Date unavailable"}
+                          </p>
+
+                          {fuel.slipImageUrl && (
+                            <a
+                              href={`https://esfserver.axeiro.com${fuel.slipImageUrl}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-2 inline-block text-sm text-blue-600 hover:underline"
+                            >
+                              View Fuel Slip
+                            </a>
+                          )}
+                        </div>
+                      )),
+                    )}
+
+                    {!(selectedTrip.destinations ?? []).some(
+                      (destination) => destination.fuelEntries?.length,
+                    ) && (
+                      <p className="text-sm text-slate-500">
+                        No fuel entries available.
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   <div className="space-y-3">
                     <div className="rounded-xl bg-slate-50 p-4">
@@ -653,20 +786,18 @@ const activeDestinationId =
                     </div>
 
                     <div className="grid min-h-48 place-items-center rounded-xl border border-slate-100 bg-slate-50 p-5 text-center">
-
-                    <div className="h-80 w-full overflow-hidden rounded-xl">
-                      <GoogleMapProvider>
-                        <TripMap
-                          driver={selectedTrip.driver?.name || "Driver"}
-                          currentLocation={mapCurrentLocation}
-                          destinations={destinations}
-                          route={routeCoordinates}
-                          activeDestinationId={activeDestinationId}
-                          height="320px"
-                        />
-                      </GoogleMapProvider>
-                    </div>
-
+                      <div className="h-80 w-full overflow-hidden rounded-xl">
+                        <GoogleMapProvider>
+                          <TripMap
+                            driver={selectedTrip.driver?.name || "Driver"}
+                            currentLocation={mapCurrentLocation}
+                            destinations={destinations}
+                            route={routeCoordinates}
+                            activeDestinationId={activeDestinationId}
+                            height="320px"
+                          />
+                        </GoogleMapProvider>
+                      </div>
                     </div>
 
                     <div className="rounded-xl border border-slate-100 p-4">
