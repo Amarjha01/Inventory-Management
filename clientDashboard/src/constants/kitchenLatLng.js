@@ -7,20 +7,20 @@ const destinations = [
     longitude: 85.238876,
     accuracy:109
   },
-  {
-    _id: "6a733e8d0c0f5542b2d268ff",
-    name: "Hajipur",
-    latitude: 25.693673,
-    longitude: 85.238864,
-    accuracy:109
-  },
   // {
   //   _id: "6a733e8d0c0f5542b2d268ff",
   //   name: "Hajipur",
-  //   latitude: 25.692888,
-  //   longitude: 85.257168,
+  //   latitude: 25.693673,
+  //   longitude: 85.238864,
   //   accuracy:109
   // },
+  {
+    _id: "6a733e8d0c0f5542b2d268ff",
+    name: "Hajipur",
+    latitude: 25.692888,
+    longitude: 85.257168,
+    accuracy:109
+  },
   {
     _id: "6a7431483f54294f6e35d477",
     name: "Bidupur",

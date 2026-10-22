@@ -658,7 +658,7 @@ const Trips = () => {
 
                         {selectedTrip.startMeter.imageUrl && (
                           <a
-                            href={`https://esf.axeiro.com/uploads/trips/start/${selectedTrip.startMeter.imageUrl}`}
+                            href={`https://esfserver.axeiro.com/api/v1/uploads/trips/start/${selectedTrip.startMeter.imageUrl}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="mt-2 inline-block text-sm text-blue-600 hover:underline"
@@ -695,7 +695,7 @@ const Trips = () => {
 
                             {(meter?.imageUrl ?? destination.meterImageUrl) && (
                               <a
-                                href={`https://esf.axeiro.com${meter?.imageUrl ?? destination.meterImageUrl}`}
+                                href={`https://esfserver.axeiro.com/api/v1${meter?.imageUrl ?? destination.meterImageUrl}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="mt-2 inline-block text-sm text-blue-600 hover:underline"
@@ -748,7 +748,7 @@ const Trips = () => {
 
                           {fuel.slipImageUrl && (
                             <a
-                              href={`https://esfserver.axeiro.com${fuel.slipImageUrl}`}
+                              href={`https://esfserver.axeiro.com/api/v1${fuel.slipImageUrl}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="mt-2 inline-block text-sm text-blue-600 hover:underline"
