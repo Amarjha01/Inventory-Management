@@ -501,16 +501,16 @@ const ActiveTrip = () => {
       return;
     }
 
-    if (
-      !Number.isFinite(gpsAccuracy) ||
-      gpsAccuracy < 0 ||
-      gpsAccuracy > MAX_GPS_ACCURACY_METERS
-    ) {
-      toast.error(
-        "GPS accuracy is too low. Move to an area with a better GPS signal and capture your location again.",
-      );
-      return;
-    }
+    // if (
+    //   !Number.isFinite(gpsAccuracy) ||
+    //   gpsAccuracy < 0 ||
+    //   gpsAccuracy > MAX_GPS_ACCURACY_METERS
+    // ) {
+    //   toast.error(
+    //     "GPS accuracy is too low. Move to an area with a better GPS signal and capture your location again.",
+    //   );
+    //   return;
+    // }
 
     const distanceMeters = calculateDistanceMeters(
       driverLatitude,

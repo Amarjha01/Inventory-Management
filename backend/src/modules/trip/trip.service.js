@@ -610,7 +610,8 @@ class TripService {
   /* Arrive At Destination                                                    */
   /* ------------------------------------------------------------------------ */
 
- async arriveAtDestination(tripId, destinationId, payload, user) {
+
+async arriveAtDestination(tripId, destinationId, payload, user, files) {
   const trip = await tripRepository.findById(tripId, {
     populate: false,
   });
@@ -633,6 +634,7 @@ class TripService {
 
   assertCurrentDestination(trip, destination);
 
+  // 1. Validate geofence
   const distance = haversineDistanceMeters(
     payload.latitude,
     payload.longitude,
@@ -651,7 +653,53 @@ class TripService {
     );
   }
 
-  // 1. Mark the destination as arrived
+  // 2. Parse fuel entries sent through FormData
+  let fuelEntries = [];
+
+  if (payload.fuelEntries) {
+    try {
+      fuelEntries =
+        typeof payload.fuelEntries === "string"
+          ? JSON.parse(payload.fuelEntries)
+          : payload.fuelEntries;
+    } catch (error) {
+      throw new ApiError(400, "Invalid fuelEntries JSON.");
+    }
+  }
+
+  if (!Array.isArray(fuelEntries)) {
+    throw new ApiError(400, "fuelEntries must be an array.");
+  }
+
+  // 3. Attach each uploaded fuel slip to its corresponding entry
+  destination.fuelEntries = fuelEntries.map((entry, index) => {
+    const slipFile = files?.[`fuelSlip_${index}`]?.[0];
+
+    return {
+      litres: Number(entry.litres),
+      totalAmount: Number(entry.totalAmount),
+
+      slipImageUrl: slipFile
+        ? `/uploads/trips/arrival/${slipFile.filename}`
+        : entry.slipImageUrl || undefined,
+
+      latitude:
+        entry.latitude != null
+          ? Number(entry.latitude)
+          : undefined,
+
+      longitude:
+        entry.longitude != null
+          ? Number(entry.longitude)
+          : undefined,
+
+      capturedAt: entry.capturedAt
+        ? new Date(entry.capturedAt)
+        : new Date(),
+    };
+  });
+
+  // 4. Mark destination as arrived
   destination.status = "ARRIVED";
 
   destination.arrival = {
@@ -666,7 +714,7 @@ class TripService {
     ),
   };
 
-  // 2. Update trip's latest location
+  // 5. Update trip's latest location
   trip.currentLocation = {
     latitude: payload.latitude,
     longitude: payload.longitude,
@@ -674,22 +722,18 @@ class TripService {
     capturedAt: new Date(),
   };
 
-  // 3. Find the next destination by sequence
+  // 6. Find the next destination by sequence
   const nextDestination = trip.destinations
-    .filter(
-      (item) => item.sequence > destination.sequence
-    )
+    .filter((item) => item.sequence > destination.sequence)
     .sort((a, b) => a.sequence - b.sequence)
-    .find(
-      (item) => item.status === "PENDING"
-    );
+    .find((item) => item.status === "PENDING");
 
-  // 4. Activate the next destination
+  // 7. Activate the next destination
   if (nextDestination) {
     nextDestination.status = "CURRENT";
   }
 
-  // 5. Record the audit event
+  // 8. Record the audit event
   if (!Array.isArray(trip.auditLog)) {
     trip.auditLog = [];
   }
@@ -706,7 +750,7 @@ class TripService {
     createdAt: new Date(),
   });
 
-  // 6. Persist the trip
+  // 9. Persist the trip
   await tripRepository.save(trip);
 
   return tripRepository.findById(trip._id);
