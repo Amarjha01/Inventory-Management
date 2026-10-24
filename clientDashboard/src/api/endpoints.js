@@ -23,6 +23,8 @@ export const ENDPOINTS = {
 
     MAINTENANCE: "/maintenance",
 
-    TRIPS: "/trips"
+    TRIPS: "/trips",
+
+    ATTENDANCE: "/attendance",
 
 };
