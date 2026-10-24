@@ -51,6 +51,8 @@ import OutForDelivery from "../pages/MainStore/NewRequirements/OutForDelivery.js
 import DGMonetoring from "../pages/MainStore/DGMonetoring/DGMonetoring.jsx";
 import Trips from "../pages/MainStore/Trips/Trips.jsx";
 
+import Attendance from "../pages/attendance/Attendance.jsx";
+import AddEmployee from "../pages/attendance/AddEmployee.jsx";
 
 const AppRoutes = () => {
   return (
@@ -285,6 +287,39 @@ element={<Notification />}
     <Route path="/trip/history" element={<TripHistory />} />
 
 </Route>
+
+
+<Route
+  path="/attendance"
+  element={
+    <ProtectedRoute
+      roles={[
+        "Kitchen Incharge",
+        "Store Incharge",
+        "Production Incharge",
+        "Admin"
+      ]}
+    >
+      <Attendance />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/attendance/add-employee"
+  element={
+    <ProtectedRoute
+      roles={[
+        "Kitchen Incharge",
+        "Store Incharge",
+        "Production Incharge",
+        "Admin"
+      ]}
+    >
+      <AddEmployee />
+    </ProtectedRoute>
+  }
+/>
     </Routes>
 
     

@@ -691,7 +691,7 @@ const Trips = () => {
                               <p className="mt-1 text-sm text-slate-600">
                                 Reading: {meter.reading}
                               </p>
-                            )}
+                            )} 
 
                             {(meter?.imageUrl ?? destination.meterImageUrl) && (
                               <a
