@@ -7,13 +7,6 @@ const destinations = [
     longitude: 85.238876,
     accuracy:109
   },
-  // {
-  //   _id: "6a733e8d0c0f5542b2d268ff",
-  //   name: "Hajipur",
-  //   latitude: 25.693673,
-  //   longitude: 85.238864,
-  //   accuracy:109
-  // },
   {
     _id: "6a733e8d0c0f5542b2d268ff",
     name: "Hajipur",
@@ -54,6 +47,69 @@ const destinations = [
     name: "Begusarai",
     latitude: 25.447730,
     longitude: 86.139905,
+    accuracy:109
+  },
+  {
+    _id: "",
+    name: "Hilsa",
+    latitude:25.277187 ,
+    longitude: 85.213937,
+    accuracy:109
+  },
+  {
+    _id: "",
+    name: "Silao",
+    latitude:25.103902 ,
+    longitude:85.461737 ,
+    accuracy:109
+  },
+  {
+    _id: "",
+    name: "Birpur",
+    latitude: 25.517394,
+    longitude:86.085775 ,
+    accuracy:109
+  },
+  {
+    _id: "",
+    name: "Benipur",
+    latitude:26.085770 ,
+    longitude: 86.112400,
+    accuracy:109
+  },
+  {
+    _id: "",
+    name: "Darbhanga",
+    latitude:26.184972 ,
+    longitude: 85.833530,
+    accuracy:109
+  },
+  {
+    _id: "",
+    name: "Cheriya Bariyarpur",
+    latitude:25.585166,
+    longitude: 86.073473,
+    accuracy:109
+  },
+  {
+    _id: "",
+    name: "Barauni",
+    latitude:25.435595,
+    longitude:86.026137,
+    accuracy:109
+  },
+  {
+    _id: "",
+    name: "Ballia",
+    latitude:25.4264375,
+    longitude:86.3364314,
+    accuracy:109
+  },
+  {
+    _id: "",
+    name: "Ramghat",
+    latitude:25.363829,
+    longitude:85.368948,
     accuracy:109
   },
 ];
