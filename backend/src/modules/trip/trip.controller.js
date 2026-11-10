@@ -49,12 +49,26 @@ export const createTrip = asyncHandler(async (req, res) => {
     : undefined;
 
   const startMeterImg = req.file?.filename;
+let vehicleId;
+const name = req.user.name.trim().toLowerCase();
+
+if (name === "kundankumar") {
+  vehicleId = "6a743c3a3f54294f6e35d48b";
+} else if (name === "princeyadav") {
+  vehicleId = "6a743c2d3f54294f6e35d48a";
+} else if(name === "deepak"){
+  vehicleId = "6a743c5a3f54294f6e35d48d";
+}else if(name === "manish"){
+  vehicleId = "6a743c4f3f54294f6e35d48c"
+}else {
+  vehicleId = "6a743b6c3f54294f6e35d480"
+}
 
   const payload = {
     ...req.body,
-
+    vehicleId:vehicleId,
     startLocation,
-
+    
     destinations,
 
     ...(route !== undefined && { route }),

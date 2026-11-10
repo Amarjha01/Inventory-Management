@@ -5,23 +5,25 @@ import authService from "../services/auth.service.js";
 
 import { MESSAGE } from "../constants/responseMessages.js";
 
+const cookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  path: "/",
+  maxAge: 5 * 365 * 24 * 60 * 60 * 1000,
+};
+
 export const login = asyncHandler(async (req, res) => {
     
-    const result = await authService.login(req.body);
+  const result = await authService.login(req.body);
 
-    res.cookie("accessToken", result.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
-        path: "/",
-        maxAge: 5 * 365 * 24 * 60 * 60 * 1000,
-    });
+  res.cookie("accessToken", result.accessToken, cookieOptions);
 
-    return ApiResponse.success(
-        res,
-        MESSAGE.LOGIN_SUCCESS,
-        result.user
-    );
+  return ApiResponse.success(
+    res,
+    MESSAGE.LOGIN_SUCCESS,
+    result.user
+  );
 });
 
 export const changePassword = asyncHandler(async (req, res) => {
@@ -43,16 +45,13 @@ export const changePassword = asyncHandler(async (req, res) => {
     );
 });
 
-export const logout = asyncHandler(async(req , res)=>{
-    res.clearCookie("accessToken", {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-  path: "/",
-});
+export const logout = asyncHandler(async (req, res) => {
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    path: "/",
+  });
 
-return ApiResponse.success(
-    res,
-    MESSAGE.LOGOUT_SUCCESS
-)
-})
+  return ApiResponse.success(res, MESSAGE.LOGOUT_SUCCESS);
+});

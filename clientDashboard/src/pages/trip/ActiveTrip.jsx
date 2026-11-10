@@ -710,7 +710,7 @@ const ActiveTrip = () => {
         animate={{ opacity: 1, y: 0 }}
         className="relative overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm"
       >
-        <div className="relative h-[320px] bg-gray-100">
+        <div className="relative h-80 bg-gray-100">
           <GoogleMapProvider>
             <TripMap
               driver={trip.driver?.name || "Driver"}
@@ -977,7 +977,7 @@ const ActiveTrip = () => {
                       </span>
 
                       {entry.slip && (
-                        <p className="max-w-[180px] truncate text-[10px] text-gray-400">
+                        <p className="max-w-45 truncate text-[10px] text-gray-400">
                           {entry.slip.name}
                         </p>
                       )}

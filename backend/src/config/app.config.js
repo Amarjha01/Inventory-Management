@@ -20,6 +20,7 @@ const configureApplication = (app) => {
 const allowedOrigins = [
   "https://esf.axeiro.com",
   "https://localhost", // Capacitor Android
+  "capacitor://localhost",
   "http://localhost:5173", // Local Vite development
 ];
 
