@@ -377,7 +377,8 @@ formData.append("startMeter.imageUrl", meterImage);
           />
 
           <div className="mt-5 space-y-3">
-            {kitchensLatLng.map((start, index) => (
+<div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-5">
+              {kitchensLatLng.map((start, index) => (
               <label
                 key={start._id ?? index}
                 className="flex cursor-pointer items-center gap-2"
@@ -394,6 +395,7 @@ formData.append("startMeter.imageUrl", meterImage);
                 <span>{start.name}</span>
               </label>
             ))}
+</div>
 
             <div className="relative">
               <MdSearch
@@ -534,7 +536,8 @@ formData.append("startMeter.imageUrl", meterImage);
           />
 
           {/* ADD */}
-          {kitchensLatLng.map((destination, index) => (
+          <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-5">
+                        {kitchensLatLng.map((destination, index) => (
             <label
               key={destination._id ?? index}
               className="flex items-center gap-2 cursor-pointer"
@@ -554,6 +557,7 @@ formData.append("startMeter.imageUrl", meterImage);
               <span>{destination.name}</span>
             </label>
           ))}
+          </div>
 
           {/* LIST */}
 

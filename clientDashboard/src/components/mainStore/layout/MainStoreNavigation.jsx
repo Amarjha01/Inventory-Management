@@ -115,6 +115,11 @@ useEffect(() => {
       path: "/store/dgmonetoring",
     },
     {
+      title: "attendance",
+      icon: FaUsers,
+      path: "/attendance/add-employee",
+    },
+    {
       title: "Trips",
       icon: AiFillTruck,
       path: "/store/trips",
